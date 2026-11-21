@@ -5,10 +5,10 @@ Where this differs from the website, the **website and the WhatsApp channel are 
 
 ---
 
-## 1. Rules that affect Vidya Nestham
+## 1. Rules that affect Annapoorna Link
 | Topic | Official answer | Timestamp |
 |---|---|---|
-| **External AI models inside our app** | Allowed. If the solution needs to call an AI model (bought or free API), we can connect it. Only code generation must use Codebenders' own model. **So Gnani and an AI-model API in the product are fine.** | 1:07:41 |
+| **External AI models inside our app** | Allowed. If the solution needs to call an AI model (bought or free API), we can connect it. Only code generation must use Codebenders' own model. **So Gnani (voice post) and an AI-model API in the product are fine.** | 1:07:41 |
 | **ChatGPT / Gemini outside the IDE** | Allowed for research, planning prompts and writing specs (PRDs). | 1:14:07 |
 | **Coding tools** | Codebenders IDE only. No other AI coding tools, no pre-existing code, no ready-made projects. | 51:00 |
 | **Existing code** | Not allowed. Everything must be created after the build window opened. Moving a project between teammates' Codebenders accounts is fine. | 1:05:11 |
@@ -44,17 +44,17 @@ Where this differs from the website, the **website and the WhatsApp channel are 
 - **Commit after each working slice** so you can roll back. (37:06)
 - **Their summary:** "Does it know the system? Is there a plan? How will we prove it works?" If any answer is no, you're back to "prompt and pray". (42:02)
 
-**For us:** prompts A1, B1 and B5 are large. If Nexon's plan for one looks huge, split it into two or three smaller prompts. That's better for quality, credits, and the usage log judges see.
+**For us:** prompts A1, B1, B7 and B9 are large. If Nexon's plan for one looks huge, split it into two or three smaller prompts. That's better for quality, credits, and the usage log judges see.
 
 ## 4. Judging reminders
 - **Weights:** Working product 30% · Business viability 25% · Problem & user clarity 20% · Build quality & use of Codebenders 15% · Presentation 10%. (52:08)
-- **Business viability isn't only revenue.** Social impact counts too, e.g. helping people access government support. That supports our model of NGO, CSR and state-programme payers. (1:23:01)
+- **Business viability isn't only revenue.** Social impact counts too. For Annapoorna Link: meals rescued and waste diverted from landfill, alongside donor Pro plans, CSR area sponsorships and city partnerships. (1:23:01)
 - **Before building, answer three questions** (1:23:49):
   1. Who is the user, and do you understand their day?
   2. Can you build something that works for them and is easy to use?
-  3. Do you understand the guardrails? For us: minors' data, no copied textbooks, a tutor that stays on the syllabus.
+  3. Do you understand the guardrails? For us: never certifying food as safe, no tax or legal claims, synthetic data with no real addresses.
 - **Be original.** Existing solutions can be a reference point, but don't copy them. Do research and talk to real users. (1:22:19)
 
 ## 5. Still open: ask in the WhatsApp group
-- Can **AI-drafted lesson content** (concept cards, questions) be shipped inside the app after human review? Docs 10 and 11 were drafted with an external tool. Planning and specs are allowed (§1), but app content wasn't asked directly.
+- Nothing project-specific is open. All app content (food chips, guidance text, sample data) is created during the build.
 - The **build-window start**: 11:30 AM (said in the session) vs 12:00 PM (website). It doesn't affect us, since our first commit was after 12:00, but note it.

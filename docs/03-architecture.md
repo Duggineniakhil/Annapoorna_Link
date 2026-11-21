@@ -1,101 +1,101 @@
 # 03 — Technical Architecture
-> Judging criterion: **Build Quality & Use of Codebenders — 15%** (and **Working Product — 30%**).
-> Everything here must be built *inside the Codebenders IDE*, from scratch, during the build window. This doc is the plan, not code.
+> Judging criterion: **Build Quality & Use of Codebenders, 15%** (and **Working Product, 30%**).
+> All code is built *inside the Codebenders IDE* during the build window. External AI-model and voice APIs may be called *by the product* (kick-off Q&A, doc 15).
 
 ---
 
-## 1. Recommended stack (simple, deployable in 36 h)
+## 1. Stack
 | Layer | Choice | Why |
 |---|---|---|
-| Frontend | React + Vite + TypeScript, as a **PWA** | Fast, small bundle, installable from browser, no Play Store download |
-| Offline | Service worker (Workbox / vite-plugin-pwa) + **IndexedDB** (Dexie) | Cache app shell + chapter packs; store progress locally |
-| Styling | Tailwind CSS, Noto Sans Telugu font (subset, self-hosted) | Readable Telugu, small font file |
-| Backend | Node.js (Express or serverless functions) | Holds API keys; proxies Gnani + LLM; sync endpoint |
-| Database | Supabase (Postgres) or Firebase — or SQLite on Render if simpler | Synced progress, teacher view aggregates |
-| Voice | **Gnani** STT (Telugu) + TTS (Telugu) | Indian-language voice; you have credits |
-| LLM | Any AI-model API (paid or free); allowed inside the product per the kick-off Q&A. Code itself must be generated in Codebenders | Tutor answers, photo-question extraction |
-| Hosting | Vercel/Netlify (frontend) + Render/Railway/Vercel functions (backend) | Free tiers, public URL quickly |
-
-> If Codebenders IDE has its own preferred stack / deploy target, **use that instead** — it scores better on "Use of Codebenders".
+| Frontend | React + Vite + TypeScript, **PWA**, Tailwind CSS | Fast, small, installable from a link |
+| i18n | `app/src/i18n/en.ts`, `te.ts`; Noto Sans Telugu (self-hosted subset) | English + Telugu toggle |
+| Map | **Leaflet + OpenStreetMap tiles** (with attribution) | Free; no map API key |
+| Backend | Node.js + Express + TypeScript | Business logic, matching, keys stay server-side |
+| Database | **Postgres (Supabase)** | Relational data, transactions for state changes |
+| Realtime | **Server-Sent Events (SSE)** + 15 s polling fallback | Simple live status; works through most networks |
+| Voice post (P1) | **Gnani** speech-to-text (English/Telugu) + an AI model to turn speech into a structured listing | Faster posting for busy donors |
+| Hosting | Vercel (frontend) + Render/Railway (backend) + Supabase | Free tiers |
 
 ## 2. System diagram
 ```
- ┌─────────────── Learner's shared phone (PWA) ───────────────┐
- │  UI (Telugu)  →  Profile store ─┐                           │
- │  Lessons / Practice (offline)   ├─ IndexedDB (per profile)  │
- │  Adaptive engine (runs locally) ┘   + sync queue            │
- │  Service worker: app shell + chapter packs + TTS audio      │
- └───────────────┬─────────────────────────────────────────────┘
-                 │ HTTPS (only when online)
-        ┌────────▼─────────┐
-        │  Backend API      │── /api/stt ───► Gnani STT (te-IN)
-        │  (keys live here) │── /api/tts ───► Gnani TTS (te-IN)
-        │  rate limiting    │── /api/tutor ─► LLM (+ concept-card context, guardrails)
-        │                   │── /api/photo ─► Vision model
-        │                   │── /api/sync ──► Database (progress, attempts)
-        └───────────────────┘── /api/teacher ► aggregates (sample class)
+ ┌───────────── PWA (one app, role-based screens, EN/TE) ─────────────┐
+ │ Donor: Quick Post · Listings · Impact                               │
+ │ Receiver: Offers · Needs · History                                  │
+ │ Volunteer: Tasks · Pickup/Delivery steps                            │
+ │ Sponsor: City impact · Map                                          │
+ └──────────────┬───────────────────────────────▲──────────────────────┘
+                │ HTTPS (REST + JWT)            │ SSE /api/events
+        ┌───────▼───────────────────────────────┴──────┐
+        │ Backend API (Express)                         │
+        │  auth (demo roles) · listings · guidance      │
+        │  matching engine · offers cascade             │
+        │  pickups state machine · handover codes       │
+        │  impact calculator · voice-post (P1)          │── Gnani STT, AI model
+        │  scheduler (offer timeouts, expiry)           │
+        └───────┬──────────────────────────────────────┘
+                │
+        ┌───────▼────────┐
+        │ Postgres        │
+        └────────────────┘
 ```
 
-## 3. Data model (logical)
-| Entity | Key fields | Stored where |
+## 3. Data model
+| Table | Key fields |
+|---|---|
+| `orgs` | id, type (`donor` \| `receiver`), donor_type (`caterer` \| `wedding_hall` \| `hostel_mess` \| `restaurant`), name (fictional), area, lat, lng (area-level, synthetic), veg_only, open_from, open_to, reliability |
+| `users` | id, org_id (nullable for volunteers), role (`donor` \| `receiver` \| `volunteer` \| `sponsor`), display_name, lang, vehicle (`two_wheeler` \| `car` \| null), capacity_meals, available |
+| `receiver_needs` | org_id, date, meals_needed, meals_received |
+| `listings` | id, donor_org_id, items (JSON: name, category, qty_meals, qty_kg?), total_meals, veg, allergens[], storage (`hot` \| `room` \| `chilled`), cooked_at, pickup_by, status, pickup_code, delivery_code, created_at, posted_in_ms |
+| `offers` | id, listing_id, receiver_org_id, rank, score, reasons (JSON en/te), status (`pending` \| `accepted` \| `declined` \| `expired`), expires_at |
+| `pickups` | id, listing_id, receiver_org_id, volunteer_user_id, status, meals_delivered, picked_up_at, delivered_at |
+| `events` | id, listing_id, type, actor_user_id, data, created_at (the timeline) |
+| `guidance_rules` | food_category, storage, max_window_minutes, guidance_en, guidance_te |
+
+## 4. Listing state machine
+| From | To | Who / what triggers it |
 |---|---|---|
-| `LearnerProfile` | id (uuid), nickname, avatar, class, pin_hash, created_at | Device; synced (no PII) |
-| `Chapter` | id, title_te, order, syllabus_ref | Bundled JSON pack |
-| `Concept` | id, chapter_id, title_te, card_text_te, image, audio_url | Bundled JSON pack |
-| `Question` | id, concept_id, type, difficulty, stem_te, options[], correct, explanation_te, option_misconception{} | Bundled JSON pack |
-| `Misconception` | id, concept_id, description_te, fix_hint_te | Bundled JSON pack |
-| `Attempt` | id, learner_id, question_id, chosen, correct, time_ms, created_at, synced | Device → server |
-| `Mastery` | learner_id, concept_id, value, last_seen | Device (derived), mirrored on server |
-| `Doubt` | id, learner_id, input_type (voice/text/photo), text_te, answer_te, concept_id, created_at, status (queued/answered) | Device → server |
-| `Guardian` | id, learner_ids[], pin_hash | Device |
+| — | `posted` | donor |
+| `posted` | `offered` | matching engine (immediately) |
+| `offered` | `claimed` | receiver accepts |
+| `offered` | `offered` (next rank) | decline or 10-min timeout (max 5), then open to all nearby |
+| `claimed` | `volunteer_assigned` | volunteer accepts (or auto-assigned) |
+| `volunteer_assigned` | `picked_up` | volunteer enters the correct **pickup code** |
+| `picked_up` | `delivered` | volunteer enters the correct **delivery code** + quantity |
+| any before `picked_up` | `expired` | scheduler: pickup_by passed |
+| any before `picked_up` | `cancelled` | donor |
 
-Content packs are versioned JSON (`chapter-<id>-v1.json`) so content can be updated without an app release.
+Every transition writes an `events` row and publishes an SSE message to the donor, the receiver and the volunteer involved. Transitions run in a DB transaction with a status check, so double-taps can't create two states.
 
-## 4. Offline & sync strategy
-- **App shell + chapter packs:** precached by service worker on first load ("Download for offline" button per chapter).
-- **Writes:** every attempt/doubt goes to IndexedDB first with `synced=false`.
-- **Sync:** on `online` event or app open → POST batched unsynced records → server returns ack → mark synced. Idempotent by record uuid (safe if connection drops mid-sync).
-- **Queued doubts:** voice recordings stored locally (compressed), sent when back online; learner gets a badge "Your answer is ready".
-- **Conflict rule:** attempts are append-only; mastery is recomputed from attempts → no conflicts.
-- Show a clear **online/offline indicator** and "last saved" time — demonstrable in the demo by toggling airplane mode.
+## 5. Realtime
+- `GET /api/events` (SSE, JWT in a query token or cookie) streams `{ type, listing_id, status, at }` for listings the user is part of.
+- The client falls back to polling `GET /api/listings/:id` every 15 s if SSE drops.
 
-## 5. Voice pipeline (Gnani)
-1. Browser `MediaRecorder` → record ≤ 15 s, mono, low bitrate (Opus/webm, or convert to the format Gnani expects — **check Gnani's docs** for sample rate/encoding and Telugu language code).
-2. Upload to `/api/stt` → backend calls Gnani STT → returns Telugu text.
-3. Show transcript, editable (handles STT errors gracefully).
-4. Answer text → `/api/tts` → Gnani TTS → small audio file → cached by hash of text (same answer never synthesised twice → saves credits).
-5. **Pre-generate** TTS for all lesson concept cards once (build script) → served as static files → zero runtime cost.
-6. Fallbacks: if STT fails → "మళ్ళీ చెప్పండి" (please say again) + text box; if TTS fails → browser `speechSynthesis` (if Telugu voice available) else text only.
-
-## 6. Tutor pipeline (LLM)
-1. Input: question text (Telugu), learner class, current chapter, top-matching concept cards (simple keyword/embedding match over our own cards).
-2. System prompt = tutor rules from `02-product-spec.md §5`.
-3. Output JSON: `{ answer_te, concept_id, check_question_te, out_of_syllabus: bool }` → `concept_id` updates mastery ("needs practice").
-4. Cache answers for frequent questions (normalised text hash) → cheaper and works for repeat doubts offline.
-5. Safety: input filter for personal data (phone numbers etc. stripped), output length cap, refusal template in Telugu.
+## 6. Voice post pipeline (P1)
+1. Donor holds the mic (≤ 20 s); the browser records Opus/webm (mp4 on iOS).
+2. `POST /api/voice-post` → Gnani STT (English or Telugu) → the AI model extracts `{ items[], storage, cooked_at, veg, allergens[] }` as JSON, validated with zod.
+3. The form is prefilled; the donor confirms or edits, then posts. Nothing is posted without confirmation.
+4. Audio is never stored.
 
 ## 7. Security & privacy
-- API keys (Gnani, LLM) only in backend env vars; `.env` in `.gitignore`; **never commit keys to the public repo**.
-- Rate-limit `/api/stt`, `/api/tutor` per device id (protect credits during judging).
-- PINs hashed (not plain) on device. No PII collected. HTTPS only.
-- Audio not stored on server after transcription (state this in privacy note).
+- API keys (Gnani, AI model) only in backend env vars; `.env` git-ignored.
+- JWT with role; every route checks role and org ownership (a receiver can't read another receiver's codes).
+- Handover codes are shown only to the donor (pickup code) and the receiver (delivery code); volunteers must enter them.
+- Synthetic, area-level locations only. No real names, phones or addresses.
+- Rate limits per user; voice-post daily cap to protect credits.
 
 ## 8. Quality bar ("Build Quality")
-- TypeScript, ESLint/Prettier, consistent folder structure (`/app`, `/server`, `/content`).
-- Content packs validated against a schema at build time (every question has a concept, every wrong option has a misconception).
-- Unit tests for the adaptive engine and sync queue (they're pure logic — easy to test).
-- Lighthouse run on mobile profile: target PWA ✓, performance ≥ 80 — screenshot it for the submission.
-- Error states designed in Telugu (no network, mic denied, STT failed, server busy).
-- README with setup, env vars, architecture diagram, and how Codebenders was used.
+- TypeScript strict, ESLint/Prettier, one schema file for API contracts (zod) shared by tests.
+- Unit tests: matching engine, state machine, impact calculator, guidance rules.
+- Integration tests: full flow post → offer → claim → pickup → deliver.
+- A scripted **demo scenario** (seed + bots) so the full flow can be shown in 2 minutes.
+- Lighthouse mobile: PWA ✓, performance ≥ 80.
 
-## 9. Repository layout (suggested)
+## 9. Repository layout
 ```
-Vidya_Nestham/
-  app/          # PWA frontend
-  server/       # API (proxy for Gnani + LLM, sync)
-  content/      # chapter packs (JSON) + content sources/attribution
-  docs/         # these documents (copy in)
+Vidya_Nestham/            (repo; product name: Annapoorna Link)
+  app/        # PWA frontend (Member A)
+  server/     # API, matching, state machine, impact (Member B)
+  docs/       # these documents
   README.md
   CODEBENDERS_USAGE.md
-  LICENSE
 ```

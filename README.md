@@ -1,10 +1,10 @@
-# విద్యా నేస్తం · Vidya Nestham
+# అన్నపూర్ణ లింక్ · Annapoorna Link
 
-**A Telugu learning friend that works on a shared phone with poor data.**
-A voice-first, offline-friendly AI Science tutor for Class 8 students in Telugu-medium government schools (Telangana State Board).
+**Surplus food to people who need it, before it spoils.**
+A web app that lets Hyderabad's caterers, wedding halls, hostel messes and restaurants post surplus food in under a minute. It matches the food to the best nearby shelter or community kitchen, coordinates a volunteer pickup with live status, and shows the real impact.
 
 > 🏆 Built for the **ACE Builders Hackathon 2026** by Codebenders
-> 📌 **Problem Statement 3: The Last-Mile Tutor** (Education)
+> 📌 **Problem Statement 2: Rescue the Surplus** (Society & Environment)
 
 | | |
 |---|---|
@@ -13,226 +13,134 @@ A voice-first, offline-friendly AI Science tutor for Class 8 students in Telugu-
 | 📊 **Pitch deck** | <!-- TODO --> `https://...` |
 | 🛠️ **How we built it** | [CODEBENDERS_USAGE.md](CODEBENDERS_USAGE.md) |
 
-**Try it in 30 seconds:**
-1. Open the live app on a phone.
-2. Tap **"డెమో డేటా లోడ్ చేయండి"** (Load demo data).
-3. Pick the learner **లక్ష్మి**. The demo PIN is shown on screen.
-4. Tap 🎤 and ask a Science doubt in Telugu.
+**Try it in 60 seconds:**
+1. Open the live app and tap a demo account (e.g. **Sri Sai Caterers**).
+2. Post surplus food, then switch to **Annadanam Community Kitchen** to accept it.
+3. Switch to volunteer **Ravi** to pick it up and deliver it.
+
+Or tap **Run wedding-night demo** to watch the whole flow live. All organisations and people are fictional demo data.
 
 ---
 
 ## 📖 The problem
+It's 10:30 PM and a wedding reception in Kukatpally has just ended. 150 plates of good food are left over.
+1. The caterer calls two NGOs. One doesn't answer; the other is too far away to send anyone.
+2. By midnight the food is in the bin, and the caterer pays for its disposal.
+3. Six kilometres away, a shelter served smaller portions that night.
 
-Lakshmi is 13. She studies in Class 8 at a Zilla Parishad High School in a Telangana village, in Telugu medium. One Science teacher covers Classes 6–10, so lessons are rushed. In the evening she studies on her **father's phone, which the whole family shares**, on a data pack that runs out by night. Nobody at home can explain Science to her.
+**Good intentions exist on both sides, but there's no fast, reliable way to connect surplus food with people who need it before it spoils.** Coordination runs on phone calls and WhatsApp groups that fail late at night, with no matching, no status and no record of impact.
 
-Most digital learning is built for a different student: someone who **studies in English, has a personal smartphone, has steady data, and has a parent who can help**. YouTube videos use hundreds of MB. Chatbots expect typed English. Tuition costs ₹300–800 a month, if there's any in the village at all.
-
-**The students who need help the most are the ones ed-tech reaches the least.**
-
-<!-- TODO: add 2–3 cited statistics (UDISE+, ASER, NAS) and 1–2 anonymised quotes from your user calls -->
+<!-- TODO: add 2–3 cited statistics and 1–2 anonymised quotes from your user calls -->
 
 ## 💡 Our solution
-
-Vidya Nestham is a **Telugu-first tutor in the phone's browser**, designed around the conditions Lakshmi actually studies in:
-
 | | Feature | What it does |
 |---|---|---|
-| 🎤 | **Ask doubts by voice, in Telugu** | Hold the mic and speak the doubt. You get a simple Telugu answer with an example from village life, read aloud. No typing needed. |
-| 🧠 | **Adaptive practice** | Every wrong answer is linked to a specific misconception. The next question targets that exact gap, and the app explains *why* it chose it. |
-| 📶 | **Works offline** | Lessons and practice work in airplane mode. Progress is saved on the phone and syncs when the network returns. |
-| 👨‍👩‍👧 | **Built for shared phones** | Each family member gets their own profile with an avatar and a 4-digit PIN, so progress never mixes. |
-| 📷 | **Photo doubts** | Take a photo of a textbook question and get it explained. <!-- remove if not shipped --> |
-| 🔊 | **A parent view you can *listen* to** | Each chapter gets a green, yellow or red status, plus a spoken Telugu summary for parents who can't read dashboards. |
-| 🧑‍🏫 | **Teacher/volunteer view** | Shows which concepts the class is stuck on (demo data). |
+| ⏱️ | **Post in under a minute** | Food chips, quantities, storage, allergens. The latest safe pickup time is suggested automatically. "Repeat last post" for regular donors. Optional voice posting in English or Telugu |
+| 🎯 | **Explainable matching** | Ranks receivers by distance, today's need, food preferences (veg-only), opening hours and time left; picks the nearest volunteer with enough capacity. Shows *why*: "2.4 km · needs 180 meals · veg accepted" |
+| 🔁 | **Offer cascade** | Each receiver gets 10 minutes to accept; then the next one gets the offer. Food never waits on one phone call |
+| 🛵 | **Live pickup with handover codes** | Posted → claimed → picked up → delivered, live for donor, receiver and volunteer. 4-digit codes confirm each handover, with no GPS tracking |
+| 🛡️ | **Safety card on every listing** | Storage, safe-window countdown, allergens, veg/non-veg, handling guidance. Listings auto-expire. **We never certify food as safe** |
+| 📊 | **Impact with assumptions** | Meals saved, kg of waste avoided, CO₂e avoided, for donors and the whole city. Every number shows how it's calculated, and only delivered food counts |
+| 🌐 | **English + Telugu** | For owners, NGO staff, kitchen staff and volunteers alike |
 
 ### Problem statement requirements → our features
-| Required by Problem Statement 3 | How Vidya Nestham meets it |
+| Required by Problem Statement 2 | How Annapoorna Link meets it |
 |---|---|
-| One regional language end to end, not just translated English | Telugu throughout: interface, lessons, practice, tutor answers, voice and parent view. Content is written natively in Telugu with local examples. |
-| One subject from the real state-board syllabus | Telangana SCERT **Class 8 Physical Science**: Ch 1 *Force (బలం)* and Ch 2 *Friction (ఘర్షణ)*, mapped to the official chapter list |
-| AI tutor that explains simply, answers doubts, adapts to mistakes | Voice/text/photo doubt tutor plus a misconception-based adaptive practice engine |
-| Light on data, saves progress when the connection drops | Offline-first PWA, cached chapter packs, local progress store with idempotent background sync, Data Saver mode |
-| Voice or photo input | Telugu speech-to-text and text-to-speech (Gnani), plus photo questions |
-| Progress view for learner and parent/teacher/volunteer | Learner stars and concept map, parent traffic lights with voice summary, teacher weak-concept view |
+| A donor flow under a minute: what food, how much, pickup-by time | Quick Post with chips, auto-suggested pickup-by and a built-in timer (median posting time: <!-- TODO --> s) |
+| Smart matching by distance, quantity, timing and need | Matching engine with eligibility rules, weighted score and reasons; volunteer selection by distance and capacity |
+| Pickup coordination with live status: posted → claimed → collected → delivered | Server-enforced state machine, SSE live updates, handover codes |
+| Impact view: meals saved and waste avoided, with assumptions | Donor and city dashboards with a "How we calculate this" panel; printable monthly report |
+| Handling and safety info: time window, storage, allergens | Safety card on every listing, offer and task; server-enforced safe windows and auto-expiry |
+| Business case for donors and sponsors | Donor Pro, institution plans, CSR area sponsorships (see below) |
 
 ## 📸 Screenshots
-<!-- TODO: 5–6 phone screenshots in a row: profile picker · home · voice doubt · practice feedback · offline mode · parent view -->
-| Profile picker | Voice doubt | Adaptive practice | Offline | Parent view |
-|---|---|---|---|---|
-| `docs/img/s1.png` | `docs/img/s4.png` | `docs/img/s5.png` | `docs/img/offline.png` | `docs/img/s7.png` |
+<!-- TODO: phone screenshots: Quick Post · offer with reasons · volunteer stepper · live timeline · impact dashboard -->
 
 ## 🏗️ How it works
-
 ```
- ┌──────────── Learner's shared phone (PWA) ─────────────┐
- │  Telugu UI · Profiles (PIN) · Lessons · Practice      │
- │  Adaptive engine (runs on device)                     │
- │  IndexedDB per profile + sync queue                   │
- │  Service worker: app shell, chapter packs, audio      │
- └──────────────┬────────────────────────────────────────┘
-                │ HTTPS, only when online
-       ┌────────▼────────┐
-       │   Backend API   │── /api/stt ─────► Gnani speech-to-text (Telugu)
-       │ (keys live here)│── /api/tts ─────► Gnani text-to-speech (Telugu)
-       │  rate-limited   │── /api/tutor ───► AI model + our concept cards as context
-       │                 │── /api/photo ───► Vision model
-       │                 │── /api/sync ────► Database (attempts, doubts)
-       └─────────────────┘── /api/teacher ─► Class aggregates
+ PWA (Donor · Receiver · Volunteer · Sponsor, EN/TE)
+        │ REST + JWT                 ▲ SSE live events
+ Backend API (Express): listings · guidance · matching · offers · tasks/state machine · impact · voice post
+        │
+ Postgres (Supabase)                 Gnani speech-to-text + AI model (voice post, optional)
 ```
-
-**Voice doubt flow:**
-1. The learner holds the mic button (up to 15 s, compressed audio).
-2. Gnani speech-to-text turns it into Telugu text, which the learner can edit.
-3. The tutor answers using the matching concept cards as context.
-4. The answer comes back in simple Telugu, at most 120 words, with one local example and a check question.
-5. Gnani text-to-speech reads it aloud, and the audio is cached on the device.
-
-**Adaptive engine:**
-- Every question is tagged with a concept and a difficulty level, and every wrong option is tagged with a misconception.
-- The app keeps a mastery score per concept and updates it after each answer.
-- The next question comes from the weakest concept, at a difficulty that fits the learner's mastery, and targets their most frequent misconception.
-- The logic is pure functions with unit tests.
-
-**Offline and sync:**
-- Every attempt and doubt is written to IndexedDB first.
-- Unsynced records upload in batches whenever the phone is online.
-- The server upserts by record ID, so a dropped connection never creates duplicates.
-- Attempts are append-only and mastery is recomputed from them, so there are no sync conflicts.
+- **Matching score:** `0.4 × proximity + 0.3 × need + 0.2 × time slack + 0.1 × reliability`, after eligibility checks (veg-only, open hours, need, arrival before pickup-by). Weights are in config and covered by unit tests.
+- **State machine:** posted → offered → claimed → volunteer assigned → picked up → delivered (or expired / cancelled). Only the server changes status, inside transactions.
+- **Safety windows:** from published food-handling guidance (hot / room / chilled, stricter for dairy and non-veg). The donor can choose an earlier pickup, never a later one.
 
 ### Tech stack
 <!-- TODO: update to what you actually used -->
 | Layer | Technology |
 |---|---|
-| Frontend | React + Vite + TypeScript, PWA (service worker), Tailwind CSS, Noto Sans Telugu |
-| Offline storage | IndexedDB (Dexie) |
-| Backend | Node.js + Express |
-| Database | <!-- Supabase / Firebase / SQLite --> |
-| Voice | Gnani (Telugu speech-to-text and text-to-speech) |
-| AI tutor | <!-- model/provider used --> |
-| Hosting | <!-- e.g., Vercel + Render --> |
+| Frontend | React + Vite + TypeScript, PWA, Tailwind CSS, Leaflet + OpenStreetMap |
+| Backend | Node.js + Express + TypeScript, zod |
+| Database | Postgres (Supabase) |
+| Realtime | Server-Sent Events |
+| Voice (optional) | Gnani speech-to-text + an AI model |
+| Hosting | Vercel + Render/Railway |
 | Built with | **Codebenders IDE** |
 
-## 📶 Designed for low data
-
-| | Budget | Measured |
-|---|---|---|
-| First load (app shell) | < 1.5 MB | <!-- TODO --> |
-| One chapter pack (text, images, questions) | < 400 KB | <!-- TODO --> |
-| One voice doubt round-trip | < 150 KB | <!-- TODO --> |
-| 10-minute study session (text mode) | < 5 MB | <!-- TODO --> |
-| Lighthouse (mobile) | PWA ✓, Performance ≥ 80 | <!-- TODO: screenshot --> |
-
-How we keep it light:
-- Lesson audio is generated once and served as static files.
-- Repeat doubts are answered from a cache.
-- Images are compressed to WebP and load lazily.
-- Data Saver mode turns off auto-audio and loads images only on tap.
-
 ## 🛡️ Guardrails & privacy
-
-The learners are children, so the app is built to protect them:
-
-- **Minimal data:** we store only a nickname, class, avatar and a hashed PIN. No phone number, school ID, Aadhaar or face photos.
-- **Synthetic data only:** all demo learners and the teacher's class are sample profiles.
-- **Safe tutor:** it stays within Class 8 Science, never asks for personal information, and politely redirects off-topic or unsafe questions in Telugu.
-- **Original content:** all explanations and questions are written for this project, aligned to the syllabus chapters and not copied from textbooks. See [content/SOURCES.md](content/SOURCES.md).
-- **Secrets stay on the server:** API keys live only in backend environment variables and are never sent to the browser or committed.
-- **No audio retention:** voice recordings are used for transcription and not stored on the server.
+- **We connect people; we don't certify food safety.** Every listing shows guidance and time limits, and receivers check food before serving.
+- **No tax or legal benefit claims** anywhere.
+- **Synthetic data only.** Fictional organisations and people, area-level locations, no real addresses or phone numbers.
+- **Handover codes** are visible only to the right party.
+- **Secrets stay on the server.** Voice recordings are never stored.
 
 ## 💰 Business model
-
-**Free for students. Paid by those who fund learning outcomes.**
-
-| Who pays | Why | Price |
+**Receivers and volunteers use it free.**
+| Who pays | Why | Plan |
 |---|---|---|
-| CSR programmes | They need measurable, reportable education impact | <!-- ₹___ --> per student per year |
-| Education NGOs | Their volunteers can't reach every child every evening | <!-- ₹___ --> per student per year |
-| State education programmes (later) | Learning outcomes in government schools, plus the regional-language mandate | District/state licence |
+| Caterers & wedding halls | Lower disposal cost; "zero-waste events" story for clients | Donor Pro: <!-- ₹___ -->/venue/month |
+| Hostel & college messes | Routine daily pickups + sustainability reports | Institution plan |
+| CSR sponsors | Verified, reportable social and environmental impact | Area sponsorship + dashboard |
+| City authorities (later) | Less food waste to landfill | City licence + data |
 
-- **Low cost to run:**
-  - Lessons and practice run on the device.
-  - Lesson audio is generated once.
-  - Popular doubts are cached.
-
-  Estimated running cost: <!-- ₹___ --> per student per month.
-- **Go-to-market:**
-  1. A free 8-week NGO pilot.
-  2. CSR-funded district cohorts.
-  3. State programme partnerships.
-- **What payers get:** concept-level mastery gains, active learners, top confusing concepts, and data used per session.
-
-<!-- TODO: link to the full business doc or deck -->
+## 📈 Results (demo data)
+<!-- TODO: paste the `npm run metrics` table: median time to claim/deliver, on-time rate, posting time -->
 
 ## 🛠️ Built with Codebenders
-
-The whole application was built in the **Codebenders IDE** during the hackathon build window (21 Nov 11:30 AM to 22 Nov 11:59 PM IST).
-[CODEBENDERS_USAGE.md](CODEBENDERS_USAGE.md) documents the build timeline, key prompts, the iterations that mattered, and where human review corrected the output (Telugu wording, science accuracy, security).
+The whole application was built in the **Codebenders IDE** during the hackathon build window (21 Nov 11:30 AM to 22 Nov 11:59 PM IST), using chat-to-build with the Nexon agent. [CODEBENDERS_USAGE.md](CODEBENDERS_USAGE.md) documents the timeline, key prompts, the iterations that mattered and where we corrected the output.
 
 ## 🚀 Run locally
-
-**Requirements:** Node.js 18+, a Gnani API key, and an API key for the AI tutor model.
-
 ```bash
 git clone https://github.com/Duggineniakhil/Vidya_Nestham.git
 cd Vidya_Nestham
 
 # backend
-cd server
-cp .env.example .env      # fill in your own keys
-npm install
-npm run dev
+cd server && cp .env.example .env   # fill in your own values
+npm install && npm run migrate && npm run seed && npm run dev
 
 # frontend (new terminal)
-cd app
-npm install
-npm run dev
+cd app && npm install && npm run dev
 ```
-
-**Environment variables** (`server/.env`; see `.env.example`):
 | Variable | Purpose |
 |---|---|
-| `GNANI_API_KEY` | Gnani speech-to-text / text-to-speech <!-- adjust to Gnani's actual auth fields --> |
-| `AI_API_KEY` | AI tutor model |
-| `DATABASE_URL` | Progress sync database |
+| `DATABASE_URL` | Postgres connection |
+| `JWT_SECRET` | Demo auth tokens |
 | `ALLOWED_ORIGIN` | Frontend URL for CORS |
+| `GNANI_API_KEY`, `AI_API_KEY` | Optional voice post |
+| `VITE_API_BASE_URL`, `VITE_USE_MOCKS` | Frontend config |
 
-> Never commit `.env`. It's listed in `.gitignore`.
-
-**Tests:**
-```bash
-cd app && npm test     # adaptive engine, sync queue, content validator
-```
+> Never commit `.env`.
 
 ## 📁 Project structure
 ```
-Vidya_Nestham/
-├── app/                 # PWA frontend (Telugu UI, offline, adaptive engine)
-├── server/              # API: voice proxy, tutor, sync, teacher aggregates
-├── content/             # Chapter packs (concept cards, questions, misconceptions) + SOURCES.md
-├── docs/                # Problem research, product spec, architecture, business model
-├── CODEBENDERS_USAGE.md # How we built it with Codebenders
-└── README.md
+app/                  PWA frontend (role-based screens, EN/TE, map, live updates)
+server/               API, matching engine, state machine, impact, seed data
+docs/                 Problem research, spec, architecture, business model, plans
+CODEBENDERS_USAGE.md  How we built it with Codebenders
 ```
 
 ## 🗺️ Roadmap
-- [x] Class 8 Physical Science: Force & Friction (Telugu)
-- [ ] All Class 8 Science chapters (Physical + Biological Science)
-- [ ] Classes 6–10, Science and Maths
-- [ ] More languages: Kannada, Tamil, Marathi…
-- [ ] SMS / IVR mode for feature phones
-- [ ] NGO pilot with 100–300 learners
+- [x] Hyderabad MVP: post → match → pickup → deliver → impact
+- [ ] Pilot with 10 caterers/halls and 5 receivers
+- [ ] Scheduled pickups for regular donors
+- [ ] WhatsApp notifications
+- [ ] More cities; CSR and city partnerships
 
 ## 👥 Team
 <!-- TODO -->
-| Name | Role | Links |
-|---|---|---|
-| | | |
-
-## 🙏 Acknowledgements
-- **Codebenders**, for the ACE Builders Hackathon and the IDE
-- **Gnani**, for Telugu speech technology
-- **SCERT Telangana**, for the syllabus the content is aligned to
-- <!-- the native Telugu reviewer / teacher who checked the content -->
 
 ## 📄 License
-<!-- TODO: choose a license (e.g., MIT) after checking the hackathon's ownership/licensing terms -->
+<!-- TODO: choose after checking the hackathon's ownership/licensing terms -->

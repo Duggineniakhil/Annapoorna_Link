@@ -1,599 +1,411 @@
-# 13 — Codebenders Prompts: Member A (Frontend, Offline & Content)
-**Vidya Nestham (విద్యా నేస్తం)** · tasks A1–A15 from `12-team-split.md`
+# 13 — Codebenders Prompts: Member A (Frontend & Experience)
+**Annapoorna Link (అన్నపూర్ణ లింక్)** · tasks A1–A15 from `12-team-split.md`
 
 ## How to use this file
-1. Paste **one prompt at a time** into the Codebenders IDE, in order. Each prompt assumes the earlier ones are done.
-2. If the IDE accepts context files, attach `02-product-spec.md`, `03-architecture.md` and `12-team-split.md` (it holds the shared contracts).
+1. **Start a new Nexon chat** and send the context message below first. If you used Nexon for an earlier idea, don't continue that chat.
+2. Paste **one prompt at a time**, in order. Each assumes the earlier ones are done.
 3. After each prompt:
-   - run the **checks** listed under it
-   - fix what's wrong with follow-up prompts
+   - **read Nexon's plan before approving it**
+   - run the **checks** listed under the prompt
+   - fix issues with short follow-ups (exact error + what you expected)
    - commit
-   - add an entry to `CODEBENDERS_USAGE.md` with the prompt, the result, what you changed, and a screenshot
-4. **You own:** `app/` (except `app/src/engine/` and `app/src/sync/`) and `content/`. Member B owns `server/`, `app/src/engine/`, `app/src/sync/` and `scripts/`.
-5. **Never wait for B.** Until B's piece is ready, use mocks (`USE_MOCKS=true`) or the local stand-ins these prompts ask for.
-6. **Telugu strings:** all user-facing text lives in `app/src/i18n/te.ts`. Have the wording reviewed by a native speaker; changing it later takes minutes.
+   - add a row to `CODEBENDERS_USAGE.md`
+4. **You own `app/`.** Member B owns `server/`. Never edit B's folder.
+5. **Never wait for B.** Use mocks (`VITE_USE_MOCKS=true`) matching `12-team-split.md` §2 until B's endpoints are live.
+6. **Strings:** every visible string lives in `app/src/i18n/en.ts` and `te.ts`. Have the Telugu checked by a native speaker.
 7. **Use the IDE the way the organisers recommend** (doc 15 §3):
-   - work in **chat-to-build** with Nexon
-   - **read the plan before approving it**
-   - if a plan looks huge (likely for A1 and A7), split the prompt into 2–3 smaller ones, e.g. A1a routes + layout, A1b PWA + offline, A1c i18n + budget checks
-   - if a fix fails twice, re-plan instead of resending it
+   - one feature at a time
+   - if a plan looks huge, split it into 2–3 prompts
+   - re-plan after two failed fixes
    - start a new chat when the history gets long
 8. **Hard cut-off:** last commit before **Sun 22 Nov, 11:59 PM IST**.
 
+### Context message (send first, in a new chat)
+```text
+We are building "Annapoorna Link" (అన్నపూర్ణ లింక్), a web app (PWA) for the ACE Builders Hackathon 2026,
+Problem Statement 2: Rescue the Surplus. In Hyderabad, it connects surplus food from caterers, wedding halls,
+hostel/college messes and restaurants to nearby shelters, community kitchens and NGOs, with volunteers doing
+the pickup, before the food spoils. English + Telugu interface.
+
+Read these files for context: docs/01-problem-and-user.md, docs/02-product-spec.md, docs/03-architecture.md,
+docs/10-food-handling-guidance.md, docs/11-impact-assumptions.md, docs/12-team-split.md.
+
+I am Member A (Frontend & Experience). I own app/. Member B owns server/; never create or edit files there.
+Until B's API is live, I use mocks in app/src/mocks/ that follow the contracts in docs/12-team-split.md §2
+(types, API table, decisions D1–D12).
+
+Don't write code yet. Reply with a short summary of the product, the four roles, my responsibilities and the
+listing status flow, then wait for task A1.
+```
+
 ---
 
-## A1 · PWA skeleton
+## A1 · PWA skeleton with roles and EN/TE
 ```text
-Create the frontend skeleton for "Vidya Nestham" (విద్యా నేస్తం), a Telugu-first, offline-friendly
-learning app for Class 8 students who use a shared, low-end Android phone with poor mobile data.
-This task is ONLY the frontend skeleton. Do not build a backend, do not call any external API,
-and do not add real features yet. Every screen should be a working placeholder.
+Create the frontend skeleton for Annapoorna Link in app/. This task is ONLY the skeleton: routes, layout,
+i18n and placeholders. No API calls yet.
 
-TECH
-- React + Vite + TypeScript (strict mode), Tailwind CSS, React Router.
-- PWA with vite-plugin-pwa (Workbox): precache the app shell, offline fallback page,
-  web app manifest (name "Vidya Nestham", short_name "విద్యా నేస్తం", lang "te",
-  display "standalone", portrait, theme color + background color, placeholder icons 192/512).
-- Self-host the Noto Sans Telugu font (e.g., @fontsource/noto-sans-telugu), Telugu + Latin
-  subsets only, font-display: swap. No Google Fonts CDN.
-- ESLint + Prettier configured. No UI component library (keep the bundle small).
+TECH: React + Vite + TypeScript (strict), Tailwind CSS, React Router, vite-plugin-pwa (app shell precache,
+manifest: name "Annapoorna Link", short_name "Annapoorna", theme color, placeholder icons 192/512).
+Self-host Noto Sans Telugu (Telugu + Latin subsets, font-display: swap). ESLint + Prettier. No UI library.
 
-FOLDER STRUCTURE (inside app/)
-src/
-  screens/       one file per screen below
-  components/    shared UI (TopBar, BigButton, OnlineBadge, ScreenLayout)
-  i18n/te.ts     ALL user-facing strings live here, in Telugu. No hard-coded text in components.
-  config.ts      API_BASE_URL and USE_MOCKS (default true), read from Vite env vars
-  mocks/         empty for now (add .gitkeep)
-  engine/        leave EMPTY with .gitkeep (owned by the other team member)
-  sync/          leave EMPTY with .gitkeep (owned by the other team member)
-  hooks/useOnlineStatus.ts
+STRUCTURE (app/src/)
+  screens/donor/, screens/receiver/, screens/volunteer/, screens/sponsor/, screens/common/
+  components/   (AppShell, TopBar, BottomNav, LanguageToggle, DemoDataBadge, StatusBadge, EmptyState)
+  i18n/en.ts, i18n/te.ts, i18n/index.ts   (useT() hook; language saved in localStorage)
+  types/api.ts  (mirror the types in docs/12-team-split.md §2.1 exactly)
+  services/     (empty for now)
+  mocks/        (empty for now, .gitkeep)
+  config.ts     (VITE_API_BASE_URL, VITE_USE_MOCKS default true)
 
-ROUTES AND SCREENS (all text in Telugu, taken from i18n/te.ts)
-/                         ProfilePicker   "ఎవరు చదువుతున్నారు?" (Who is studying?), placeholder avatars + "కొత్త విద్యార్థి" (new learner) button
-/home                     Home            4 big buttons: 🎤 "సందేహం అడగండి" (Ask a doubt), 📖 "పాఠాలు" (Lessons),
-                                          ✏️ "సాధన" (Practice), ⭐ "నా ప్రగతి" (My progress); a "మార్చు" (Switch learner) link
-/lessons                  Lessons         placeholder chapter list: "బలం" (Force), "ఘర్షణ" (Friction)
-/lessons/:chapterId       ChapterDetail   placeholder concept list
-/lessons/:chapterId/:conceptId  ConceptCard  placeholder card with a 🔊 button (does nothing yet)
-/ask                      AskDoubt        placeholder: big mic button, text box, camera button
-/practice                 Practice        placeholder question card with 4 options
-/progress                 Progress        placeholder stars per concept
-/parent                   ParentView      "తల్లిదండ్రుల కోసం" (For parents), placeholder traffic-light rows
-/teacher                  TeacherView     "ఉపాధ్యాయుల కోసం" (For teachers), with a visible "డెమో డేటా" (Demo data) label
-/settings                 Settings        placeholder toggles: "డేటా సేవర్" (Data Saver), text size, voice on/off
-*                         NotFound        Telugu message + button back to home
+ROUTES (placeholders, every visible string from i18n)
+/login                    Demo login (placeholder list of accounts)
+/donor                    Donor home: active listings + big "Post surplus" button
+/donor/post               Quick Post (placeholder)
+/donor/listings/:id       Listing detail (placeholder timeline)
+/donor/impact             My impact (placeholder)
+/receiver                 Incoming offers
+/receiver/offers/:id      Offer detail
+/receiver/needs           Today's needs
+/receiver/history         Received history
+/volunteer                Available tasks
+/volunteer/tasks/:id      Active task stepper
+/volunteer/history        My deliveries
+/sponsor                  City impact dashboard
+/sponsor/map              Activity map
+/about                    About & food-safety note (doc 10 §3 disclaimer in EN and TE)
+*                         Not found
 
-SHARED LAYOUT
-- TopBar on every screen except ProfilePicker: back button, screen title, OnlineBadge, settings icon.
-- OnlineBadge uses navigator.onLine + online/offline events:
-  online  -> "ఆన్‌లైన్" (green dot)
-  offline -> "ఆఫ్‌లైన్ · మీ పని ఫోన్‌లో సేవ్ అవుతుంది" (grey dot; "Offline · your work is saved on the phone")
+LAYOUT
+- AppShell with TopBar (title, LanguageToggle "EN | తెలుగు", account menu) and a role-specific BottomNav.
+- DemoDataBadge: small "Demo data / డెమో డేటా" label, used on screens with sample data.
+- Mobile-first (360 px), tap targets ≥ 48 px, base font 16–18 px, high contrast.
 
-DESIGN RULES (low-end phone, young learner)
-- Mobile-first for a 360 × 640 screen; looks fine up to tablet width.
-- Tap targets at least 48 × 48 px; base font size at least 18 px for Telugu text; high contrast.
-- Big icon + short Telugu label on every main button (assume slow readers).
-- No images over 40 KB; no animations that block on slow CPUs.
+BUDGET: initial JS + CSS + fonts < 1.5 MB uncompressed; lazy-load every role's screens.
 
-PERFORMANCE BUDGET
-- Initial JS + CSS + font under 1.5 MB uncompressed total; lazy-load every screen except
-  ProfilePicker and Home with React.lazy.
-- After the first visit, the app must open and navigate between all screens in airplane mode.
-
-ALSO
-- npm scripts: dev, build, preview, lint.
-- app/.env.example with VITE_API_BASE_URL and VITE_USE_MOCKS=true (no secrets in the frontend, ever).
-- app/README.md: how to run, the folder ownership note (engine/ and sync/ belong to the other member),
-  and how to test offline (build + preview, load once, then turn on airplane mode / DevTools offline).
-
-When done, list: the files you created, the final bundle size from `npm run build`,
-and anything you could not do.
+ALSO: npm scripts dev/build/preview/lint; app/.env.example; app/README.md (run, env vars, folder ownership).
+When done, list the files created and the build size.
 ```
 **Checks:**
-- `npm run build` and `npm run preview` work.
-- Every screen opens.
-- After going to airplane mode and reloading, the app still opens and you can move between screens.
-- All visible text is Telugu.
-- The online/offline badge switches when you toggle airplane mode.
-- `engine/` and `sync/` are empty.
+- Every route opens.
+- The language toggle switches all visible text and is remembered after reload.
+- The build is under budget.
+
+> If Nexon's plan is large, split it into A1a (routes, layout, types) and A1b (i18n, PWA, font, budget).
 
 ---
 
-## A2 · Frontend deploy
+## A2 · Frontend deploy (Vercel)
 ```text
-Make the Vidya Nestham frontend (app/) deployable and deploy it.
-
-1. Add hosting config for <Vercel | Netlify> (pick the one I name here: ______):
-   - SPA fallback: every unknown path serves index.html (React Router routes must work on refresh).
-   - Cache headers: hashed assets (JS/CSS/fonts/images) cached for 1 year, immutable;
-     index.html, manifest and the service worker file served with no-cache so updates reach users.
-   - Build command and output directory for a Vite app inside the app/ folder.
-2. Environment variables: VITE_API_BASE_URL and VITE_USE_MOCKS are read at build time;
-   document how to set them in the hosting dashboard. No secrets in the frontend.
-3. Service worker updates: when a new version is deployed, show a small Telugu banner
-   "కొత్త వెర్షన్ వచ్చింది · నొక్కండి" (A new version is available · tap) that reloads the app when tapped.
-   Never auto-reload while the learner is in the middle of a practice question.
-4. Add a tiny "version" line (build date + short git hash) on the Settings screen so we can
-   confirm which build is live.
-5. Update app/README.md with the deploy steps.
-
-When done, give me the exact steps I must click in the hosting dashboard, and a checklist to verify
-the live site works offline on a phone.
+Make app/ deployable on Vercel and give me the steps.
+- SPA fallback so React Router routes work on refresh.
+- Cache headers: hashed assets immutable for 1 year; index.html, manifest and the service worker no-cache.
+- Env vars VITE_API_BASE_URL and VITE_USE_MOCKS set in the Vercel dashboard (no secrets in the frontend).
+- A "new version available, tap to refresh" banner when a new service worker is waiting
+  (EN + TE strings), never interrupting an in-progress form.
+- A version line (build date + short git hash) on /about.
+Update app/README.md with deploy steps and a checklist to verify the live site on a phone.
 ```
 **Checks:**
 - The live URL opens in incognito on your phone.
-- Refreshing on `/lessons` doesn't show a 404.
-- Load the page once, switch to airplane mode, and it still opens.
-- A redeploy shows the "new version" banner.
-- Share the URL with Member B.
+- Refreshing on `/donor/post` works.
+- **Send the URL to Member B** for `ALLOWED_ORIGIN`.
 
 ---
 
-## A3 · Profiles & PIN (shared-phone support)
+## A3 · Demo login & role routing
 ```text
-Implement learner profiles for a phone shared by a family, in the Vidya Nestham frontend.
+Implement demo login and role-based routing for Annapoorna Link.
 
-LOCAL DATABASE
-- Create app/src/db/schema.ts using Dexie (IndexedDB) with the agreed tables:
-  profiles, attempts, doubts, mastery, audioCache, meta.
-  I own `profiles` and `meta`. The other member owns attempts, doubts, mastery and the sync logic.
-  Define all tables now (so the schema version is shared), but only write code for profiles and meta.
-  Every learner-owned row includes learner_id.
-- meta stores: deviceId (random uuid created on first launch), dataSaver, textSize, voiceEnabled,
-  activeLearnerId, lastActiveAt.
-
-PROFILE DATA (nothing else may be collected)
-- id (uuid), nickname (1–12 characters, Telugu or English letters), avatar (one of 12 emoji animals),
-  class (fixed to 8 for now, with a note that only Class 8 Science is available),
-  pinHash, pinSalt, createdAt.
-- Max 5 profiles per device.
-- PIN: exactly 4 digits. Store only a salted SHA-256 hash via the Web Crypto API, never the PIN itself.
-
-SCREENS
-- ProfilePicker (/): grid of avatar + nickname cards; tap → PIN pad (big digits, 3 × 4 layout);
-  "కొత్త విద్యార్థి" (new learner) opens a 3-step flow: choose avatar → type nickname → set PIN twice.
-- Wrong PIN: show "PIN తప్పు. మళ్ళీ ప్రయత్నించండి." (Wrong PIN, try again); after 3 wrong tries,
-  lock that profile for 30 seconds with a visible countdown.
-- Long-press a profile → "తొలగించు" (delete), which needs that profile's PIN and a confirm step.
-- A one-line privacy note under the picker, in Telugu: we store only a nickname, an avatar and a PIN, on this phone.
-
-SESSION RULES
-- After a correct PIN, set activeLearnerId and go to /home.
-- Every screen except ProfilePicker requires an active learner; otherwise redirect to /.
-- After 10 minutes with no interaction, clear the active learner and return to the picker
-  (so a sibling doesn't continue on someone else's profile).
-- A "మార్చు" (switch learner) link on Home returns to the picker immediately.
-- Provide a hook useActiveLearner() that returns the active profile (or null) for other screens.
-
-Write unit tests for: PIN hashing/verification, the 3-try lock, the 10-minute idle logout, and the
-5-profile limit. All user-facing text goes in i18n/te.ts.
+- services/api.ts: a fetch client with base URL from config, JSON handling, Authorization: Bearer <token>,
+  and typed errors from { error_code, message, message_te } (show message_te when the language is Telugu).
+  Timeouts: 15 s → a friendly "server busy" error with retry.
+- Mocks (VITE_USE_MOCKS=true): app/src/mocks/ with handlers for GET /api/demo/accounts,
+  POST /api/auth/demo-login and GET /api/me, using the demo accounts in docs/04-sample-data-plan.md §4
+  (fictional names, area-level). Mock responses must match docs/12-team-split.md §2.1 exactly.
+- /login: list demo accounts grouped by role (Donor, Receiver, Volunteer, Sponsor) with name and area;
+  one tap logs in. Store the token and user in localStorage; DemoDataBadge on this screen.
+- AuthContext + useAuth(); route guards: each role can open only its own section; others redirect to the
+  user's home. Logout in the account menu. If a token expires (401), go back to /login.
+- Role homes show "Hello, <display_name>" and the org name.
+- A quick account switcher in the account menu (demo only) to jump between roles for the demo video.
+Write unit tests for the route guards and the API error mapping.
 ```
 **Checks:**
-- Create two profiles, and confirm a wrong PIN locks after 3 tries.
-- After 10 minutes idle, the app returns to the picker.
-- In DevTools → Application → IndexedDB, there's no plain PIN anywhere.
+- Each demo account lands on its own home.
+- Typing another role's URL redirects you.
+- Switching accounts works in one tap.
 
 ---
 
-## A4 · Home screen
+## A4 · Donor Quick Post (under a minute)
 ```text
-Build the real Home screen (/home) for Vidya Nestham.
+Build the donor Quick Post screen (/donor/post). Goal: a busy caterer posts surplus in under 60 seconds.
 
-- Greeting at the top with the active learner's avatar and nickname: "నమస్తే, {nickname}!"
-- 4 big buttons (icon + Telugu label, each at least 25% of the screen width, 48 px+ tall):
-  🎤 సందేహం అడగండి → /ask, 📖 పాఠాలు → /lessons, ✏️ సాధన → /practice, ⭐ నా ప్రగతి → /progress.
-- A "today's suggestion" card under the buttons. For now, show the first concept of the first chapter
-  ("ఈరోజు నేర్చుకుందాం: బలం అంటే ఏమిటి?"). Later it will come from the learning engine, so read it
-  through a function getTodaySuggestion(learnerId) in app/src/services/suggestions.ts that I can swap.
-- A small footer row: 👨‍👩‍👧 తల్లిదండ్రులు → /parent, 🧑‍🏫 ఉపాధ్యాయులు → /teacher, "మార్చు" (switch learner).
-- A Data Saver quick toggle (reads/writes meta.dataSaver) with a one-line Telugu explanation:
-  "డేటా సేవర్: ఆడియో ఆటోమేటిక్‌గా ప్లే కాదు, చిత్రాలు నొక్కితేనే లోడ్ అవుతాయి."
-- Everything works offline. No network calls on this screen.
+FORM (big, thumb-friendly, EN/TE)
+1. Food items: chips for common dishes grouped by category (rice_dish, curry, bread, dry_snack, sweet,
+   dairy_based, salad_cut_fruit), e.g. Veg biryani, Chicken biryani, Dal, Sambar, Curd rice, Chapati,
+   Gulab jamun. Tapping a chip adds an item with a quantity stepper in meals (±10 buttons and direct entry);
+   an optional "enter kg instead" toggle per item. "+ Other dish" lets them type a name and pick a category.
+2. Storage: three big buttons Hot 🔥 / Room temperature 🌡️ / Chilled ❄️.
+3. Cooked at: defaults to "now − 30 min"; quick buttons (now, −30 min, −1 h, −2 h) + time picker.
+4. Pickup by: call GET /api/guidance with the item categories, storage and cooked_at; pre-fill pickup_by with
+   max_pickup_by and show "Latest safe pickup: 11:45 PM". The donor can choose earlier, never later
+   (disable later times; the server also rejects with PICKUP_BY_TOO_LATE).
+5. Veg / Non-veg toggle (auto-set to non-veg if any chicken/mutton/egg/fish item is chosen).
+6. Allergens: chips (nuts, peanuts, dairy, gluten, egg, seafood, soy, sesame), with smart defaults
+   (e.g., curd rice → dairy, chapati → gluten), editable.
+7. A live summary card ("150 meals · Veg · Hot · pickup by 11:45 PM") and the safety card preview (A6).
+8. "Post surplus" button → POST /api/listings with posted_in_ms (time since the form opened) → go to the
+   listing detail with a success toast "Posted in 42 s".
+- "Repeat last post" button at the top: prefills items, storage and allergens from the last listing.
+- The donor's venue is taken from their org (no address entry).
+- Mocks: /api/guidance using docs/10-food-handling-guidance.md rules; POST /api/listings returns a Listing.
+Write tests for: pickup-by can't exceed max, veg auto-detection, allergen defaults, posted_in_ms.
 ```
 **Checks:**
-- Every button goes to the right screen.
-- The Data Saver toggle survives a reload.
-- The screen works in airplane mode.
+- Time yourself posting on a phone. It should take under 60 s.
+- Later pickup-by times can't be chosen.
+- "Repeat last post" fills the form.
 
 ---
 
-## A5 · Content pack (Force, then Friction)
+## A5 · Donor listings & detail
 ```text
-Create the content pipeline for Vidya Nestham.
+Build donor listings for Annapoorna Link.
 
-1. TypeScript types in app/src/content/types.ts that exactly match the agreed chapter pack format:
-   chapter { id, title_te, order, syllabus_ref }
-   concepts[] { id, chapter_id, title_te, card_text_te, example_te, check_question_te, check_answer_te,
-                image, audio_url, syllabus_ref }
-   questions[] { id, concept_id, type: "mcq" | "tf" | "fill", difficulty: 1 | 2 | 3, stem_te, options[],
-                 correct, explanation_te, option_misconception: { [optionKey]: misconception_id } }
-   misconceptions[] { id, concept_id, description_te, fix_hint_te }
-   common_doubts[] { id, concept_id, question_te, answer_te, audio_url }
-   version: "1"
-2. Create content/chapter-force-v1.json from the reviewed content I paste below.
-   Keep every Telugu string exactly as I give it; do not rewrite or translate it.
-   Use concept ids F1…F8 → force-what-is, force-contact, force-field, force-net, force-effects-motion,
-   force-effects-shape, pressure-what-is, pressure-fluids, and question ids like F1-Q1.
-   For true/false questions use options ["ఒప్పు", "తప్పు"]; for fill-in use options [] and put the
-   accepted answers in `correct` as an array.
-   Leave audio_url empty (""); another script fills it later. Use image: "" for now.
-3. Common doubts: add 10 entries for the Force chapter, using the questions learners are most likely
-   to ask (e.g., "బలం అంటే ఏమిటి?"). Mark each drafted answer with "review": true so I can review
-   it before release; the app must hide items with review: true in production builds.
-4. A loader app/src/content/loader.ts:
-   - loadChapter(chapterId) fetches /content/chapter-<id>-v1.json, validates the shape at runtime
-     (fail with a clear developer error, show a Telugu "content not available" message to users),
-     and caches it in memory.
-   - listChapters() returns the available chapters in order.
-   - Serve the content folder as static files from the frontend build, and make sure the service
-     worker caches packs after first use.
-5. A script `npm run content:check` that runs the shared validator (owned by the other member,
-   at scripts/validate-content) if it exists, and otherwise prints a reminder.
+/donor (home): "Active" (posted → picked_up) and "Past" (delivered, expired, cancelled) tabs; each card shows
+items summary, meals, status badge, pickup-by countdown, and the matched receiver's name and area if any.
 
-REVIEWED CONTENT (paste the cards from doc 10 and the questions from doc 11 here, after review):
-<<< paste here >>>
-
-When done, show me the count of concepts, questions per concept and difficulty, misconceptions, and
-common doubts, and list any question whose wrong options are missing a misconception id.
+/donor/listings/:id:
+- Status timeline (posted, offered to <receiver>, claimed, volunteer assigned, picked up, delivered), each with
+  a time, from GET /api/listings/:id → timeline.
+- Matched receiver (name, area, distance) and volunteer (first name, vehicle) when assigned.
+- **Pickup code**: big 4-digit code with "Show this to the volunteer at pickup" (only visible to the donor;
+  hidden after pickup).
+- Safety card (A6).
+- Cancel button (only before pickup) with a confirm step → POST /api/listings/:id/cancel.
+- Expired state: red banner "Not picked up in time. Do not use this food." (from doc 10).
+- Refetch every 15 s for now (A9 adds live updates).
+Mocks for list, detail, timeline and cancel, with listings in different statuses.
 ```
 **Checks:**
-- `content:check` passes once B's validator exists.
-- The counts match doc 11 (29 Force questions).
-- No Telugu text was changed.
-- Repeat this prompt for `chapter-friction-v1.json` (R1–R7) on Sunday.
-
-> ⚠️ Docs 10 and 11 were drafted with an external tool. Outside tools are allowed for research and specs (doc 15), but before pasting that content in to ship it, get the organisers' OK in the WhatsApp group. Otherwise, write the final content yourself inside Codebenders, using docs 10–11 as reference.
+- Every status shows correctly.
+- The pickup code is visible only to the donor, and hidden after pickup.
+- Cancel works only before pickup.
 
 ---
 
-## A6 · Lessons (offline, with audio)
+## A6 · Safety card component
 ```text
-Build the lesson screens for Vidya Nestham using the content loader from the previous task.
-
-/lessons (chapter list)
-- One card per chapter: Telugu title, number of concepts, a progress ring (concepts opened / total,
-  stored per learner in meta or a small `lessonProgress` key), and a "ఆఫ్‌లైన్ కోసం డౌన్‌లోడ్"
-  (Download for offline) button showing the download size in KB/MB.
-- Download for offline: fetch the chapter pack, all its images and all audio_url files into the
-  Cache API, with a progress bar; afterwards show "✓ ఆఫ్‌లైన్‌లో అందుబాటులో ఉంది" (available offline).
-  Skip empty URLs. If Data Saver is on, ask before downloading audio.
-
-/lessons/:chapterId (concept list)
-- Ordered concept list with a ✓ for concepts this learner has opened.
-
-/lessons/:chapterId/:conceptId (concept card)
-- Title, card text (respect the text size setting), example in a highlighted box, image
-  (if Data Saver is on: show a "చిత్రం చూడండి" (show picture) button instead of loading it).
-- 🔊 button plays audio_url with play/pause; hide it if audio_url is empty. Never auto-play
-  when Data Saver is on.
-- "చెక్ ప్రశ్న" (check question): show check_question_te; tapping "జవాబు చూడండి" (see answer)
-  reveals check_answer_te.
-- "అర్థం కాలేదు · అడుగుతాను" (I didn't understand · I'll ask) → /ask?concept=<conceptId>.
-- "సాధన చేయండి" (practise this) → /practice?concept=<conceptId>.
-- Previous / next concept buttons; swipe left/right also works.
-- Mark the concept as opened for the active learner.
-
-Everything must work in airplane mode after the chapter has been downloaded (or opened once).
-Show a Telugu message if a chapter was never downloaded and the phone is offline.
+Build a reusable SafetyCard component (app/src/components/SafetyCard.tsx) used on every listing, offer and task.
+Show (EN/TE):
+- Storage icon + label (Hot 🔥 / Room temperature 🌡️ / Chilled ❄️)
+- Countdown to pickup_by (before pickup) or to serve_by (after pickup); turns amber under 30 min, red under 10 min
+- Veg 🥗 / Non-veg 🍗
+- Allergen chips
+- guidance_en / guidance_te from the listing's safety object
+- The disclaimer from docs/10-food-handling-guidance.md §3, always visible
+- Expired state: red, "Do not use. The safe window has passed."
+Never show words like "safe", "certified", "approved" or any tax/legal benefit.
+Add a compact variant for list cards. Unit-test the countdown colour thresholds and the expired state.
 ```
 **Checks:**
-- Download the Force chapter, switch to airplane mode, and confirm every card, image and audio clip still works.
-- Data Saver stops audio from auto-playing.
+- It appears on donor, receiver and volunteer screens.
+- The disclaimer is always visible.
+- The colours change at the right times.
 
 ---
 
-## A7 · Ask-a-doubt screen (voice, text, photo)
+## A7 · Receiver: offers, needs, history
 ```text
-Build the Ask-a-doubt screen (/ask) for Vidya Nestham. It talks to the backend through an API client;
-while USE_MOCKS=true it must work fully with mocks.
+Build the receiver screens for Annapoorna Link.
 
-API CLIENT (app/src/services/api.ts)
-- Base URL from config; every request sends header "X-Device-Id: <meta.deviceId>".
-- Functions matching the agreed contract:
-  stt(audioBlob) -> { text_te }             POST /api/stt (multipart "audio")
-  tts(text_te) -> audio Blob                 POST /api/tts
-  tutor({ question_te, class, chapter_id, concept_hint? }) -> { answer_te, concept_id, check_question_te, out_of_syllabus }
-  photo(imageBlob) -> { question_te }        POST /api/photo (multipart "image")
-- Errors arrive as { error_code, message_te }; throw a typed ApiError and show message_te to the user.
-- Timeouts: stt/photo 20 s, tutor 25 s, tts 15 s → Telugu "సర్వర్ బిజీగా ఉంది" message with a retry button.
-- Mocks in app/src/mocks/ returning realistic Telugu responses with a 600 ms delay.
+/receiver (incoming offers): cards from GET /api/offers with items, meals, distance, ETA, pickup-by, compact
+SafetyCard, the **match reasons** (reasons[].en/te as small chips, e.g. "2.1 km away", "Needs 120 meals today",
+"Veg accepted"), and a countdown to expires_at (10 min). Accept / Decline buttons (decline asks an optional
+reason: too far, can't accept type, no space, closing).
 
-VOICE INPUT
-- Big round mic button: press and hold to record, release to send; a ✕ button cancels.
-- MediaRecorder with audio/webm;codecs=opus (fall back to audio/ogg if needed), mono,
-  audioBitsPerSecond 16000–24000, hard stop at 15 seconds with a visible countdown ring.
-- First use: explain in Telugu why we need the mic, then request permission. If denied: show how to
-  allow it, and focus the text box instead.
-- After recording: show "వింటున్నాను…" (listening…) → call stt → put the text in an editable box
-  so the learner can fix mistakes → "పంపు" (send).
-- Show the size of the recording in KB in dev mode only (we report data usage later).
+/receiver/offers/:id: full detail, map placeholder (A10 adds the map), timeline, and after accepting, the big
+**delivery code** "Show this to the volunteer at delivery" (only for this receiver), and the volunteer's first
+name and ETA once assigned.
 
-TEXT INPUT
-- A text box with a Telugu placeholder "మీ సందేహం ఇక్కడ రాయండి…" and a send button.
+/receiver/needs: today's meals needed, veg-only toggle, intake hours (open_from/open_to) → PUT /api/receiver/needs.
+/receiver/history: received listings with meals and dates.
 
-PHOTO INPUT
-- Camera button → <input type="file" accept="image/*" capture="environment">.
-- Compress on the device with a canvas: max 1024 px on the long side, WebP or JPEG, ≤ 150 KB.
-- Call photo() → show the extracted question in the editable box → send.
-
-ANSWER
-- Call tutor with the active chapter (from ?concept= or the last opened lesson) and concept_hint.
-- Answer card: answer_te (respect text size), then check_question_te in a separate box.
-- If out_of_syllabus: show a gentle Telugu note that this is beyond Class 8 Science.
-- 🔊 button: fetch tts(answer_te) only when tapped; cache the audio in audioCache (and/or the
-  Cache API) keyed by a SHA-256 hash of the text, so the same answer never downloads twice.
-  Never auto-play when Data Saver is on.
-- Follow-up buttons that call tutor again with the same question plus an instruction in Telugu:
-  "ఇంకా సులభంగా చెప్పండి" (explain more simply), "ఒక ఉదాహరణ ఇవ్వండి" (give an example).
-  A third button "దీనిపై సాధన" (practise this) → /practice?concept=<concept_id>.
-- Keep the last 20 doubts with answers for this learner in a "నా సందేహాలు" (my doubts) list on this screen.
-
-LOGGING FOR SYNC
-- After each answered doubt, call recordDoubt(...) from app/src/services/syncAdapter.ts.
-  Create that adapter now: if the other member's module at app/src/sync/ exports queueRecord, call it;
-  otherwise do nothing. This keeps my code working before their sync module exists.
-
-All text in i18n/te.ts. The screen must never show English error messages.
+Empty state for offers: "No offers right now. We'll notify you when food is available nearby."
+Mocks for all endpoints, including an offer that expires while open.
 ```
 **Checks:**
-- With mocks on, voice → transcript → answer → 🔊 works.
-- Switch `USE_MOCKS=false` and repeat against B's deployed backend.
-- Test on a real Android phone in Chrome, since mic behaviour differs from desktop.
+- Accepting shows the delivery code.
+- An expired offer disappears with a message.
+- Saved needs survive a reload.
 
 ---
 
-## A8 · Offline doubt experience
+## A8 · Volunteer: tasks & pickup/delivery stepper
 ```text
-Make the Ask-a-doubt screen work gracefully with no internet, for Vidya Nestham.
+Build the volunteer screens for Annapoorna Link.
 
-WHEN OFFLINE (navigator.onLine is false, or a request fails with a network error)
-- Voice: still record. Instead of calling stt, call queueDoubt(audioBlob, { learner_id, chapter_id,
-  concept_hint, created_at }) through syncAdapter.ts (add queueDoubt + onDoubtAnswered there; if the
-  other member's sync module isn't ready, store the blob in the `doubts` table with status "queued"
-  as a temporary stand-in and log a developer warning).
-- Text: queue the typed question the same way.
-- Show a friendly Telugu card: "ఇంటర్నెట్ లేదు. మీ సందేహం దాచాను · నెట్ వచ్చాక జవాబు వస్తుంది."
-  (No internet. I saved your doubt · the answer comes when the network returns.)
-- Suggest help that works offline right now:
-  1. "ఈ పాఠం చూడండి" (look at this lesson): the concept card for concept_hint, or the last opened concept.
-  2. The common doubts list for the current chapter (from the chapter pack, excluding review: true items):
-     tappable chips; tapping shows answer_te and a 🔊 button that plays the pre-generated audio_url
-     offline.
+/volunteer: availability toggle (PUT /api/volunteer/availability); list of available tasks from GET /api/tasks
+(donor area → receiver area, meals, distance, deadline countdown, vehicle fit) and my active task at the top.
+Accept → POST /api/tasks/:id/accept.
 
-MY DOUBTS LIST
-- Show every doubt with a status pill: "వేచి ఉంది" (waiting), "జవాబు సిద్ధం" (answer ready), "చూశారు" (seen).
-- Subscribe to onDoubtAnswered: when a queued doubt gets its answer, update the list and show a badge
-  on the Home screen's ask button: "మీ జవాబు సిద్ధంగా ఉంది" (your answer is ready).
-
-ALWAYS
-- The common doubts chips are also shown when online, above the mic, as a quick way to ask.
-- Nothing on this screen may throw an unhandled error when offline.
+/volunteer/tasks/:id: a 4-step stepper with big buttons:
+ 1. "Go to pickup": donor name + area, "Navigate" (opens a Google Maps URL with the lat/lng), SafetyCard.
+ 2. "Enter pickup code": 4 big digit boxes → POST /api/tasks/:id/pickup { code }. WRONG_CODE shows the
+    remaining tries; after 5 wrong tries, show "Ask the donor to check the code".
+ 3. "Go to delivery": receiver name + area, Navigate, countdown to serve_by.
+ 4. "Enter delivery code + meals delivered" (prefilled with total meals, editable down) →
+    POST /api/tasks/:id/deliver → a success screen "Delivered 150 meals 🎉".
+- If the network fails while submitting a code, keep the entered code and show a Retry button
+  (don't lose progress).
+/volunteer/history: deliveries with meals and dates.
+Mocks for every step, including WRONG_CODE.
 ```
 **Checks:**
-- In airplane mode, record a doubt and see the "saved" card.
-- Common doubts play their audio while offline.
-- Go back online. Once B's sync is ready, the badge appears.
+- Do the full flow on a phone.
+- A wrong code shows the tries left.
+- Navigate opens maps.
 
 ---
 
-## A9 · Practice screen
+## A9 · Live updates
 ```text
-Build the Practice screen (/practice) for Vidya Nestham. The learning logic is owned by the other
-member and lives in app/src/engine/ with this agreed interface:
-  recordAttempt(learnerState, question, chosenOption) -> { learnerState, correct, misconception_id?, feedback_te }
-  nextQuestion(learnerState, chapterPack)            -> { question, reason_te }
-  masteryByConcept(learnerState)                     -> { [concept_id]: 0..1 }
-  chapterStatus(learnerState, chapterPack)           -> "green" | "yellow" | "red"
-
-1. Create app/src/services/engineAdapter.ts: if the real engine exists, use it; otherwise use a
-   simple stand-in in app/src/mocks/engineStub.ts (random unanswered question, mastery = share of
-   correct answers) so this screen works today. Same interface either way.
-2. Learner state: load/save it per learner through the adapter (the engine owner decides storage;
-   the stand-in may use the `mastery` table).
-
-SCREEN FLOW
-- Entry: /practice?concept=<id> practises one concept; /practice alone lets the learner pick a chapter.
-- A session is 10 questions. Show "ప్రశ్న 3/10" and a thin progress bar.
-- Above the question, show reason_te in a small grey line (e.g., why this question was chosen).
-- Question types:
-  mcq: shuffle the options every time they're shown (keep each option's original key for grading);
-       big full-width option buttons.
-  tf: two big buttons "ఒప్పు" / "తప్పు".
-  fill: a text box; normalise before comparing (trim, Unicode NFC, collapse spaces, accept digits
-        and the units N / న్యూటన్ as equivalent where `correct` lists them).
-- After answering: lock the options, colour the chosen one (green/red), show:
-  ✅ "సరైన జవాబు!" or ❌ "అయ్యో! సరైన జవాబు: …", then explanation_te, and if a misconception was
-  detected, its fix_hint_te in a highlighted box.
-- "తదుపరి" (next) → nextQuestion.
-- End of session: a summary card (correct out of 10, concepts that improved, one concept to practise
-  next) with buttons "మళ్ళీ సాధన" (practise again) and "ముఖ్య పేజీ" (home).
-
-DATA
-- Every answer goes through recordAttempt, and also to recordAttempt logging in syncAdapter.ts
-  (call queueRecord({ type: "attempt", … }) if the sync module exists).
-- The whole screen works offline (packs are cached; the engine runs on the device).
+Add live updates across Annapoorna Link.
+- hooks/useLiveEvents.ts: connect to GET /api/events (SSE, token as ?token=); on each event
+  { type, listing_id, status, at }, invalidate/refetch the affected data (listing detail, lists, offers, tasks).
+- Auto-reconnect with backoff; if SSE fails 3 times, fall back to polling every 15 s and show a small
+  "Live updates paused, refreshing every 15 s" note.
+- Toasts in EN/TE for important events: donor ("Annapoorna Community Kitchen accepted your food",
+  "Picked up", "Delivered"); receiver ("New food offer nearby", "Volunteer on the way"); volunteer
+  ("New task nearby").
+- Remove the per-screen 15 s refetch from A5 when SSE is connected.
+- Mock mode: a fake event emitter that advances a listing through statuses every 10 s for testing.
 ```
 **Checks:**
-- A full 10-question session works offline.
-- MCQ options are in a different order each time.
-- A wrong answer shows the fix hint for that misconception.
-- Once B's engine lands, `reason_te` changes to the real reason.
+- Open the donor and receiver in two browser windows. An accept in one shows in the other within seconds.
 
 ---
 
-## A10 · Learner progress
+## A10 · Map (Leaflet + OpenStreetMap)
 ```text
-Build the learner's progress screen (/progress) for Vidya Nestham, using masteryByConcept and
-chapterStatus from engineAdapter.ts.
-
-- Per chapter: Telugu title, the chapter's traffic-light colour, and every concept with stars:
-  mastery < 0.5 → ★☆☆, 0.5–0.79 → ★★☆, ≥ 0.8 → ★★★ (never-practised concepts show "ఇంకా మొదలు పెట్టలేదు").
-- Two short lists: "బాగా వచ్చినవి" (strong topics: mastery ≥ 0.8) and
-  "ఇంకా సాధన చేయాల్సినవి" (practise more: mastery < 0.5), each item linking to /practice?concept=<id>.
-- Study streak: number of consecutive days with at least one attempt or opened lesson, with a 🔥 icon.
-- "ఈ వారం" (this week): a 7-dot row for the days studied.
-- Big, simple, encouraging, no percentages. Works offline. Updates immediately after a practice session.
-- Also replace getTodaySuggestion on Home: suggest the lowest-mastery concept that has been opened
-  in a lesson, or the next unopened concept if none.
+Add maps to Annapoorna Link using Leaflet + OpenStreetMap tiles (show the required attribution). No API keys.
+- components/AreaMap.tsx: lazy-loaded (don't add Leaflet to the initial bundle); markers for donor (🍲) and
+  receiver (🏠) at area-level coordinates; a straight line between them for an active listing/task; distance label.
+- Use it on: donor listing detail (receiver location once claimed), receiver offer detail, volunteer task
+  steps 1 and 3.
+- /sponsor/map: activity map from GET /api/map: donors and receivers as markers, recent deliveries as lines
+  (last 24 h), with a filter by donor type; DemoDataBadge.
+- Show a simple text fallback (area names + distance) if tiles fail to load or the device is slow.
 ```
 **Checks:**
-- Practise wrong on purpose and the stars drop; practise right and they rise.
-- The Home suggestion changes to match.
+- Maps load on mobile without slowing the first screen.
+- The attribution is visible.
+- The fallback text works when you're offline.
 
 ---
 
-## A11 · Parent view
+## A11 · Impact dashboards
 ```text
-Build the parent view (/parent) for Vidya Nestham, for a parent who may not read well.
+Build the impact views for Annapoorna Link from GET /api/impact.
 
-ACCESS
-- A separate parent PIN (4 digits, salted SHA-256, stored in meta as a guardian record linked to
-  the learners on this device). First visit: set the parent PIN. Later visits: enter it.
-- This screen is reachable without an active learner (from the picker footer too).
+/donor/impact (scope=me): big counters (meals saved, kg of food waste avoided, CO₂e avoided), this week /
+this month toggle, a simple bar chart of meals per week (lightweight SVG, no heavy chart library), and
+the on-time rate.
+/sponsor (scope=city): the same counters for the city + breakdown by area and by donor type (caterer,
+wedding hall, hostel mess, restaurant), median time to claim, on-time rate, rescue rate; DemoDataBadge.
 
-CONTENT (very visual, very little text)
-- One card per learner: avatar + nickname, then one row per chapter with a big coloured circle
-  (🟢 / 🟡 / 🔴 from chapterStatus) and the chapter title.
-- "ఈ వారం {n} రోజులు చదివారు" (studied n days this week) with 7 dots.
-- A huge 🔊 "వినండి" (listen) button per learner that plays a spoken Telugu summary.
+"How we calculate this" panel on both: list every item of impact.assumptions (label, value, source) and the
+note "Only delivered food counts. Expired or cancelled listings count as zero." (docs/11-impact-assumptions.md).
 
-SPOKEN SUMMARY (must work offline)
-- Build it by playing a sequence of short pre-generated audio phrases (made by the other member's
-  audio script). Use these phrase keys and look up their files in /content/audio/phrases/<key>.ogg:
-    summary_intro
-    days_0 … days_7                   ("this week they studied N days")
-    chapter_<chapterId>_green | _yellow | _red
-    summary_outro
-  Do not speak the child's name (names can't be pre-generated); say "మీ పిల్లలు" (your child) instead
-  and show the name on screen.
-- If a phrase file is missing and the phone is online, fall back to tts() for that sentence;
-  if offline, skip it silently.
-- Put the list of phrase keys and their Telugu text in content/phrases.json so the audio script can
-  generate them.
-
-Works offline. Never shows question-level details, only the simple summary.
+Printable monthly report (donor): a print-friendly page /donor/impact/report?month=YYYY-MM with the counters,
+weekly chart, assumptions and "Generated by Annapoorna Link. Figures based on confirmed deliveries."
+Use window.print() with print CSS. No tax or legal claims.
 ```
 **Checks:**
-- Set the parent PIN and see both demo learners.
-- 🔊 plays the summary in airplane mode once B has generated the phrases.
+- The counters match the API.
+- The assumptions panel shows the sources.
+- The printed report fits one A4 page.
 
 ---
 
-## A12 · Teacher / volunteer view
+## A12 · Voice post UI (P1)
 ```text
-Build the teacher/volunteer view (/teacher) for Vidya Nestham.
-
-- Clear banner at the top: "డెమో డేటా · ఇవి నిజమైన విద్యార్థులు కాదు" (Demo data · these are not real students).
-- Fetch GET /api/teacher/summary via the API client (mock while USE_MOCKS=true):
-  { class_size, weakest_concepts: [{ concept_id, avg_mastery }], learners_needing_help: [{ nickname, weak_concepts }] }.
-- Section 1 "తరగతికి కష్టంగా ఉన్న అంశాలు" (topics the class finds hard): horizontal bars per concept,
-  sorted weakest first, with the concept's Telugu title from the chapter pack (not the raw id).
-- Section 2 "సహాయం కావాల్సిన విద్యార్థులు" (learners who need help): list of nicknames with their
-  weak concepts as small chips.
-- Cache the last successful response; when offline, show it with "చివరిగా నవీకరించింది: <time>"
-  (last updated).
-- Loading skeletons, an empty state, and the Telugu error message from the API on failure.
+Add a voice option to Quick Post.
+- A 🎤 button: press and hold to record (max 20 s, countdown ring), release to send. MediaRecorder with
+  audio/webm;codecs=opus, falling back to audio/ogg;codecs=opus, then audio/mp4; send with the right Content-Type.
+- POST /api/voice-post (multipart "audio") → { draft, transcript }. Show the transcript, then prefill the
+  form with the draft (items, veg, allergens, storage, cooked_at). The donor must review and tap Post;
+  never auto-post.
+- Mic permission explanation (EN/TE) before the first request; if denied, hide the button and keep the form.
+- Errors (STT_EMPTY, SERVER_BUSY) show message/message_te with a retry.
+- Mock: return a draft for "150 plates veg biryani and dal, cooked at 9:30, kept hot".
 ```
 **Checks:**
-- It works with mocks, then with B's endpoint.
-- Offline, it shows the cached data with the "last updated" time.
+- A spoken English or Telugu description fills the form correctly.
+- Nothing gets posted without a tap.
 
 ---
 
-## A13 · Settings & error states
+## A13 · Errors, empty states, settings, about
 ```text
-Finish Settings (/settings) and make error handling consistent across Vidya Nestham.
-
-SETTINGS (persist in meta)
-- డేటా సేవర్ (Data Saver) on/off, with the one-line explanation.
-- అక్షరాల పరిమాణం (text size): 3 steps, applied app-wide through a CSS variable.
-- గొంతు (voice) on/off: when off, hide mic buttons and 🔊 buttons everywhere.
-- ఆఫ్‌లైన్ కంటెంట్ (offline content): list downloaded chapters with their size, and a
-  "తొలగించు" (remove) button per chapter.
-- గోప్యత (privacy): a short Telugu note for parents: only nickname, avatar and PIN are stored, on this
-  phone; voice recordings are used only to understand the question and are not kept; no phone number,
-  no Aadhaar, no photos of faces.
-- About: app version line, content sources note ("All explanations and questions are original content
-  aligned to the Telangana SCERT Class 8 syllabus"), and team names placeholder.
-
-ERRORS
-- A top-level React error boundary with a Telugu "ఏదో తప్పు జరిగింది" screen and a "మళ్ళీ ప్రయత్నించండి"
-  (try again) button that reloads safely.
-- A small toast system for non-blocking messages.
-- Map every API error_code to its message_te (show message_te from the server when present).
-- Handle and test, with Telugu messages: mic permission denied, camera denied, offline, server busy,
-  rate limited, storage full (QuotaExceededError → suggest removing a downloaded chapter),
-  content pack missing.
-- Search the codebase and move any remaining hard-coded English user-facing text into i18n/te.ts.
+Polish Annapoorna Link's resilience and copy.
+- Top-level error boundary with a friendly EN/TE screen and "Try again".
+- Toast system for non-blocking messages; map every error_code to message/message_te.
+- Empty states for every list (no listings, no offers, no tasks, no history) with a helpful next action.
+- Offline banner when navigator.onLine is false: "You're offline. Some actions will retry when you're back."
+- Settings (account menu): language, notification sound on/off, text size (3 steps).
+- /about: what the app does, how matching works (one paragraph), the food-safety disclaimer, the data note
+  ("All organisations and people shown are fictional demo data"), version line.
+- Search the code for any hard-coded user-facing text and move it to i18n/en.ts and te.ts.
 ```
 **Checks:**
-- Each setting works and survives a reload.
-- Trigger each error case once; there's no English text and no blank screen.
+- Trigger each error once. There's no raw error text and no blank screen.
+- Every visible string switches language.
 
 ---
 
-## A14 · Demo data
+## A14 · Demo mode
 ```text
-Add a "load demo data" feature to Vidya Nestham so judges can try the full app in one tap.
-
-- On the ProfilePicker, a small button "డెమో డేటా లోడ్ చేయండి" (load demo data).
-- It creates (or recreates) these sample profiles. They're synthetic, not real children:
-  లక్ష్మి (🦚, class 8, PIN 1111): practised over the last 6 days; strong on force basics
-     (force-what-is, force-contact ≥ 0.8), weak on friction concepts with repeated misconceptions
-     friction-is-not-a-force and no-friction-at-rest; one queued doubt and two answered doubts.
-  రవి (🐯, class 8, PIN 2222): a few sessions, mid-level mastery (different from Lakshmi's).
-  చిన్ను (🐘, class 8, PIN 3333): brand new, no history.
-  Parent PIN: 9999.
-- Write the history through the same tables the app uses, with every seeded row marked
-  demo: true and synced: true so it is never uploaded to the server.
-- After loading, show a card listing the demo profiles and PINs (demo only), and a
-  "డెమో డేటా తొలగించు" (remove demo data) button that deletes only demo: true rows.
-- The button only appears when there are no real (non-demo) profiles, or in a build with
-  VITE_DEMO=true.
+Make Annapoorna Link easy to demo to judges and in the video.
+- On /login and in the sponsor dashboard: a "Run wedding-night demo" button → POST /api/demo/scenario
+  { name: "wedding_night" }, then show a small floating "Demo running" panel with the steps
+  (posted → offered → claimed → picked up → delivered) ticking live from SSE events.
+- Quick account switcher: one-tap switch between the six demo accounts (docs/04 §4), keeping the language.
+- A /demo-guide page: how to show the full flow by hand in two browser windows (donor + receiver) and on a
+  phone (volunteer), with the demo accounts and codes explained.
+- DemoDataBadge on every screen that shows seeded data.
 ```
 **Checks:**
-- In a fresh incognito window, one tap gives you Lakshmi with a believable history.
-- Her parent view shows green for Force and red for Friction.
-- Removing the demo data leaves any real profiles untouched.
+- One tap runs the whole flow in about 2 minutes.
+- Judges can follow `/demo-guide` without help.
 
 ---
 
 ## A15 · Performance & accessibility pass
 ```text
-Do a performance and accessibility pass on Vidya Nestham for a low-end Android phone on 2G/3G.
-
-1. Run a production build and report the size of every chunk, the font files and the precache list.
-   Target: initial load under 1.5 MB uncompressed; every lazy screen chunk under 200 KB.
-   Remove unused dependencies; make sure each screen is code-split.
-2. Images: convert to WebP, max 40 KB each, explicit width/height to avoid layout shifts, lazy-load.
-3. Font: confirm only Telugu + Latin subsets of Noto Sans Telugu ship, with font-display: swap.
-4. Run Lighthouse in mobile mode (simulated slow 4G + 4× CPU slowdown) and fix issues until:
-   PWA installable ✓, Performance ≥ 80, Accessibility ≥ 90, Best Practices ≥ 90.
-5. Accessibility: every icon button has a Telugu aria-label; focus order is logical; colour contrast
-   passes; tap targets ≥ 48 px; text size setting scales everything without overflow at 360 px width.
-6. Measure and print (dev tool page or console script): the size of each chapter pack, the total size
-   of a downloaded chapter (pack + images + audio), and the average voice clip size from recent
-   recordings. I'll put these numbers in the README.
-7. Test with DevTools "Slow 3G" and offline; list anything that feels slow and fix the worst three.
-
-Give me a before/after table of the numbers.
+Do a performance and accessibility pass on Annapoorna Link for mid-range Android phones on 4G/3G.
+1. Report chunk sizes; initial load < 1.5 MB uncompressed; each role's chunk < 250 KB; Leaflet lazy-loaded.
+2. Lighthouse mobile (slow 4G, 4× CPU): PWA installable, Performance ≥ 80, Accessibility ≥ 90, Best Practices ≥ 90.
+3. Every icon button has an aria-label in the current language; focus order is logical; colour contrast passes;
+   tap targets ≥ 48 px; the Telugu text fits at 360 px without overflow at the largest text size.
+4. Measure Quick Post time on a real phone 5 times and report the median (for the README).
+Give me a before/after table.
 ```
 **Checks:**
-- Take a screenshot of the Lighthouse results for the README and submission.
-- Record the measured sizes in the README's "Measured" column.
+- Save the Lighthouse screenshot and the median posting time for the README.
 
 ---
 
-## Order and dependencies at a glance
+## Order and dependencies
 | Prompt | Needs from Member B | Works without B? |
 |---|---|---|
-| A1–A4 | none | ✅ |
-| A5 | validator script (B6) for the final check | ✅ (runs the check later) |
-| A6 | pre-generated audio (B7) for 🔊 | ✅ (🔊 hidden until audio exists) |
-| A7 | `/api/stt`, `/api/tts`, `/api/tutor`, `/api/photo` (B3–B5, B12) | ✅ with mocks |
-| A8 | sync module + queued doubts (B9, B11) | ✅ with stand-in storage |
-| A9, A10 | engine (B8) | ✅ with the stand-in engine |
-| A11 | phrase audio (B7) | ✅ (falls back or skips) |
-| A12 | `/api/teacher/summary` (B13) | ✅ with mocks |
-| A13–A15 | none | ✅ |
+| A1–A2 | none | ✅ |
+| A3–A8 | B1 stubs → B4–B9 real endpoints | ✅ with mocks |
+| A9 | B10 (SSE) | ✅ with the fake event emitter |
+| A10 | B3 (map data) | ✅ with mocks |
+| A11 | B11 (impact) | ✅ with mocks |
+| A12 | B12 (voice post) | ✅ with mocks |
+| A14 | B13 (demo scenario) | ✅ by hand with the account switcher |
+| A13, A15 | none | ✅ |
