@@ -8,8 +8,9 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-BG = (122, 62, 0)  # #7a3e00, matches theme_color
-FG = (255, 253, 247)  # #fffdf7, matches the page background
+BG = (22, 79, 46)  # #164F2E (leaf-800), matches theme_color
+FG = (255, 249, 238)  # #FFF9EE (cream), matches the page background
+STEAM = (247, 181, 0)  # #F7B500 (turmeric)
 SCALE = 4  # draw large, then downscale for smooth edges
 
 OUT = Path(__file__).resolve().parent.parent / "public"
@@ -43,7 +44,7 @@ def draw_icon(size: int) -> Image.Image:
             (x + s * 0.025, bottom - (bottom - top) * 0.66),
             (x, top),
         ]
-        d.line(points, fill=FG, width=w, joint="curve")
+        d.line(points, fill=STEAM, width=w, joint="curve")
 
     return img.resize((size, size), Image.LANCZOS)
 

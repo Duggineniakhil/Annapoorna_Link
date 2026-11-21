@@ -21,6 +21,7 @@ ACE Builders Hackathon 2026 · **Problem Statement 2: Rescue the Surplus** · Hy
 | 13 | [13-prompts-member-a.md](13-prompts-member-a.md) | Context message + Codebenders prompts A1–A15 (frontend & experience) |
 | 14 | [14-prompts-member-b.md](14-prompts-member-b.md) | Context message + Codebenders prompts B1–B15 (backend, matching & data) |
 | 15 | [15-kickoff-session-notes.md](15-kickoff-session-notes.md) | Official answers from the kick-off session: deadlines, what's allowed, credits, submission, IDE tips |
+| 16 | [16-ui-ux-design.md](16-ui-ux-design.md) | UI/UX direction: lessons from Olio and Too Good To Go, what we do better, colours, components, screen patterns |
 
 ## Judging criteria → where the evidence lives
 | Criterion | Weight | What judges must see | Evidence |

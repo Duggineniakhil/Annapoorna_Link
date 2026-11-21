@@ -8,7 +8,7 @@ export function LanguageToggle() {
     <div
       role="group"
       aria-label={t("lang.toggleLabel")}
-      className="flex overflow-hidden rounded-full border border-amber-800/40 text-sm"
+      className="flex rounded-full bg-leaf-50 p-1 text-sm ring-1 ring-inset ring-leaf-800/15"
     >
       {OPTIONS.map((option) => (
         <button
@@ -16,8 +16,8 @@ export function LanguageToggle() {
           type="button"
           onClick={() => setLang(option)}
           aria-pressed={lang === option}
-          className={`min-h-[40px] min-w-[48px] px-3 font-medium ${
-            lang === option ? "bg-amber-800 text-white" : "bg-white text-amber-900"
+          className={`min-h-[40px] min-w-[44px] rounded-full px-3 font-bold transition-colors ${
+            lang === option ? "bg-leaf-800 text-white" : "text-leaf-800"
           }`}
         >
           {option === "en" ? t("lang.en") : t("lang.te")}

@@ -2,8 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
-const THEME = "#7a3e00";
-const BACKGROUND = "#fffdf7";
+const THEME = "#164F2E";
+const BACKGROUND = "#FFF9EE";
 
 export default defineConfig({
   plugins: [

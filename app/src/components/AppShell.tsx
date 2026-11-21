@@ -4,14 +4,22 @@ import { TopBar } from "./TopBar";
 import { BottomNav } from "./BottomNav";
 import { roleFromPath } from "./roles";
 
+function Loading() {
+  return (
+    <div className="flex justify-center py-16" role="status" aria-live="polite">
+      <span className="h-8 w-8 animate-spin rounded-full border-4 border-leaf-100 border-t-leaf-700" />
+    </div>
+  );
+}
+
 export function AppShell() {
   const { pathname } = useLocation();
   const role = roleFromPath(pathname);
   return (
     <div className="min-h-screen">
       <TopBar />
-      <main className={`mx-auto max-w-xl px-4 py-4 ${role ? "pb-24" : ""}`}>
-        <Suspense fallback={<div className="py-10 text-center text-gray-500">…</div>}>
+      <main className={`mx-auto max-w-xl px-4 py-4 ${role ? "pb-28" : ""}`}>
+        <Suspense fallback={<Loading />}>
           <Outlet />
         </Suspense>
       </main>

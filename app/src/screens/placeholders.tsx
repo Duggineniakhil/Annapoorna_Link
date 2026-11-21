@@ -1,6 +1,4 @@
-import { useT } from "../i18n";
 import { Screen, ComingSoon } from "../components/Screen";
-import { EmptyState } from "../components/EmptyState";
 
 // Placeholder screens. Each is replaced by its real implementation in a later task (A4–A11).
 
@@ -24,15 +22,6 @@ export function DonorImpact() {
   return (
     <Screen titleKey="donor.impact.title" demoData>
       <ComingSoon />
-    </Screen>
-  );
-}
-
-export function ReceiverOffers() {
-  const { t } = useT();
-  return (
-    <Screen titleKey="receiver.offers.title" demoData>
-      <EmptyState icon="🍲" message={t("receiver.offers.empty")} />
     </Screen>
   );
 }
@@ -61,15 +50,6 @@ export function ReceiverHistory() {
   );
 }
 
-export function VolunteerTasks() {
-  const { t } = useT();
-  return (
-    <Screen titleKey="volunteer.tasks.title" demoData>
-      <EmptyState icon="🛵" message={t("volunteer.tasks.empty")} />
-    </Screen>
-  );
-}
-
 export function VolunteerTaskDetail() {
   return (
     <Screen titleKey="volunteer.task.title" demoData>
@@ -81,14 +61,6 @@ export function VolunteerTaskDetail() {
 export function VolunteerHistory() {
   return (
     <Screen titleKey="volunteer.history.title" demoData>
-      <ComingSoon />
-    </Screen>
-  );
-}
-
-export function SponsorDashboard() {
-  return (
-    <Screen titleKey="sponsor.dashboard.title" demoData>
       <ComingSoon />
     </Screen>
   );
