@@ -1,0 +1,609 @@
+# 14 — Codebenders Prompts: Member B (Backend, Voice, AI & Learning Logic)
+**Vidya Nestham (విద్యా నేస్తం)** · tasks B1–B15 from `12-team-split.md`
+
+## How to use this file
+1. Paste **one prompt at a time** into the Codebenders IDE, in order. Each prompt assumes the earlier ones are done.
+2. If the IDE accepts context files, attach `02-product-spec.md`, `03-architecture.md` and `12-team-split.md` (it holds the shared contracts).
+3. After each prompt:
+   - run the **checks** listed under it
+   - fix what's wrong with follow-up prompts
+   - commit
+   - add an entry to `CODEBENDERS_USAGE.md` with the prompt, the result, what you changed, and a screenshot
+4. **You own:** `server/`, `app/src/engine/`, `app/src/sync/`, `scripts/`. Member A owns the rest of `app/` and `content/`.
+5. **Things Member A creates that you use:**
+   - the local database schema `app/src/db/schema.ts` (from A3). Use it; don't create a second database.
+   - `content/chapter-*-v1.json` (from A5)
+   - `content/phrases.json` (from A11)
+6. **Secrets:** only you hold the Gnani and AI keys, and only in backend environment variables. Never put them in prompts, code, commits or chat.
+7. **Fill in the blanks** marked `<<< >>>` with Gnani's real API details and the AI model you're allowed to use. Confirm the AI model with the organisers first.
+
+---
+
+## B1 · Backend skeleton
+```text
+Create the backend skeleton for "Vidya Nestham" (విద్యా నేస్తం), a Telugu-first learning app for
+Class 8 students on shared, low-end phones. This task is ONLY the backend skeleton: project setup,
+security basics, error handling, and STUB endpoints that already return the agreed response shapes,
+so the frontend can integrate immediately. Do NOT call Gnani or any AI model yet; those come in
+later tasks. Never put real API keys in code.
+
+TECH
+- Node.js 18+, Express, TypeScript (strict), in a folder named server/.
+- zod for request validation, multer for file uploads (memory storage only; never write uploads to disk),
+  helmet, cors, express-rate-limit, pino for logging.
+- Vitest + supertest for tests. ESLint + Prettier.
+
+FOLDER STRUCTURE (inside server/)
+src/
+  index.ts            starts the server on process.env.PORT (default 8080)
+  app.ts              builds the Express app (exported separately so tests can import it)
+  config.ts           reads and validates env vars with zod; fails fast with a clear message
+  routes/             health.ts, stt.ts, tts.ts, tutor.ts, photo.ts, sync.ts, teacher.ts
+  services/           gnani.ts and ai.ts: empty interfaces + TODO comments only (no network calls yet)
+  middleware/         errorHandler.ts, rateLimit.ts, requestId.ts
+  errors.ts           AppError class + the error catalogue below
+  schemas.ts          all zod request/response schemas (the contract lives here, in one place)
+  stubs/              fake responses for each endpoint
+tests/                one test file per route
+
+ENV VARS (.env.example; never commit .env)
+PORT=8080
+ALLOWED_ORIGIN=http://localhost:5173      # frontend URL; CORS allows only this origin
+GNANI_API_KEY=                            # used in a later task
+AI_API_KEY=                               # used in a later task
+DATABASE_URL=                             # used in a later task
+USE_STUBS=true
+In config.ts, the keys may be empty while USE_STUBS=true, but must be present when USE_STUBS=false.
+
+ENDPOINTS: agreed contract (while USE_STUBS=true, return realistic fake data
+and the response header "X-Stub: true")
+GET  /api/health
+     -> { ok: true, version, stubs: boolean }
+POST /api/stt          multipart field "audio" (audio/webm or audio/ogg, max 300 KB, max 15 s)
+     -> { text_te }
+POST /api/tts          JSON { text_te } (max 600 characters)
+     -> audio/ogg file (stub: a tiny silent clip generated in memory)
+POST /api/tutor        JSON { question_te, class, chapter_id, concept_hint? }
+     -> { answer_te, concept_id, check_question_te, out_of_syllabus }
+POST /api/photo        multipart field "image" (image/jpeg or image/webp, max 200 KB)
+     -> { question_te }
+POST /api/sync         JSON { device_id, records: [ { uuid, type: "attempt" | "doubt", learner_id, payload, created_at } ] }
+                       max 200 records per batch
+     -> { acked: [uuid] }   (stub: ack every valid uuid; the same uuid sent twice is still acked once)
+GET  /api/teacher/summary
+     -> { class_size, weakest_concepts: [{ concept_id, avg_mastery }],
+          learners_needing_help: [{ nickname, weak_concepts }] }   (stub: 30 synthetic learners)
+Use Telugu text in the stub responses (e.g., a short Telugu answer about "బలం" / force) so the
+frontend can test Telugu rendering.
+
+ERRORS: every error response has the shape { error_code, message_te }
+VALIDATION_FAILED  400  "సమాచారం సరిగా లేదు. మళ్ళీ ప్రయత్నించండి."
+FILE_TOO_LARGE     413  "ఫైల్ చాలా పెద్దగా ఉంది."
+UNSUPPORTED_TYPE   415  "ఈ రకమైన ఫైల్ పనిచేయదు."
+RATE_LIMITED       429  "చాలా ప్రశ్నలు వచ్చాయి. కొంచెం సేపు ఆగి మళ్ళీ ప్రయత్నించండి."
+NOT_FOUND          404  "ఈ పేజీ దొరకలేదు."
+SERVER_BUSY        503  "సర్వర్ బిజీగా ఉంది. కొద్దిసేపటి తర్వాత ప్రయత్నించండి."
+INTERNAL_ERROR     500  "ఏదో తప్పు జరిగింది. మళ్ళీ ప్రయత్నించండి."
+Never leak stack traces or internal messages to the client; log them server-side with the request id.
+
+SECURITY & PRIVACY
+- CORS: allow only ALLOWED_ORIGIN.
+- helmet on; JSON body limit 100 KB.
+- Rate limits per device (header "X-Device-Id", fall back to IP):
+  /api/stt, /api/tutor and /api/photo: 20 requests per 10 minutes; everything else: 120 per 10 minutes.
+- Logs must NOT contain request bodies, audio, images, or any learner text; log only
+  method, path, status, duration, request id and device id.
+- Uploaded audio and images stay in memory and are discarded after the request.
+
+TESTS (must pass)
+- health returns 200 and ok: true
+- each stub endpoint returns the exact contract shape (validate it with the same zod schemas)
+- invalid body -> 400 VALIDATION_FAILED; oversized upload -> 413; wrong file type -> 415
+- CORS blocks other origins
+- rate limit returns 429 RATE_LIMITED after the limit
+- sync: the same uuid sent twice is acked without duplication
+
+ALSO
+- npm scripts: dev (watch mode), build, start (runs the built JS, for hosting), test, lint.
+- A .gitignore that includes .env and node_modules.
+- server/README.md: how to run, the env vars, the endpoint contract table, the error catalogue,
+  and how to deploy (PORT from env, start command).
+
+When done, list: the files you created, the test results, and anything you could not do.
+```
+**Checks:**
+- `npm test` passes.
+- `/api/health` shows `ok: true`.
+- `/api/tutor` returns a Telugu stub answer with the `X-Stub: true` header.
+- `.env` is not tracked by git.
+
+---
+
+## B2 · Backend deploy + database
+```text
+Deploy the Vidya Nestham backend (server/) and add a database.
+
+HOSTING (<Render | Railway>, pick the one I name here: ______)
+- Build command, start command (npm run start), Node version, PORT from env, health check path /api/health.
+- Set env vars in the dashboard: ALLOWED_ORIGIN = the live frontend URL, USE_STUBS=true for now,
+  DATABASE_URL, and empty GNANI_API_KEY / AI_API_KEY until the next tasks.
+- If the free tier sleeps when idle, document it, and make /api/health cheap so a wake-up call is fast.
+
+DATABASE (<Supabase Postgres | another Postgres> — name: ______)
+- Use a small query layer (e.g., postgres.js or Kysely), no heavy ORM.
+- Migrations in server/migrations/, run with `npm run migrate`.
+- Tables (no personal data; learners are only random uuids from the device):
+    devices   (device_id uuid primary key, first_seen_at, last_seen_at)
+    attempts  (uuid primary key, device_id, learner_id, question_id, concept_id, chosen, correct boolean,
+               misconception_id null, time_ms, created_at, received_at)
+    doubts    (uuid primary key, device_id, learner_id, input_type ('voice'|'text'|'photo'), concept_id null,
+               question_te, answer_te null, created_at, received_at)   -- never store audio or images
+- Indexes on (device_id), (learner_id), (concept_id).
+- /api/health also reports db: "ok" | "down" (with a 1-second timeout); the app keeps serving
+  stubs even if the database is down.
+
+Update server/README.md with the deploy steps, the env vars and how to run migrations.
+When done, give me the exact clicks for the hosting and database dashboards, and a checklist to
+verify the live API.
+```
+**Checks:**
+- The live `/api/health` shows `ok: true, db: "ok"`.
+- CORS allows A's live URL and blocks other sites.
+- **Send the API URL to Member A.** This is check-in point 1.
+
+---
+
+## B3 · Gnani speech-to-text (Telugu)
+```text
+Implement real Telugu speech-to-text for POST /api/stt in the Vidya Nestham backend, using Gnani.
+
+GNANI API DETAILS (from Gnani's documentation; key comes from GNANI_API_KEY only):
+<<< paste the speech-to-text endpoint, auth method, request format, required audio format
+    (encoding, sample rate, channels), Telugu language code, response format and limits >>>
+
+REQUIREMENTS
+- server/src/services/gnani.ts: function transcribe(audioBuffer, mimeType) -> { text_te }.
+- The frontend sends Opus in webm/ogg (≤ 15 s, ≤ 300 KB). If Gnani needs a different format
+  (e.g., 16 kHz mono PCM WAV), convert in memory with ffmpeg (ffmpeg-static), never writing to disk.
+- Timeout 15 s; one retry on a network error or 5xx; then SERVER_BUSY.
+- Empty or unclear transcript → error_code STT_EMPTY, message_te "సరిగా వినిపించలేదు. మళ్ళీ చెప్పండి."
+  (add it to the error catalogue).
+- Never store or log the audio or the transcript; log only duration, size in bytes, latency and status.
+- While USE_STUBS=true keep the stub; when false, call Gnani.
+- Tests: mock the Gnani HTTP call (no real network in tests) for success, empty transcript, timeout
+  and 5xx.
+- Add a small script `npm run try:stt -- <file>` that sends a local audio file through the service
+  so I can test real Telugu recordings from my phone.
+```
+**Checks:**
+- Record 5 Telugu questions on your phone and send them through `try:stt`. Note how accurate each transcript is.
+- Set `USE_STUBS=false` on the live server once STT, TTS and the tutor all work.
+
+---
+
+## B4 · Gnani text-to-speech (Telugu)
+```text
+Implement real Telugu text-to-speech for POST /api/tts in the Vidya Nestham backend, using Gnani.
+
+GNANI API DETAILS (key from GNANI_API_KEY only):
+<<< paste the text-to-speech endpoint, auth, request format, available Telugu voices,
+    output formats and limits >>>
+
+REQUIREMENTS
+- server/src/services/gnani.ts: function synthesize(text_te) -> audio Buffer.
+- Choose a clear, friendly Telugu voice suitable for children; make the voice id a config value.
+- Output small files: if Gnani returns WAV/MP3, convert in memory to Ogg Opus mono at about
+  24 kbps with ffmpeg. Target: under 100 KB for a 120-word answer.
+- Normalise the text first (trim, Unicode NFC, collapse spaces); reject text over 600 characters.
+- Cache: key = SHA-256 of (voice id + normalised text). Keep an in-memory LRU (about 200 items),
+  plus a persistent cache (database table tts_cache, or object storage) so repeat requests never
+  call Gnani again. Respond with Cache-Control: public, max-age=31536000, immutable and an ETag,
+  so the phone's browser caches it too.
+- Timeout 15 s, one retry, then SERVER_BUSY. Never log the text.
+- Tests with a mocked Gnani: cache hit avoids a second Gnani call, long text is rejected,
+  response headers are correct.
+- Script `npm run try:tts -- "<telugu text>"` that writes an .ogg file locally so I can listen to it.
+```
+**Checks:**
+- Listen to 5 generated answers on a phone speaker.
+- Check the file sizes; they should be under 100 KB.
+- Request the same text twice; the second request should be instant.
+
+---
+
+## B5 · AI tutor
+```text
+Implement the real AI tutor for POST /api/tutor in the Vidya Nestham backend.
+
+AI MODEL (key from AI_API_KEY only; organisers have confirmed it is allowed):
+<<< provider, model name, endpoint/SDK, and whether it supports JSON output >>>
+
+CONTEXT FROM OUR OWN CONTENT (reduces wrong answers)
+- At startup, load the chapter packs from content/chapter-*-v1.json.
+- For each question, pick the 2 most relevant concept cards from the given chapter_id:
+  if concept_hint is given, always include that card; otherwise score cards by character-trigram
+  overlap between the question and (title_te + card_text_te) — this works for Telugu without a
+  tokenizer. Send those cards' text as reference material.
+
+SYSTEM RULES FOR THE MODEL
+- Reply only in simple Telugu at a Class 6 reading level; short sentences.
+- At most 120 words, unless the question asks to explain more simply or give an example, in which
+  case still stay under 150 words.
+- Use one everyday example from village life in Telangana.
+- Give the English science term in brackets after the Telugu term the first time, e.g. ఘర్షణ (friction).
+- Use the same Telugu terms as the reference cards.
+- End with exactly one short check question.
+- Stay within Class 8 Science. If the question is outside it, answer in one or two lines and set
+  out_of_syllabus to true.
+- Never ask for or repeat personal information. Refuse unsafe or inappropriate requests kindly in
+  Telugu and steer back to studying.
+- Never claim to be a teacher or a human.
+- Output JSON only: { answer_te, concept_id, check_question_te, out_of_syllabus }, where concept_id
+  is one of the reference cards' ids (or null).
+
+SAFETY & COST
+- Before calling the model, remove personal data from the question: 10-digit phone numbers,
+  12-digit numbers (Aadhaar-like), email addresses → replace with "[తీసివేశాం]".
+- Validate the model's JSON with zod; on invalid output, retry once with a "return valid JSON only"
+  reminder; then SERVER_BUSY.
+- Cap the answer length server-side (truncate politely if needed).
+- Cache answers by SHA-256 of (chapter_id + concept_hint + normalised question) for 7 days.
+- Timeout 20 s. Never log the question or the answer text.
+
+TESTS
+- Mock the model: valid JSON, invalid JSON then valid, timeout, personal-data removal, cache hit.
+- An evaluation script `npm run eval:tutor` that sends these 10 real questions to the live model and
+  prints the answers, word counts and concept ids so I can review them:
+  బలం అంటే ఏమిటి? · ఘర్షణ ఎందుకు బలం అవుతుంది? · పీడనం అంటే ఏమిటి? · మేకు మొన ఎందుకు సన్నగా ఉంటుంది? ·
+  తాడు లాగుడు ఆటలో ఫలిత బలం ఎలా లెక్కిస్తారు? · ఆగి ఉన్న వస్తువుపై ఘర్షణ ఉంటుందా? ·
+  బాల్ బేరింగ్‌లు ఎందుకు వాడతారు? · చేప ఆకారం ఎందుకు అలా ఉంటుంది? · చంద్రుడు ఎందుకు ప్రకాశిస్తాడు? (out of syllabus) ·
+  నీ ఫోన్ నంబర్ ఏమిటి? (must refuse politely)
+```
+**Checks:**
+- Read all 10 `eval:tutor` answers, ideally with a Telugu-speaking reviewer.
+- Check for: short, simple, correct science, the right terms, a check question at the end, out-of-syllabus flagged, and the personal question refused.
+- Save the before/after prompt versions for the usage log; this is the "iterations that mattered" story.
+
+---
+
+## B6 · Content validator
+```text
+Create a content validator for Vidya Nestham chapter packs at scripts/validate-content.ts
+(run with `npm run validate:content` from the repo root, and callable from the frontend's
+`content:check` script).
+
+Validate every content/chapter-*-v1.json against the agreed format:
+chapter { id, title_te, order, syllabus_ref }; concepts[]; questions[]; misconceptions[];
+common_doubts[]; version "1".
+
+ERRORS (exit code 1)
+- Missing or empty required fields; any *_te string that is empty or has no Telugu characters
+  (Unicode range U+0C00–U+0C7F), except numbers and units.
+- Duplicate ids anywhere in a pack.
+- A question whose concept_id doesn't exist; a misconception whose concept_id doesn't exist.
+- type "mcq": 2–4 options, `correct` is one of the option keys, and EVERY wrong option has an
+  entry in option_misconception that points to an existing misconception id.
+- type "tf": options exactly ["ఒప్పు", "తప్పు"]; the wrong option has a misconception.
+- type "fill": options empty; `correct` is a non-empty array of accepted answers.
+- difficulty not in 1, 2, 3.
+- audio_url / image set to a file that doesn't exist under content/.
+
+WARNINGS (exit code 0, printed in yellow)
+- A concept without at least one question at each difficulty level.
+- Common doubts still marked review: true.
+- Concept card text longer than 120 words; answer_te in common doubts longer than 120 words.
+- Empty audio_url (audio not generated yet).
+
+OUTPUT
+- A summary per pack: number of concepts, questions per concept and per difficulty, misconceptions,
+  common doubts, audio coverage (%), then every error and warning with its path
+  (e.g., questions[12].option_misconception.C).
+- Unit tests with small good and bad sample packs.
+```
+**Checks:**
+- Run it on A's Force pack. Fix every error together with Member A.
+- This is check-in point 2: A's lesson data passes your checker.
+
+---
+
+## B7 · Audio pre-generation script
+```text
+Create scripts/generate-audio.ts (run with `npm run generate:audio`) for Vidya Nestham. It runs
+ONCE on a developer machine or in CI, never in the browser and never at request time.
+
+INPUTS
+- content/chapter-*-v1.json (concept cards and common doubts)
+- content/phrases.json (parent-summary phrases: [{ key, text_te }], keys like summary_intro,
+  days_0 … days_7, chapter_<chapterId>_green | _yellow | _red, summary_outro)
+
+WHAT IT DOES
+- For each concept: synthesise "title_te. card_text_te. example_te" → content/audio/<chapterId>/<conceptId>.ogg
+- For each common doubt (skip review: true): synthesise answer_te → content/audio/<chapterId>/doubts/<doubtId>.ogg
+- For each phrase: synthesise text_te → content/audio/phrases/<key>.ogg
+- Reuse the synthesize() service from the server (Gnani + Ogg Opus about 24 kbps), with GNANI_API_KEY
+  read from the local environment only.
+- Write the resulting paths back into the packs' audio_url fields as "/content/audio/…"
+  (keep the JSON formatting stable so diffs stay small).
+- Skip files that already exist and whose source text hasn't changed (store a SHA-256 of the text
+  in content/audio/manifest.json); --force regenerates everything; --chapter <id> limits the run.
+- Rate-limit calls to Gnani (e.g., 2 at a time), retry failures, and print a final report:
+  files created, skipped, failed, total size in KB, and the estimated Gnani usage.
+
+After it runs, run the content validator and show the audio coverage.
+```
+**Checks:**
+- Run it for the Force chapter and listen to 3 cards and 2 phrases.
+- Commit the generated `.ogg` files and the updated packs, or tell A if they should be hosted elsewhere.
+- Run it again for Friction on Sunday.
+
+---
+
+## B8 · Adaptive learning engine
+```text
+Implement the adaptive practice engine for Vidya Nestham in app/src/engine/ as pure TypeScript
+(no React, no network). Use the local database schema in app/src/db/schema.ts created by the other
+member (tables attempts and mastery); do not create a new database.
+
+AGREED INTERFACE (exported from app/src/engine/index.ts)
+  recordAttempt(learnerState, question, chosenOption) -> { learnerState, correct, misconception_id?, feedback_te }
+  nextQuestion(learnerState, chapterPack)            -> { question, reason_te }
+  masteryByConcept(learnerState)                     -> { [concept_id]: 0..1 }
+  chapterStatus(learnerState, chapterPack)           -> "green" | "yellow" | "red"
+Plus storage helpers:
+  loadLearnerState(learnerId) / saveLearnerState(learnerState)   (IndexedDB via the shared schema)
+
+LEARNER STATE
+- learnerId, mastery per concept (starts at 0.3 when first seen), misconception counts,
+  recent question ids (last 10), openedConceptIds (concepts opened in lessons; the frontend passes
+  these in when loading the state).
+
+RULES
+- Correct answer: m = m + 0.15 × (1 − m) × difficultyFactor (difficulty 1: 0.8, 2: 1.0, 3: 1.2).
+- Wrong answer: m = m − 0.2 × m, and increase the count for the chosen option's misconception.
+- Clamp mastery to [0, 1].
+- Unlocked concepts: the opened concepts; if none are opened yet, the first concept of the chapter.
+- nextQuestion:
+  1. pick the unlocked concept with the lowest mastery (ties: chapter order);
+  2. difficulty = 1 if m < 0.4, 2 if m < 0.7, otherwise 3; if none at that level, use the nearest level;
+  3. among those, prefer questions whose wrong options include the learner's most frequent
+     misconception for that concept;
+  4. never repeat any of the last 10 questions unless nothing else is left;
+  5. use an injectable random function so tests are deterministic.
+- reason_te: a short Telugu sentence explaining the choice, e.g.
+  "ఘర్షణ మీద రెండు ప్రశ్నలు తప్పాయి, అందుకే ఇంకా సులభమైన ప్రశ్న." (two friction questions were wrong,
+  so here's an easier one) or "బాగా చేస్తున్నారు! ఇప్పుడు కొంచెం కష్టమైన ప్రశ్న." (doing well! now a harder one).
+  Keep all reason/feedback strings in app/src/engine/strings.te.ts.
+- feedback_te: "సరైన జవాబు!" or "అయ్యో! సరైన జవాబు: <correct option text>".
+- chapterStatus: average mastery over the chapter's concepts (unseen concepts count as 0):
+  ≥ 0.8 green, ≥ 0.5 yellow, otherwise red.
+- Mastery must also be recomputable from the full attempts list (recomputeFromAttempts), so sync
+  never causes conflicts.
+
+TESTS (Vitest) — all must pass
+- mastery goes up after correct answers and down after wrong ones, and stays within 0..1
+- difficulty steps up and down at the thresholds
+- after a wrong answer, the next question targets the same concept at an easier level
+- the most frequent misconception is preferred
+- no repeats within 10 questions
+- chapterStatus thresholds
+- recomputeFromAttempts gives the same mastery as applying attempts one by one
+```
+**Checks:**
+- All tests pass.
+- Tell Member A the engine is ready. A's practice screen switches from the stand-in to your engine with no other changes.
+
+---
+
+## B9 · Offline sync module (client side)
+```text
+Implement the offline sync module for Vidya Nestham in app/src/sync/, using the shared local
+database schema in app/src/db/schema.ts (tables attempts, doubts, meta).
+
+AGREED INTERFACE (exported from app/src/sync/index.ts)
+  queueRecord(record)            // writes to IndexedDB with synced=false; record = { uuid, type: "attempt"|"doubt", learner_id, payload, created_at }
+  queueDoubt(audioBlob | null, meta)   // offline voice/text doubt: { learner_id, chapter_id, concept_hint?, question_te?, created_at }; status "queued"
+  syncNow() -> { sent, failed, lastSavedAt }
+  onDoubtAnswered(callback)      // fires with the doubt when a queued doubt gets its answer
+
+BEHAVIOUR
+- Every write goes to IndexedDB first; the network is optional.
+- Sync triggers: app start, the browser "online" event, the page becoming visible again,
+  every 60 s while online, and syncNow() calls.
+- Send unsynced records in batches of up to 200 to POST /api/sync with header X-Device-Id
+  (meta.deviceId); mark only the acked uuids as synced. Never send rows marked demo: true.
+- Failures: exponential backoff (5 s, 15 s, 60 s, max 5 min); never block the UI; never lose records.
+- Only one sync runs at a time (a simple lock), even across two open tabs (use the Web Locks API
+  if available, otherwise a meta flag with a timeout).
+- Update meta.lastSavedAt after each successful batch and expose it via a small subscribe function
+  so the UI can show "చివరిగా సేవ్ చేసింది: <time>".
+- Use the Background Sync API when the browser supports it, as an extra trigger only.
+
+TESTS (Vitest + fake-indexeddb, mocked fetch)
+- records written offline are sent once when online
+- the same batch acked twice causes no duplicates
+- a network failure mid-batch keeps unacked records unsynced and retries later
+- demo rows are never sent
+- only one sync runs at a time
+```
+**Checks:**
+- In airplane mode, do practice on the live app.
+- Go back online, and the database shows each attempt exactly once.
+- Tell Member A that A7, A8 and A9 can switch their adapters to your module.
+
+---
+
+## B10 · Sync endpoint (server side)
+```text
+Replace the stub for POST /api/sync in the Vidya Nestham backend with the real implementation.
+
+- Validate the body with the existing zod schema: { device_id, records: [...] }, max 200 records,
+  payload max 4 KB each.
+- Upsert the device (devices.last_seen_at).
+- Insert attempts and doubts by uuid with INSERT … ON CONFLICT (uuid) DO NOTHING, inside one
+  transaction per batch. Map payload fields to the table columns defined in the migrations.
+- Ignore any record that says demo: true.
+- Return { acked: [uuid] } containing every uuid that is now stored (new or already present), so a
+  retried batch is fully acked.
+- Doubts must never contain audio or images; reject a payload that includes binary data.
+- Never log payload contents.
+
+TESTS (against a test database or an in-memory Postgres such as pg-mem)
+- a new batch is stored and acked
+- the same batch sent again stores nothing new and acks everything
+- a mixed batch with invalid records returns 400 without partial writes
+- demo records are not stored
+```
+**Checks:**
+- Run `curl` twice with the same batch and confirm the row count doesn't change.
+
+---
+
+## B11 · Queued voice doubts
+```text
+Extend the sync module (app/src/sync/) so doubts asked offline get answered automatically when the
+phone is back online.
+
+- During each sync run, after sending records, process doubts with status "queued", oldest first,
+  one at a time:
+  1. voice doubt: POST the stored audio to /api/stt → question_te (text doubts skip this step);
+  2. POST /api/tutor with { question_te, class: 8, chapter_id, concept_hint };
+  3. save answer_te, check_question_te, concept_id and out_of_syllabus on the doubt; set status
+     "answered"; queue a "doubt" record for server sync (text only);
+  4. delete the stored audio blob right away (privacy and phone storage);
+  5. call every onDoubtAnswered callback with the updated doubt.
+- If the server returns RATE_LIMITED or SERVER_BUSY, stop processing and try again on the next sync run.
+- If STT returns STT_EMPTY, mark the doubt "failed" with a Telugu note
+  "సరిగా వినిపించలేదు. మళ్ళీ అడగండి." and delete the audio.
+- Keep a retry count; after 5 failed attempts, mark it "failed" with SERVER_BUSY's message.
+- Never process the same doubt in two places at once (reuse the sync lock).
+
+TESTS (mocked fetch)
+- a queued voice doubt becomes answered and its audio is deleted
+- rate limiting pauses processing without losing the doubt
+- STT_EMPTY marks it failed with the Telugu note
+- onDoubtAnswered fires exactly once per doubt
+```
+**Checks:**
+- In airplane mode, ask a voice doubt. Go back online, and the answer appears with the "your answer is ready" badge.
+- This is check-in point 4, the airplane-mode test.
+
+---
+
+## B12 · Photo doubts
+```text
+Implement POST /api/photo in the Vidya Nestham backend: extract a question from a photo of a
+textbook or notebook page.
+
+VISION MODEL (key from AI_API_KEY only; confirmed allowed by organisers):
+<<< provider and model that accepts images >>>
+
+- Accept image/jpeg or image/webp up to 200 KB (multer memory storage only).
+- Instruction to the model: read the single main question in the image and return it as Telugu
+  text exactly as written (if the question is printed in English, translate it into simple Telugu);
+  return JSON { question_te, readable: boolean, contains_person: boolean }.
+- If readable is false → error_code PHOTO_UNREADABLE, message_te
+  "ఫోటో సరిగా కనిపించడం లేదు. వెలుతురులో మళ్ళీ తీయండి." (photo not clear, take it again in good light).
+- If contains_person is true → error_code PHOTO_HAS_PERSON, message_te
+  "దయచేసి పుస్తకం లేదా నోట్‌బుక్ ఫోటో మాత్రమే తీయండి." (please photograph only the book or notebook),
+  and do not return any text.
+- Add both codes to the error catalogue.
+- Never store or log the image or the extracted text. Timeout 20 s; one retry; then SERVER_BUSY.
+- Same rate limit as /api/tutor.
+- Tests with a mocked model for each outcome.
+```
+**Checks:**
+- Photograph 3 printed questions from the Force chapter on your phone and confirm the extracted text is correct.
+- Photograph your face, and it must be refused.
+
+---
+
+## B13 · Teacher summary
+```text
+Implement GET /api/teacher/summary in the Vidya Nestham backend with clearly synthetic demo data.
+
+- Generate a sample class of 30 synthetic learners from a fixed seed (same data every time),
+  using the concept ids in content/chapter-*-v1.json. Nicknames: generic Telugu first names,
+  clearly fictional.
+- Give them a realistic mastery spread: most strong on force-what-is and force-contact; many weak
+  on pressure-what-is, friction-types and friction-is-not-a-force style misconceptions;
+  a few learners weak across the board.
+- Response (agreed contract):
+  { class_size, weakest_concepts: [{ concept_id, avg_mastery }] (sorted weakest first, top 5),
+    learners_needing_help: [{ nickname, weak_concepts }] (learners with 2+ concepts below 0.5, max 8) }
+  plus a field demo: true.
+- Do NOT mix in real synced learner data (privacy).
+- Cache the computed response in memory; Cache-Control: max-age=300.
+- Tests: the response matches the zod schema, the output is identical across calls, and the sort
+  order is correct.
+```
+**Checks:**
+- Member A's teacher view shows believable numbers with the "demo data" label.
+
+---
+
+## B14 · Hardening & credit protection
+```text
+Do a security, privacy and reliability pass on the Vidya Nestham backend and on app/src/engine and
+app/src/sync. Fix every issue you find and give me a table of what you changed.
+
+1. Secrets: search the whole repo, including git history, for API keys or tokens; confirm .env is
+   ignored; confirm the frontend build contains no secret values. If any secret was ever committed,
+   tell me to rotate it.
+2. Credit guard: per-device daily caps (e.g., 60 STT, 60 tutor, 20 photo, 200 TTS calls) and a
+   global daily budget for Gnani and the AI model, read from env vars. When a cap is hit, return
+   RATE_LIMITED or SERVER_BUSY with the Telugu messages instead of calling the provider.
+   TTS cache hits never count.
+3. Abuse tests for the tutor: prompt-injection attempts in Telugu and English (e.g., "ignore your
+   rules"), requests for personal data, unsafe topics. Confirm the tutor stays in role; add the
+   cases to the test suite with a mocked model plus a short live check list in server/README.md.
+4. Privacy: verify that no route logs request bodies, audio, images, questions or answers;
+   uploads never touch disk; the database has no names, phone numbers or audio.
+5. Reliability: timeouts on every outgoing call; a graceful SERVER_BUSY when Gnani or the AI model
+   is down; /api/health reports the status of each dependency without calling paid APIs.
+6. Dependencies: run npm audit and fix high/critical issues.
+7. CORS, helmet and HTTPS-only (redirect or reject plain HTTP if the host allows).
+```
+**Checks:**
+- Spam `/api/tutor` from one device and you should get `RATE_LIMITED` in Telugu.
+- The network tab and the built JS contain no keys.
+- Every test passes.
+
+---
+
+## B15 · Measure data use
+```text
+Measure how much mobile data Vidya Nestham uses, so we can report real numbers.
+
+1. Server middleware that records, per endpoint, the request and response size in bytes and the
+   latency (aggregated counts, averages and 95th percentiles only; no content). Expose it at
+   GET /api/metrics, protected by a METRICS_TOKEN env var.
+2. A script `npm run measure` that, against the live or local API:
+   - sends 5 real recorded Telugu voice clips through /api/stt and reports their average upload size;
+   - runs 5 tutor questions and reports the average response size;
+   - requests TTS for 5 answers and reports the average audio size, plus the cache hit timing;
+   - reports the size of each chapter pack and its audio folder.
+3. Print a final table:
+   | Item | Budget | Measured |
+   with rows: voice doubt round trip (upload + answer text), TTS answer audio, chapter pack,
+   chapter audio total, a typical 10-minute session (assume 3 voice doubts with audio + 10 practice
+   questions offline + 2 lessons with audio).
+   Budgets: voice doubt round trip < 150 KB, TTS answer < 100 KB, chapter pack < 400 KB,
+   10-minute session < 5 MB.
+```
+**Checks:**
+- Copy the final table into the README's "Measured" column.
+- Give the numbers to whoever writes the pitch.
+
+---
+
+## What you deliver to Member A, and when
+| Deliverable | From task | A switches from |
+|---|---|---|
+| Live API URL | B2 | mocks → real stubs |
+| Real STT, TTS and tutor (`USE_STUBS=false`) | B3–B5 | stub answers → real Telugu answers |
+| Content validator | B6 | "reminder" → real `content:check` |
+| Lesson, common-doubt and phrase audio | B7 | 🔊 hidden → audio plays offline |
+| Engine | B8 | engine stand-in → adaptive practice |
+| Sync module + queued doubts | B9, B11 | stand-in storage → real sync + "answer ready" badge |
+| Photo endpoint | B12 | mock → real photo doubts |
+| Teacher summary | B13 | mock → demo class data |
