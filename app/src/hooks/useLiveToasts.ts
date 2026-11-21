@@ -5,6 +5,8 @@ import { useT } from "../i18n";
 import type { MessageKey } from "../i18n/en";
 import { useToast } from "../components/ToastProvider";
 import { useLiveEvents } from "./useLiveEvents";
+import { useSettings } from "../components/SettingsProvider";
+import { playChime } from "../lib/settings";
 
 /**
  * Which toast (if any) a live status change shows for a role. Event payloads carry no names,
@@ -35,6 +37,12 @@ export function useLiveToasts(): void {
   const { user } = useAuth();
   const { t } = useT();
   const { show } = useToast();
+  const { settings } = useSettings();
+  // Notification sound (Settings): a short chime with each live toast.
+  const notify = (message: string) => {
+    show(message);
+    if (settings.sound) playChime();
+  };
   const role = user?.role ?? null;
 
   useLiveEvents((e) => {
@@ -46,11 +54,11 @@ export function useLiveToasts(): void {
       apiRequest<Listing>("GET", `/api/listings/${e.listing_id}`)
         .then((listing) => {
           const name = listing.matched_receiver?.name;
-          show(name ? t("toast.donor.acceptedBy", { name }) : t(key));
+          notify(name ? t("toast.donor.acceptedBy", { name }) : t(key));
         })
-        .catch(() => show(t(key)));
+        .catch(() => notify(t(key)));
       return;
     }
-    show(t(key));
+    notify(t(key));
   });
 }

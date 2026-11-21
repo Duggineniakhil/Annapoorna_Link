@@ -1,5 +1,6 @@
 import { config } from "../config";
 import { handleMockRequest } from "../mocks/handlers";
+import { errorText } from "../lib/errorMessages";
 import type {
   DeclineReason,
   DeliverInput,
@@ -73,18 +74,28 @@ function nonEmptyString(value: unknown): string | undefined {
 export function mapErrorBody(body: unknown, status: number, lang: Lang): ApiError {
   const obj: Record<string, unknown> = isRecord(body) ? body : {};
   const errorCode = nonEmptyString(obj.error_code) ?? "UNKNOWN_ERROR";
-  const rawEn = nonEmptyString(obj.message);
-  const rawTe = nonEmptyString(obj.message_te);
-  const messageEn = rawEn ?? GENERIC_EN;
-  const messageTe = rawTe ?? GENERIC_TE;
-  const retryable = errorCode === "SERVER_BUSY" || status === 503;
+  // The server's own message first; else the app's message for the code; else a generic one.
+  const known = errorText(errorCode);
+  const messageEn = nonEmptyString(obj.message) ?? known.en;
+  const messageTe = nonEmptyString(obj.message_te) ?? known.te;
+  const retryable =
+    errorCode === "SERVER_BUSY" || errorCode === "RATE_LIMITED" || status === 503 || status >= 500;
 
   const err = new ApiError(errorCode, messageEn, messageTe, status, retryable);
-  err.message = lang === "te" ? (rawTe ?? rawEn ?? GENERIC_TE) : (rawEn ?? rawTe ?? GENERIC_EN);
+  err.message = lang === "te" ? messageTe : messageEn;
   if (typeof obj.tries_left === "number") {
     err.tries_left = obj.tries_left;
   }
   return err;
+}
+
+/**
+ * Text safe to show for any caught error: an ApiError's translated message, otherwise a generic
+ * message in the current language (never a raw JavaScript error).
+ */
+export function userMessage(err: unknown): string {
+  if (err instanceof ApiError) return err.message;
+  return currentLang() === "te" ? GENERIC_TE : GENERIC_EN;
 }
 
 export function busyError(lang: Lang): ApiError {

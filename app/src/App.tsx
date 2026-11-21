@@ -7,6 +7,8 @@ import { ToastProvider } from "./components/ToastProvider";
 import LiveStatusNote from "./components/LiveStatusNote";
 import { LiveEventsProvider } from "./hooks/useLiveEvents";
 import Login from "./screens/common/Login";
+import { RouteError } from "./components/ErrorScreen";
+import { SettingsProvider } from "./components/SettingsProvider";
 
 // Lazy-load every screen except login so the first load stays small.
 const DonorHome = lazy(() => import("./screens/donor/DonorHome"));
@@ -29,6 +31,8 @@ const NotFound = lazy(() => import("./screens/common/NotFound"));
 const router = createBrowserRouter([
   {
     element: <AppShell />,
+    // A screen that fails to load (offline) or render gets the friendly error screen.
+    errorElement: <RouteError />,
     children: [
       {
         element: <SectionGuard />,
@@ -64,13 +68,15 @@ const router = createBrowserRouter([
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <LiveEventsProvider>
-          <LiveStatusNote />
-          <RouterProvider router={router} />
-        </LiveEventsProvider>
-      </ToastProvider>
-    </AuthProvider>
+    <SettingsProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <LiveEventsProvider>
+            <LiveStatusNote />
+            <RouterProvider router={router} />
+          </LiveEventsProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </SettingsProvider>
   );
 }

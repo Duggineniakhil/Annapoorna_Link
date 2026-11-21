@@ -8,7 +8,7 @@ import { ApiError, acceptOffer, declineOffer, getOffer } from "../../services/ap
 import { Screen } from "../../components/Screen";
 import { EmptyState } from "../../components/EmptyState";
 import { Card } from "../../components/ui/Card";
-import { Button } from "../../components/ui/Button";
+import { Button, ButtonLink } from "../../components/ui/Button";
 import { ListingCard } from "../../components/food/ListingCard";
 import { formatClock, formatNumber } from "../../components/food/format";
 import { SafetyCard } from "../../components/SafetyCard";
@@ -20,7 +20,8 @@ import { routeBetweenOrgs } from "../../components/map/route";
 // Receiver offer detail: listing, match reasons, distance and ETA, area map, timeline,
 // the delivery code once accepted, the volunteer, and the safety card. Refetched on live updates.
 
-const CLOSED_CODES: string[] = ["OFFER_EXPIRED", "OFFER_NOT_OPEN"];
+// The real server answers a closed offer with INVALID_STATE; the mock with OFFER_*.
+const CLOSED_CODES: string[] = ["OFFER_EXPIRED", "OFFER_NOT_OPEN", "INVALID_STATE"];
 
 const REASONS: DeclineReason[] = ["too_far", "cant_accept_type", "no_space", "closing"];
 const REASON_KEY: Record<DeclineReason, MessageKey> = {
@@ -128,7 +129,15 @@ export default function ReceiverOfferDetail() {
       )}
 
       {notFound ? (
-        <EmptyState icon="🔍" message={t("receiver.offer.notFound")} />
+        <EmptyState
+          icon="🔍"
+          message={t("receiver.offer.notFound")}
+          action={
+            <ButtonLink to="/receiver" variant="secondary">
+              {t("empty.action.offers")}
+            </ButtonLink>
+          }
+        />
       ) : !offer ? (
         error ? null : (
           <p role="status" className="text-ink/60">

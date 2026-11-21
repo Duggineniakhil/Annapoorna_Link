@@ -4,7 +4,7 @@ import type { Role } from "../../types/api";
 import type { MessageKey } from "../../i18n/en";
 import { useT } from "../../i18n";
 import { useAuth } from "../../auth/AuthContext";
-import { apiRequest } from "../../services/api";
+import { ApiError, apiRequest } from "../../services/api";
 import { ROLE_HOME } from "../../components/roles";
 import { DemoDataBadge } from "../../components/DemoDataBadge";
 import { LogoMark } from "../../components/TopBar";
@@ -96,7 +96,7 @@ export default function Login() {
     try {
       setAccounts(await apiRequest<AccountSummary[]>("GET", "/api/demo/accounts"));
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : t("login.loadError"));
+      setLoadError(err instanceof ApiError ? err.message : t("login.loadError"));
     }
   }, [t]);
 
@@ -111,7 +111,7 @@ export default function Login() {
       const user = await login(accountId);
       navigate(ROLE_HOME[user.role], { replace: true });
     } catch (err) {
-      setSignInError(err instanceof Error ? err.message : t("login.loadError"));
+      setSignInError(err instanceof ApiError ? err.message : t("login.loadError"));
       setSigningIn(null);
     }
   };

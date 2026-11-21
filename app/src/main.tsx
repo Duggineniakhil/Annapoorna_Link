@@ -7,14 +7,21 @@ import "@fontsource/noto-sans-telugu/700.css";
 import "./index.css";
 import App from "./App";
 import { LanguageProvider } from "./i18n";
+import { AppErrorBoundary } from "./components/ErrorScreen";
+import { applyTextSize, readSettings } from "./lib/settings";
+
+// Text size is applied before the first paint so the page does not jump.
+applyTextSize(readSettings().textSize);
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element #root not found");
 
 createRoot(root).render(
   <StrictMode>
-    <LanguageProvider>
-      <App />
-    </LanguageProvider>
+    <AppErrorBoundary>
+      <LanguageProvider>
+        <App />
+      </LanguageProvider>
+    </AppErrorBoundary>
   </StrictMode>,
 );

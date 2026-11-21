@@ -8,6 +8,7 @@ import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import { Screen } from "../../components/Screen";
 import { EmptyState } from "../../components/EmptyState";
 import { Card } from "../../components/ui/Card";
+import { ButtonLink } from "../../components/ui/Button";
 import { formatNumber, itemsTitle } from "../../components/food/format";
 import { orgArea, orgName } from "../../mocks/fixtures";
 
@@ -76,7 +77,15 @@ export default function ReceiverHistory() {
       )}
       {!error && !items && <p className="text-ink/70">{t("receiver.history.loading")}</p>}
       {items && items.length === 0 && (
-        <EmptyState icon="🍱" message={t("receiver.history.empty")} />
+        <EmptyState
+          icon="🍱"
+          message={t("receiver.history.empty")}
+          action={
+            <ButtonLink to="/receiver" variant="secondary">
+              {t("empty.action.offers")}
+            </ButtonLink>
+          }
+        />
       )}
       {items && items.length > 0 && (
         <ul className="flex flex-col gap-3">

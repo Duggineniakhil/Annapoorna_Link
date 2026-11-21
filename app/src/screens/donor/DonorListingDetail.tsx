@@ -5,7 +5,7 @@ import type { MessageKey } from "../../i18n/en";
 import { useT } from "../../i18n";
 import { useAuth } from "../../auth/AuthContext";
 import { useLiveRefetch } from "../../hooks/useLiveEvents";
-import { ApiError, apiRequest } from "../../services/api";
+import { ApiError, apiRequest, userMessage } from "../../services/api";
 import { Screen } from "../../components/Screen";
 import { Card } from "../../components/ui/Card";
 import { Icon } from "../../components/ui/Icon";
@@ -56,7 +56,7 @@ export default function DonorListingDetail() {
           setError(null);
         })
         .catch((err: unknown) => {
-          setError(err instanceof Error ? err.message : String(err));
+          setError(userMessage(err));
         }),
     [id],
   );

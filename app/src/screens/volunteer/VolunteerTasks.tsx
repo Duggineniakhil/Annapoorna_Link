@@ -246,7 +246,21 @@ export default function VolunteerTasks() {
       )}
 
       {tasks !== null && open.length === 0 ? (
-        <EmptyState icon="🛵" message={t("volunteer.empty.available")} />
+        <EmptyState
+          icon="🛵"
+          message={t(available === false ? "volunteer.empty.off" : "volunteer.empty.available")}
+          action={
+            available === false ? (
+              <Button onClick={() => void changeAvailability(true)}>
+                {t("empty.action.available")}
+              </Button>
+            ) : (
+              <ButtonLink to="/volunteer/history" variant="secondary">
+                {t("empty.action.deliveries")}
+              </ButtonLink>
+            )
+          }
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {open.map((task) => (

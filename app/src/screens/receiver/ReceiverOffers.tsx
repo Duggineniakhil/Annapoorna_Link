@@ -11,13 +11,14 @@ import { Screen } from "../../components/Screen";
 import { EmptyState } from "../../components/EmptyState";
 import { FilterChips, type ChipOption } from "../../components/ui/FilterChips";
 import { LocationHeader } from "../../components/ui/LocationHeader";
-import { Button } from "../../components/ui/Button";
+import { Button, ButtonLink } from "../../components/ui/Button";
 import { ListingCard } from "../../components/food/ListingCard";
 import { Countdown } from "../../components/food/FoodBits";
 import { orgArea, orgName } from "../../mocks/fixtures";
 import { IncomingFood } from "./IncomingFood";
 
-const CLOSED_CODES: string[] = ["OFFER_EXPIRED", "OFFER_NOT_OPEN"];
+// The real server answers a closed offer with INVALID_STATE; the mock with OFFER_*.
+const CLOSED_CODES: string[] = ["OFFER_EXPIRED", "OFFER_NOT_OPEN", "INVALID_STATE"];
 
 type Filter = "all" | "veg" | "soon";
 const FILTERS: ChipOption<Filter>[] = [
@@ -170,9 +171,25 @@ export default function ReceiverOffers() {
           </p>
         )
       ) : mine.length === 0 ? (
-        <EmptyState icon="🍲" message={t("receiver.offers.empty")} />
+        <EmptyState
+          icon="🍲"
+          message={t("receiver.offers.empty")}
+          action={
+            <ButtonLink to="/receiver/needs" variant="secondary">
+              {t("empty.action.needs")}
+            </ButtonLink>
+          }
+        />
       ) : shown.length === 0 ? (
-        <EmptyState icon="🔍" message={t("receiver.offers.noMatch")} />
+        <EmptyState
+          icon="🔍"
+          message={t("receiver.offers.noMatch")}
+          action={
+            <Button variant="secondary" onClick={() => setFilter("all")}>
+              {t("empty.action.showAll")}
+            </Button>
+          }
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {shown.map((offer) => (

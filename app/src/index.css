@@ -57,3 +57,10 @@ body {
     print-color-adjust: exact;
   }
 }
+
+/* Largest text on a phone: the header shows the logo only (the name is its accessible label). */
+@media (max-width: 420px) {
+  html[data-text-size="larger"] .brand-name {
+    display: none;
+  }
+}

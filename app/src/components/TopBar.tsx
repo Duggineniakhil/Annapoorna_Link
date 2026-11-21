@@ -7,6 +7,71 @@ import { DEMO_ACCOUNTS } from "../mocks/demoData";
 import { LanguageToggle } from "./LanguageToggle";
 import { ROLE_HOME } from "./roles";
 import { Icon } from "./ui/Icon";
+import OfflineBanner from "./OfflineBanner";
+import { useSettings } from "./SettingsProvider";
+import { TEXT_SIZES, type TextSize } from "../lib/settings";
+
+const SIZE_CLASS: Record<TextSize, string> = {
+  normal: "text-sm",
+  large: "text-base",
+  larger: "text-lg",
+};
+
+/** Settings in the account menu (A13): language, notification sound, text size. */
+function SettingsSection() {
+  const { t } = useT();
+  const { settings, update } = useSettings();
+  return (
+    <div className="flex flex-col gap-3 border-t border-ink/5 px-4 py-3">
+      <p className="text-xs font-bold text-ink/60">{t("settings.title")}</p>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-ink">{t("settings.language")}</span>
+        <LanguageToggle />
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={settings.sound}
+        onClick={() => update({ sound: !settings.sound })}
+        className="flex min-h-11 items-center justify-between gap-2 text-left text-ink"
+      >
+        <span>{t("settings.sound")}</span>
+        <span
+          aria-hidden="true"
+          className={`flex h-7 w-12 shrink-0 items-center rounded-full p-1 transition-colors ${
+            settings.sound ? "justify-end bg-leaf-700" : "justify-start bg-ink/20"
+          }`}
+        >
+          <span className="h-5 w-5 rounded-full bg-white shadow" />
+        </span>
+      </button>
+      <div className="flex items-center justify-between gap-2">
+        <span id="text-size-label" className="text-ink">
+          {t("settings.textSize")}
+        </span>
+        <div role="radiogroup" aria-labelledby="text-size-label" className="flex gap-1">
+          {TEXT_SIZES.map((size) => (
+            <button
+              key={size}
+              type="button"
+              role="radio"
+              aria-checked={settings.textSize === size}
+              aria-label={t(`settings.textSize.${size}`)}
+              onClick={() => update({ textSize: size })}
+              className={`flex h-11 w-11 items-center justify-center rounded-full font-bold ${SIZE_CLASS[size]} ${
+                settings.textSize === size
+                  ? "bg-leaf-800 text-white"
+                  : "bg-leaf-50 text-leaf-800 ring-1 ring-inset ring-leaf-800/15"
+              }`}
+            >
+              {t("settings.textSize.letter")}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Closes the <details> account menu after an item is chosen.
 function closeMenu(e: MouseEvent<HTMLElement>): void {
@@ -56,11 +121,16 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-10 print:hidden border-b border-ink/5 bg-cream/95 backdrop-blur">
+      <OfflineBanner />
       <div className="mx-auto flex max-w-xl items-center justify-between gap-2 px-4 py-2">
         {/* "/" sends a logged-in user to their role home and everyone else to login. */}
-        <Link to="/" className="flex min-h-[48px] items-center gap-2">
+        <Link
+          to="/"
+          aria-label={t("app.name")}
+          className="flex min-h-[48px] min-w-0 items-center gap-2"
+        >
           <LogoMark />
-          <span className="font-bold leading-tight text-leaf-900">{t("app.name")}</span>
+          <span className="brand-name font-bold leading-tight text-leaf-900">{t("app.name")}</span>
         </Link>
         <div className="flex items-center gap-1">
           <LanguageToggle />
@@ -91,6 +161,7 @@ export function TopBar() {
                   {t("common.logout")}
                 </button>
               ) : null}
+              <SettingsSection />
               {config.useMocks && isLoggedIn ? (
                 <div className="border-t border-ink/5 pt-1">
                   <p className="px-4 py-1 text-xs font-bold text-ink/60">{t("menu.switchDemo")}</p>

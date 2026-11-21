@@ -7,6 +7,7 @@ import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import { useT } from "../../i18n";
 import { Screen } from "../../components/Screen";
 import { EmptyState } from "../../components/EmptyState";
+import { ButtonLink } from "../../components/ui/Button";
 import { StatusBadge } from "../../components/StatusBadge";
 import { SectionHeader, StatTile } from "../../components/ui/Card";
 import { FilterChips, type ChipOption } from "../../components/ui/FilterChips";
@@ -99,6 +100,7 @@ export default function DonorHome() {
         <EmptyState
           icon="🍽️"
           message={t(tab === "active" ? "donor.home.empty" : "donor.home.emptyPast")}
+          action={<ButtonLink to="/donor/post">{t("empty.action.post")}</ButtonLink>}
         />
       ) : (
         <ul className="flex flex-col gap-3">

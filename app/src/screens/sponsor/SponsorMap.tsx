@@ -98,7 +98,14 @@ export default function SponsorMap() {
           <Card className="flex flex-col gap-3 p-4">
             <SectionHeader titleKey="sponsor.map.recent" />
             {view.recent.length === 0 ? (
-              <p className="text-ink/60">{t("sponsor.map.none")}</p>
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-ink/60">{t("sponsor.map.none")}</p>
+                {filter !== "all" && (
+                  <Button variant="secondary" onClick={() => setFilter("all")}>
+                    {t("empty.action.allTypes")}
+                  </Button>
+                )}
+              </div>
             ) : (
               <ul className="flex flex-col divide-y divide-ink/5">
                 {view.recent.map((d) => (

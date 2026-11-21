@@ -20,6 +20,8 @@ type Listener = (e: LiveEvent) => void;
 
 interface LiveContextValue {
   mode: LiveMode;
+  /** Goes up each time the connection comes back, so screens refetch what they missed. */
+  resync: number;
   subscribe(listener: Listener): () => void;
 }
 
@@ -35,6 +37,13 @@ export function LiveEventsProvider({ children }: { children?: ReactNode }) {
   const role = user?.role;
   const orgId = org?.id;
   const [mode, setMode] = useState<LiveMode>("connecting");
+  const [resync, setResync] = useState(0);
+
+  useEffect(() => {
+    const back = () => setResync((n) => n + 1);
+    window.addEventListener("online", back);
+    return () => window.removeEventListener("online", back);
+  }, []);
   const listenersRef = useRef(new Set<Listener>());
 
   const subscribe = useCallback((listener: Listener) => {
@@ -64,7 +73,7 @@ export function LiveEventsProvider({ children }: { children?: ReactNode }) {
     return () => client.close();
   }, [token, role, orgId]);
 
-  const value = useMemo(() => ({ mode, subscribe }), [mode, subscribe]);
+  const value = useMemo(() => ({ mode, resync, subscribe }), [mode, resync, subscribe]);
   return createElement(LiveContext.Provider, { value }, children);
 }
 
@@ -96,9 +105,10 @@ export function useLiveStatus(): LiveMode {
  * also refetches every LIVE_POLL_MS. It refetches once when the mode becomes live, to catch up.
  */
 export function useLiveRefetch(refetch: () => void, listingId?: string): void {
-  const { mode, subscribe } = useLiveContext();
+  const { mode, resync, subscribe } = useLiveContext();
   const latest = useRef(refetch);
   const lastMode = useRef<LiveMode>(mode);
+  const lastResync = useRef(resync);
 
   useEffect(() => {
     latest.current = refetch;
@@ -117,6 +127,14 @@ export function useLiveRefetch(refetch: () => void, listingId?: string): void {
     const id = setInterval(() => latest.current(), LIVE_POLL_MS);
     return () => clearInterval(id);
   }, [mode]);
+
+  // Back online: refetch once (the offline banner promises that actions retry).
+  useEffect(() => {
+    if (resync !== lastResync.current) {
+      lastResync.current = resync;
+      latest.current();
+    }
+  }, [resync]);
 
   useEffect(() => {
     const previous = lastMode.current;

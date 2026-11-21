@@ -4,7 +4,7 @@ import type { Allergen, Category, Listing, Storage, VoiceDraft } from "../../typ
 import { useT } from "../../i18n";
 import { useAuth } from "../../auth/AuthContext";
 import { useNow } from "../../hooks/useNow";
-import { apiRequest } from "../../services/api";
+import { apiRequest, userMessage } from "../../services/api";
 import { Screen } from "../../components/Screen";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
@@ -526,7 +526,7 @@ export default function DonorPost() {
       }
       navigate(`/donor/listings/${listing.id}`, { state: { postedInMs: elapsed } });
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(userMessage(err));
       setSubmitting(false);
     }
   };

@@ -3,6 +3,7 @@ import { useT } from "../../i18n";
 import type { VolunteerHistoryItem } from "../../types/api";
 import { Screen } from "../../components/Screen";
 import { EmptyState } from "../../components/EmptyState";
+import { ButtonLink } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { Icon } from "../../components/ui/Icon";
 import { formatNumber } from "../../components/food/format";
@@ -71,7 +72,15 @@ export default function VolunteerHistory() {
       )}
       {items !== null &&
         (items.length === 0 ? (
-          <EmptyState icon="🕘" message={t("volunteer.history.empty")} />
+          <EmptyState
+            icon="🕘"
+            message={t("volunteer.history.empty")}
+            action={
+              <ButtonLink to="/volunteer" variant="secondary">
+                {t("empty.action.tasks")}
+              </ButtonLink>
+            }
+          />
         ) : (
           <ul className="flex flex-col gap-3">
             {items.map((item) => (
