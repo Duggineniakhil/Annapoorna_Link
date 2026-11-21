@@ -1,6 +1,6 @@
-# చదువు నేస్తం · Chaduvu Nestham
+# విద్యా నేస్తం · Vidya Nestham
 
-**A Telugu study buddy that works on a shared phone with poor data.**
+**A Telugu learning friend that works on a shared phone with poor data.**
 A voice-first, offline-friendly AI Science tutor for Class 8 students in Telugu-medium government schools (Telangana State Board).
 
 > 🏆 Built for the **ACE Builders Hackathon 2026** by Codebenders
@@ -33,7 +33,7 @@ Most digital learning is built for a different student: someone who **studies in
 
 ## 💡 Our solution
 
-Chaduvu Nestham is a **Telugu-first tutor in the phone's browser**, designed around the conditions Lakshmi actually studies in:
+Vidya Nestham is a **Telugu-first tutor in the phone's browser**, designed around the conditions Lakshmi actually studies in:
 
 | | Feature | What it does |
 |---|---|---|
@@ -46,7 +46,7 @@ Chaduvu Nestham is a **Telugu-first tutor in the phone's browser**, designed aro
 | 🧑‍🏫 | **Teacher/volunteer view** | Shows which concepts the class is stuck on (demo data). |
 
 ### Problem statement requirements → our features
-| Required by Problem Statement 3 | How Chaduvu Nestham meets it |
+| Required by Problem Statement 3 | How Vidya Nestham meets it |
 |---|---|
 | One regional language end to end, not just translated English | Telugu throughout: interface, lessons, practice, tutor answers, voice and parent view. Content is written natively in Telugu with local examples. |
 | One subject from the real state-board syllabus | Telangana SCERT **Class 8 Physical Science**: Ch 1 *Force (బలం)* and Ch 2 *Friction (ఘర్షణ)*, mapped to the official chapter list |
@@ -173,8 +173,8 @@ The whole application was built in the **Codebenders IDE** during the hackathon 
 **Requirements:** Node.js 18+, a Gnani API key, and an API key for the AI tutor model.
 
 ```bash
-git clone https://github.com/<your-username>/chaduvu-nestham.git
-cd chaduvu-nestham
+git clone https://github.com/Duggineniakhil/Vidya_Nestham.git
+cd Vidya_Nestham
 
 # backend
 cd server
@@ -205,7 +205,7 @@ cd app && npm test     # adaptive engine, sync queue, content validator
 
 ## 📁 Project structure
 ```
-chaduvu-nestham/
+Vidya_Nestham/
 ├── app/                 # PWA frontend (Telugu UI, offline, adaptive engine)
 ├── server/              # API: voice proxy, tutor, sync, teacher aggregates
 ├── content/             # Chapter packs (concept cards, questions, misconceptions) + SOURCES.md

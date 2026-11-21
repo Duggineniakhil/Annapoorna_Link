@@ -1,4 +1,4 @@
-# Chaduvu Nestham (చదువు నేస్తం) — Hackathon Docs
+# Vidya Nestham (విద్యా నేస్తం) — Hackathon Docs
 ACE Builders Hackathon 2026 · **Problem Statement 3: The Last-Mile Tutor** · Telugu · Class 8 · Science (Telangana State Board)
 
 > These are **planning documents only**, with no code. Under the rules, all code must be written in the **Codebenders IDE** during the build window (Sat 21 Nov 12:00 PM to Sun 22 Nov 11:59 PM IST).

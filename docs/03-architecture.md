@@ -90,7 +90,7 @@ Content packs are versioned JSON (`chapter-<id>-v1.json`) so content can be upda
 
 ## 9. Repository layout (suggested)
 ```
-chaduvu-nestham/
+Vidya_Nestham/
   app/          # PWA frontend
   server/       # API (proxy for Gnani + LLM, sync)
   content/      # chapter packs (JSON) + content sources/attribution

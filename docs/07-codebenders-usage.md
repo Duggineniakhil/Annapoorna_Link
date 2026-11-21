@@ -14,7 +14,7 @@
 > These are starting prompts. Refer to the spec docs so the IDE has full context. If Codebenders lets you attach files/context, add `02-product-spec.md` and `03-architecture.md`.
 
 **P1 — Skeleton**
-> Create a mobile-first PWA called "Chaduvu Nestham" using React + Vite + TypeScript + Tailwind. All UI text is in Telugu (use Noto Sans Telugu, self-hosted). Screens: profile picker, home, lessons, lesson detail, ask-a-doubt, practice, learner progress, parent view, teacher view, settings. Add a service worker that precaches the app shell. Add an online/offline indicator. Keep the initial bundle under 1.5 MB. Also create a Node/Express backend folder `server/` with a health endpoint, CORS limited to the frontend origin, and env-var based config.
+> Create a mobile-first PWA called "Vidya Nestham" using React + Vite + TypeScript + Tailwind. All UI text is in Telugu (use Noto Sans Telugu, self-hosted). Screens: profile picker, home, lessons, lesson detail, ask-a-doubt, practice, learner progress, parent view, teacher view, settings. Add a service worker that precaches the app shell. Add an online/offline indicator. Keep the initial bundle under 1.5 MB. Also create a Node/Express backend folder `server/` with a health endpoint, CORS limited to the frontend origin, and env-var based config.
 
 **P2 — Profiles on a shared phone**
 > Implement local learner profiles stored in IndexedDB (Dexie): nickname, avatar, class, hashed 4-digit PIN. Each profile's attempts, mastery and doubts are stored separately. The app opens on the profile picker and returns to it after 10 minutes idle. Collect no other personal data.
@@ -54,7 +54,7 @@
 
 ## 3. Usage log template (`CODEBENDERS_USAGE.md`)
 ```markdown
-# How we built Chaduvu Nestham with Codebenders
+# How we built Vidya Nestham with Codebenders
 
 ## Summary
 - Total build time: __ h · Prompts used: __ · Major iterations: __

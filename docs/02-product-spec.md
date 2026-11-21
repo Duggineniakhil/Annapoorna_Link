@@ -1,5 +1,5 @@
 # 02 — Product Specification
-**Chaduvu Nestham (చదువు నేస్తం)** — a Telugu-first, voice-first, offline-friendly AI Science tutor for Class 8.
+**Vidya Nestham (విద్యా నేస్తం)** — a Telugu-first, voice-first, offline-friendly AI Science tutor for Class 8.
 
 ---
 

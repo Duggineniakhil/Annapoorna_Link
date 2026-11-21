@@ -1,5 +1,5 @@
 # 01 — Problem & User Clarity
-**Product:** Chaduvu Nestham (చదువు నేస్తం — "Study Buddy")
+**Product:** Vidya Nestham (విద్యా నేస్తం — "Learning Friend")
 **Problem Statement 3 — The Last-Mile Tutor** · Telugu · Class 8 · Science (Telangana State Board)
 
 > Judging criterion: **Problem and User Clarity — 20%**. This doc answers: *who exactly, what exactly hurts, why existing options fail, and what "solved" looks like.*

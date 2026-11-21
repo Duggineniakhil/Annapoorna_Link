@@ -6,7 +6,7 @@
 ## 1. Pitch deck (8–10 slides)
 | # | Slide | Content | Supports |
 |---|---|---|---|
-| 1 | Title | Chaduvu Nestham — చదువు నేస్తం · "A Telugu study buddy that works on a shared phone with poor data" · Team names | — |
+| 1 | Title | Vidya Nestham — విద్యా నేస్తం · "A Telugu learning friend that works on a shared phone with poor data" · Team names | — |
 | 2 | Meet Lakshmi | Persona photo (illustration, not a real child), 3 facts: Telugu medium, shared phone, no one to ask | Problem & user |
 | 3 | The problem | 3 cited stats (teacher shortage, learning gaps, phone sharing) + 1–2 real quotes from your calls | Problem & user |
 | 4 | Why current options fail | The comparison table from `01-problem-and-user.md §5` | Problem & user |
@@ -35,7 +35,7 @@ Tips: record on a **real phone** (screen record + voice), show the Telugu clearl
 
 ## 3. Repository README (structure)
 ```markdown
-# Chaduvu Nestham — చదువు నేస్తం
+# Vidya Nestham — విద్యా నేస్తం
 Telugu, voice-first, offline-friendly AI Science tutor for Class 8 (Telangana State Board).
 ACE Builders Hackathon 2026 · Problem Statement 3: The Last-Mile Tutor
 
@@ -57,11 +57,11 @@ Demo: tap "Load demo data" → profile "లక్ష్మి", PIN shown on scr
 ```
 
 ## 4. LinkedIn post (draft; required for submission)
-> 🚀 Built **Chaduvu Nestham (చదువు నేస్తం)** at the **ACE Builders Hackathon 2026** by @Codebenders!
+> 🚀 Built **Vidya Nestham (విద్యా నేస్తం)** at the **ACE Builders Hackathon 2026** by @Codebenders!
 >
 > Millions of students study in Telugu-medium government schools with too few teachers and one shared family phone. Most ed-tech is built for English, personal smartphones and fast data.
 >
-> So we built a Telugu study buddy for Class 8 Science:
+> So we built a Telugu learning friend for Class 8 Science:
 > 🎤 Ask doubts by **voice in Telugu**, hear the answer read aloud
 > 🧠 **Adaptive practice** that finds *why* you got it wrong
 > 📶 Works **offline** on a shared low-end phone, syncs later
