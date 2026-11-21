@@ -2,22 +2,6 @@ import { Screen, ComingSoon } from "../components/Screen";
 
 // Placeholder screens. Each is replaced by its real implementation in a later task (A4–A11).
 
-export function DonorPost() {
-  return (
-    <Screen titleKey="donor.post.title">
-      <ComingSoon />
-    </Screen>
-  );
-}
-
-export function DonorListingDetail() {
-  return (
-    <Screen titleKey="donor.listing.title" demoData>
-      <ComingSoon />
-    </Screen>
-  );
-}
-
 export function DonorImpact() {
   return (
     <Screen titleKey="donor.impact.title" demoData>

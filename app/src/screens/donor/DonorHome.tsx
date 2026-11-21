@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import type { Listing } from "../../types/api";
+import { apiRequest } from "../../services/api";
 import { useAuth } from "../../auth/AuthContext";
 import { useT } from "../../i18n";
 import { Screen } from "../../components/Screen";
@@ -14,8 +17,14 @@ export default function DonorHome() {
   const { user, org } = useAuth();
   const name = org?.name ?? user?.display_name ?? "";
   const area = org?.area ?? "";
-  // Listings come from fixtures until the listings API lands (A4).
-  const active = LISTINGS.filter(
+  // New posts come from the API; the seeded demo listings come from fixtures until A5.
+  const [posted, setPosted] = useState<Listing[]>([]);
+  useEffect(() => {
+    apiRequest<Listing[]>("GET", "/api/listings")
+      .then(setPosted)
+      .catch(() => setPosted([]));
+  }, []);
+  const active = [...posted, ...LISTINGS].filter(
     (l) => l.donor_org === org?.id && l.status !== "delivered" && l.status !== "cancelled",
   );
 

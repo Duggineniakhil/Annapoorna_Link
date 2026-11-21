@@ -13,8 +13,8 @@ function lazyNamed<T extends Record<string, ComponentType>>(load: () => Promise<
 const placeholders = () => import("./screens/placeholders");
 
 const DonorHome = lazy(() => import("./screens/donor/DonorHome"));
-const DonorPost = lazyNamed(placeholders, "DonorPost");
-const DonorListingDetail = lazyNamed(placeholders, "DonorListingDetail");
+const DonorPost = lazy(() => import("./screens/donor/DonorPost"));
+const DonorListingDetail = lazy(() => import("./screens/donor/DonorListingDetail"));
 const DonorImpact = lazyNamed(placeholders, "DonorImpact");
 const ReceiverOffers = lazy(() => import("./screens/receiver/ReceiverOffers"));
 const ReceiverOfferDetail = lazyNamed(placeholders, "ReceiverOfferDetail");
