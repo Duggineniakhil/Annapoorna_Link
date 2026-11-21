@@ -6,7 +6,7 @@ import type {
   ReceiverNeeds,
 } from "../types/api";
 import { OFFERS, ORGS, orgArea, orgName } from "./fixtures";
-import { claimListing, listingTakenFor } from "./listings";
+import { claimListing, deliveryCodeFor, listingTakenFor } from "./listings";
 
 // Receiver-side mock server: offers, needs and history, per receiver org.
 //
@@ -109,13 +109,6 @@ function statusOf(s: StoredOffer, nowMs: number): NonNullable<Offer["status"]> {
   return Date.parse(s.offer.expires_at) <= nowMs ? "expired" : "open";
 }
 
-/** Deterministic 4-digit delivery code for a demo offer id. */
-function codeFor(id: string): string {
-  let h = 7;
-  for (const ch of id) h = (h * 37 + ch.charCodeAt(0)) % 9000;
-  return String(1000 + h);
-}
-
 /** The offer as the API serves it. The delivery code (on the listing) only once accepted. */
 function viewOf(s: StoredOffer, nowMs: number): Offer {
   const decision = decisions[s.offer.id];
@@ -177,7 +170,7 @@ export function acceptOffer(
   const s = found.stored;
   decisions[offerId] = {
     state: "accepted",
-    delivery_code: codeFor(offerId),
+    delivery_code: deliveryCodeFor(s.offer.listing.id),
     volunteer_first_name: "Ravi",
     volunteer_eta_min: Math.max(1, Math.round(s.offer.eta_min)),
   };

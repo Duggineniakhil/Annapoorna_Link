@@ -1,42 +1,77 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useT } from "../../i18n";
+import type { MessageKey } from "../../i18n/en";
 import { useAuth } from "../../auth/AuthContext";
 import type { Task } from "../../types/api";
 import { Screen } from "../../components/Screen";
 import { EmptyState } from "../../components/EmptyState";
 import { Card } from "../../components/ui/Card";
-import { ButtonLink } from "../../components/ui/Button";
+import { Button, ButtonLink } from "../../components/ui/Button";
 import { Icon } from "../../components/ui/Icon";
-import { LocationHeader } from "../../components/ui/LocationHeader";
-import { CategoryTile } from "../../components/food/FoodBits";
-import { SafetyCard } from "../../components/SafetyCard";
-import { DistancePill, MealsBadge } from "../../components/food/ListingCard";
-import { itemsTitle } from "../../components/food/format";
-import { TASKS, orgArea, orgName } from "../../mocks/fixtures";
+import { Countdown } from "../../components/food/FoodBits";
+import { formatNumber } from "../../components/food/format";
+import {
+  ApiError,
+  acceptTask,
+  getVolunteerAvailability,
+  listTasks,
+  setVolunteerAvailability,
+} from "../../services/api";
 
-function AvailabilitySwitch({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {
+const REFRESH_MS = 15_000;
+
+type AcceptFailureKind = "notOpen" | "alreadyActive" | "network" | "generic";
+type AcceptFailure = { id: string; kind: AcceptFailureKind };
+
+const FAILURE_KEY: Record<AcceptFailureKind, MessageKey> = {
+  notOpen: "volunteer.error.taskNotOpen",
+  alreadyActive: "volunteer.error.alreadyActive",
+  network: "volunteer.error.network",
+  generic: "volunteer.error.generic",
+};
+
+function failureKind(err: unknown): AcceptFailureKind {
+  if (err instanceof ApiError) {
+    if (err.error_code === "TASK_NOT_OPEN") return "notOpen";
+    if (err.error_code === "TASK_ALREADY_ACTIVE") return "alreadyActive";
+    return "generic";
+  }
+  // Offline / network failure surfaces as a plain TypeError from apiRequest.
+  if (err instanceof TypeError) return "network";
+  return "generic";
+}
+
+function AvailabilitySwitch({
+  on,
+  onChange,
+}: {
+  on: boolean | null;
+  onChange: (next: boolean) => void;
+}) {
   const { t } = useT();
+  const isOn = on === true;
   return (
     <Card className="flex items-center justify-between gap-3 p-4">
       <div className="flex flex-col">
-        <span className="font-bold text-ink">{t("volunteer.available")}</span>
+        <span className="font-bold text-ink">{t("volunteer.availability.label")}</span>
         <span className="text-sm text-ink/60">
-          {t(on ? "volunteer.availableOn" : "volunteer.availableOff")}
+          {t(isOn ? "volunteer.availableOn" : "volunteer.availableOff")}
         </span>
       </div>
       <button
         type="button"
         role="switch"
-        aria-checked={on}
-        aria-label={t("volunteer.available")}
-        onClick={() => onChange(!on)}
-        className={`relative h-9 w-16 shrink-0 rounded-full transition-colors ${
-          on ? "bg-leaf-700" : "bg-ink/20"
+        aria-checked={isOn}
+        aria-label={t("volunteer.availability.label")}
+        disabled={on === null}
+        onClick={() => onChange(!isOn)}
+        className={`relative h-9 w-16 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
+          isOn ? "bg-leaf-700" : "bg-ink/20"
         }`}
       >
         <span
           className={`absolute top-1 h-7 w-7 rounded-full bg-white shadow transition-all ${
-            on ? "left-8" : "left-1"
+            isOn ? "left-8" : "left-1"
           }`}
         />
       </button>
@@ -44,51 +79,59 @@ function AvailabilitySwitch({ on, onChange }: { on: boolean; onChange: (on: bool
   );
 }
 
-function Stop({ kind, name, area }: { kind: "from" | "to"; name: string; area: string }) {
-  const { t } = useT();
+function ActiveCard({ task }: { task: Task }) {
+  const { t, lang } = useT();
   return (
-    <li className="relative flex gap-3 pl-1">
-      <span
-        className={`mt-1 h-3 w-3 shrink-0 rounded-full ring-4 ${
-          kind === "from" ? "bg-turmeric-400 ring-turmeric-100" : "bg-leaf-700 ring-leaf-100"
-        }`}
-      />
-      <span className="flex flex-col">
-        <span className="text-xs font-bold uppercase tracking-wide text-ink/50">
-          {t(kind === "from" ? "task.from" : "task.to")}
-        </span>
-        <span className="font-bold leading-snug text-ink">{name}</span>
-        <span className="text-sm text-ink/60">{area}</span>
-      </span>
-    </li>
+    <Card className="flex flex-col gap-3 p-4">
+      <h2 className="text-lg font-bold text-ink">{t("volunteer.active.title")}</h2>
+      <p className="font-bold leading-snug text-ink">
+        {t("volunteer.task.route", { from: task.pickup.area, to: task.delivery.area })}
+      </p>
+      <div className="flex flex-wrap items-center gap-2 text-sm text-ink/70">
+        <span>{t("volunteer.task.meals", { count: formatNumber(task.meals, lang) })}</span>
+        <span aria-hidden="true">·</span>
+        <span>{t("volunteer.task.distance", { km: formatNumber(task.distance_km, lang) })}</span>
+      </div>
+      <ButtonLink to={`/volunteer/tasks/${task.id}`} size="lg" block>
+        <Icon name="bike" className="h-6 w-6" />
+        {t("volunteer.task.title")}
+      </ButtonLink>
+    </Card>
   );
 }
 
-function TaskCard({ task }: { task: Task }) {
-  const { t } = useT();
+function OpenTaskCard({
+  task,
+  disabled,
+  busy,
+  onAccept,
+}: {
+  task: Task;
+  disabled: boolean;
+  busy: boolean;
+  onAccept: (id: string) => void;
+}) {
+  const { t, lang } = useT();
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <div className="flex gap-3">
-        <CategoryTile category={task.listing.items[0]?.category ?? "rice_dish"} />
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="font-bold leading-snug text-ink">{itemsTitle(task.listing)}</h3>
-            <MealsBadge meals={task.listing.total_meals} />
-          </div>
-          <div className="flex items-center gap-2">
-            <DistancePill km={task.distance_km} />
-          </div>
-        </div>
+      <p className="font-bold leading-snug text-ink">
+        {t("volunteer.task.route", { from: task.pickup.area, to: task.delivery.area })}
+      </p>
+      <div className="flex flex-wrap items-center gap-2 text-sm text-ink/70">
+        <span className="rounded-full bg-leaf-50 px-3 py-1 font-bold text-leaf-800">
+          {t("volunteer.task.meals", { count: formatNumber(task.meals, lang) })}
+        </span>
+        <span className="rounded-full bg-leaf-50 px-3 py-1 font-bold text-leaf-800">
+          {t("volunteer.task.distance", { km: formatNumber(task.distance_km, lang) })}
+        </span>
+        <Countdown deadline={task.deadline} kind="pickup" compact />
       </div>
-      <ol className="flex flex-col gap-3 border-l-2 border-dashed border-ink/10 pl-3">
-        <Stop kind="from" name={orgName(task.donor_org)} area={orgArea(task.donor_org)} />
-        <Stop kind="to" name={orgName(task.receiver_org)} area={orgArea(task.receiver_org)} />
-      </ol>
-      <SafetyCard listing={task.listing} variant="compact" />
-      <ButtonLink to={`/volunteer/tasks/${task.id}`} size="lg" block>
-        <Icon name="bike" className="h-6 w-6" />
-        {t("volunteer.take")}
-      </ButtonLink>
+      <p className="text-sm text-ink/60">
+        {t(task.vehicle_fit ? "volunteer.task.vehicleFit" : "volunteer.task.vehicleNoFit")}
+      </p>
+      <Button size="lg" block disabled={disabled || busy} onClick={() => onAccept(task.id)}>
+        {t(busy ? "volunteer.task.accepting" : "volunteer.task.accept")}
+      </Button>
     </Card>
   );
 }
@@ -96,12 +139,71 @@ function TaskCard({ task }: { task: Task }) {
 export default function VolunteerTasks() {
   const { t } = useT();
   const { user } = useAuth();
-  const [available, setAvailable] = useState(true);
+  const [available, setAvailable] = useState<boolean | null>(null);
+  const [availError, setAvailError] = useState(false);
+  const [tasks, setTasks] = useState<Task[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [failure, setFailure] = useState<AcceptFailure | null>(null);
+
+  const refresh = useCallback(async () => {
+    try {
+      const list = await listTasks();
+      setTasks(list);
+      setLoadError(false);
+    } catch {
+      setLoadError(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    void getVolunteerAvailability()
+      .then((res) => setAvailable(res.available))
+      .catch(() => setAvailError(true));
+  }, []);
+
+  useEffect(() => {
+    void refresh();
+    const id = window.setInterval(() => void refresh(), REFRESH_MS);
+    return () => window.clearInterval(id);
+  }, [refresh]);
+
+  async function changeAvailability(next: boolean) {
+    const prev = available;
+    setAvailable(next);
+    setAvailError(false);
+    try {
+      await setVolunteerAvailability({ available: next });
+      await refresh();
+    } catch {
+      setAvailable(prev);
+      setAvailError(true);
+    }
+  }
+
+  async function accept(id: string) {
+    setBusyId(id);
+    setFailure(null);
+    try {
+      await acceptTask(id);
+      await refresh();
+    } catch (err) {
+      const kind = failureKind(err);
+      setFailure({ id, kind });
+      if (kind === "notOpen") {
+        await refresh();
+      }
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const active = tasks?.find((task) => task.status === "accepted" || task.status === "picked_up");
+  const open = tasks?.filter((task) => task.status === "open") ?? [];
+
   return (
     <Screen
       titleKey="volunteer.tasks.title"
-      // Volunteers have no org; the demo volunteer is based in Kukatpally (docs/04 §4).
-      eyebrow={<LocationHeader area="Kukatpally" radiusKm={10} />}
       aside={
         user ? (
           <span className="mt-1 rounded-full bg-leaf-50 px-3 py-1 text-sm font-bold text-leaf-800">
@@ -109,16 +211,53 @@ export default function VolunteerTasks() {
           </span>
         ) : undefined
       }
-      demoData
     >
-      <AvailabilitySwitch on={available} onChange={setAvailable} />
-      {!available || TASKS.length === 0 ? (
-        <EmptyState icon="🛵" message={t("volunteer.tasks.empty")} />
+      {active && <ActiveCard task={active} />}
+
+      <AvailabilitySwitch on={available} onChange={changeAvailability} />
+      {availError && (
+        <p role="alert" className="rounded-xl bg-chilli-50 p-3 text-sm font-bold text-chilli-700">
+          {t("volunteer.error.generic")}
+        </p>
+      )}
+
+      {failure && (
+        <div
+          role="alert"
+          className="flex flex-col gap-2 rounded-xl bg-chilli-50 p-3 text-sm font-bold text-chilli-700"
+        >
+          <p>{t(FAILURE_KEY[failure.kind])}</p>
+          {failure.kind === "network" && (
+            <Button
+              variant="secondary"
+              size="md"
+              disabled={busyId !== null}
+              onClick={() => void accept(failure.id)}
+            >
+              {t("volunteer.retry")}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {loadError && (
+        <p role="alert" className="rounded-xl bg-chilli-50 p-3 text-sm font-bold text-chilli-700">
+          {t("volunteer.error.generic")}
+        </p>
+      )}
+
+      {tasks !== null && open.length === 0 ? (
+        <EmptyState icon="🛵" message={t("volunteer.empty.available")} />
       ) : (
         <ul className="flex flex-col gap-3">
-          {TASKS.map((task) => (
+          {open.map((task) => (
             <li key={task.id}>
-              <TaskCard task={task} />
+              <OpenTaskCard
+                task={task}
+                disabled={available !== true}
+                busy={busyId === task.id}
+                onAccept={(id) => void accept(id)}
+              />
             </li>
           ))}
         </ul>

@@ -21,8 +21,8 @@ const ReceiverOfferDetail = lazy(() => import("./screens/receiver/ReceiverOfferD
 const ReceiverNeeds = lazy(() => import("./screens/receiver/ReceiverNeeds"));
 const ReceiverHistory = lazy(() => import("./screens/receiver/ReceiverHistory"));
 const VolunteerTasks = lazy(() => import("./screens/volunteer/VolunteerTasks"));
-const VolunteerTaskDetail = lazyNamed(placeholders, "VolunteerTaskDetail");
-const VolunteerHistory = lazyNamed(placeholders, "VolunteerHistory");
+const VolunteerTaskDetail = lazy(() => import("./screens/volunteer/VolunteerTaskDetail"));
+const VolunteerHistory = lazy(() => import("./screens/volunteer/VolunteerHistory"));
 const SponsorDashboard = lazy(() => import("./screens/sponsor/SponsorDashboard"));
 const SponsorMap = lazyNamed(placeholders, "SponsorMap");
 const About = lazy(() => import("./screens/common/About"));

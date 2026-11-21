@@ -2,10 +2,14 @@ import { config } from "../config";
 import { handleMockRequest } from "../mocks/handlers";
 import type {
   DeclineReason,
+  DeliverInput,
   Listing,
   Offer,
   ReceiverHistoryItem,
   ReceiverNeeds,
+  Task,
+  VolunteerAvailability,
+  VolunteerHistoryItem,
 } from "../types/api";
 
 export const TOKEN_KEY = "al.token";
@@ -17,6 +21,8 @@ const LANG_KEY = "annapoorna.lang";
 const GENERIC_EN = "Something went wrong. Please try again.";
 const GENERIC_TE = "ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.";
 const BUSY_EN = "The server is busy right now. Please try again.";
+const NETWORK_EN = "No connection. Check your internet and try again.";
+const NETWORK_TE = "కనెక్షన్ లేదు. ఇంటర్నెట్ చూసి మళ్లీ ప్రయత్నించండి.";
 const BUSY_TE = "సర్వర్ ప్రస్తుతం బిజీగా ఉంది. దయచేసి మళ్లీ ప్రయత్నించండి.";
 
 export type HttpMethod = "GET" | "POST" | "PUT";
@@ -27,6 +33,8 @@ export class ApiError extends Error {
   message_te: string;
   status: number;
   retryable: boolean;
+  /** Set on WRONG_CODE: how many code attempts are left before the code locks. */
+  tries_left?: number;
 
   constructor(
     errorCode: string,
@@ -71,6 +79,9 @@ export function mapErrorBody(body: unknown, status: number, lang: Lang): ApiErro
 
   const err = new ApiError(errorCode, messageEn, messageTe, status, retryable);
   err.message = lang === "te" ? (rawTe ?? rawEn ?? GENERIC_TE) : (rawEn ?? rawTe ?? GENERIC_EN);
+  if (typeof obj.tries_left === "number") {
+    err.tries_left = obj.tries_left;
+  }
   return err;
 }
 
@@ -78,6 +89,16 @@ export function busyError(lang: Lang): ApiError {
   const err = new ApiError("SERVER_BUSY", BUSY_EN, BUSY_TE, 503, true);
   err.message = lang === "te" ? BUSY_TE : BUSY_EN;
   return err;
+}
+
+export function networkError(lang: Lang): ApiError {
+  const err = new ApiError("NETWORK_ERROR", NETWORK_EN, NETWORK_TE, 0, true);
+  err.message = lang === "te" ? NETWORK_TE : NETWORK_EN;
+  return err;
+}
+
+function isAbortError(err: unknown): boolean {
+  return isRecord(err) && err.name === "AbortError";
 }
 
 function readToken(): string | null {
@@ -158,9 +179,13 @@ export async function apiRequest<T>(
       const text = await res.text();
       parsed = parseJson(text);
     }
-  } catch {
-    // Timeout (abort), network failure, or body read failure.
-    throw busyError(lang);
+  } catch (err) {
+    // Timeout (abort) keeps the retryable SERVER_BUSY ApiError.
+    if (isAbortError(err)) {
+      throw busyError(lang);
+    }
+    // Network failure or body read failure: a translated, retryable error (never raw text in the UI).
+    throw networkError(lang);
   } finally {
     clearTimeout(timer);
   }
@@ -208,4 +233,46 @@ export function saveReceiverNeeds(input: ReceiverNeeds): Promise<ReceiverNeeds> 
 /** GET /api/receiver/history, newest first. */
 export function getReceiverHistory(): Promise<ReceiverHistoryItem[]> {
   return apiRequest<ReceiverHistoryItem[]>("GET", "/api/receiver/history");
+}
+
+// Volunteer API. Thin typed wrappers over apiRequest.
+
+/** GET /api/volunteer/availability */
+export function getVolunteerAvailability(): Promise<VolunteerAvailability> {
+  return apiRequest<VolunteerAvailability>("GET", "/api/volunteer/availability");
+}
+
+/** PUT /api/volunteer/availability → { ok } (contract). */
+export function setVolunteerAvailability(input: { available: boolean }): Promise<{ ok: boolean }> {
+  return apiRequest<{ ok: boolean }>("PUT", "/api/volunteer/availability", input);
+}
+
+/** GET /api/tasks: open tasks plus this volunteer's own tasks. */
+export function listTasks(): Promise<Task[]> {
+  return apiRequest<Task[]>("GET", "/api/tasks");
+}
+
+/** GET /api/tasks/:id */
+export function getTask(id: string): Promise<Task> {
+  return apiRequest<Task>("GET", `/api/tasks/${encodeURIComponent(id)}`);
+}
+
+/** POST /api/tasks/:id/accept → the accepted Task. */
+export function acceptTask(id: string): Promise<Task> {
+  return apiRequest<Task>("POST", `/api/tasks/${encodeURIComponent(id)}/accept`);
+}
+
+/** POST /api/tasks/:id/pickup { code } → the Listing, now picked_up. WRONG_CODE carries tries_left. */
+export function submitPickupCode(id: string, code: string): Promise<Listing> {
+  return apiRequest<Listing>("POST", `/api/tasks/${encodeURIComponent(id)}/pickup`, { code });
+}
+
+/** POST /api/tasks/:id/deliver { code, meals_delivered } */
+export function deliverTask(id: string, input: DeliverInput): Promise<Listing> {
+  return apiRequest<Listing>("POST", `/api/tasks/${encodeURIComponent(id)}/deliver`, input);
+}
+
+/** GET /api/volunteer/history: delivered tasks, newest first. */
+export function getVolunteerHistory(): Promise<VolunteerHistoryItem[]> {
+  return apiRequest<VolunteerHistoryItem[]>("GET", "/api/volunteer/history");
 }

@@ -99,6 +99,9 @@ function seedFixture(listing: Listing): Listing {
       guidance_te: GUIDANCE[listing.storage].te,
     },
     pickup_code: listing.pickup_code ?? codeFor(listing.id),
+    // The receiver's delivery code exists once a kitchen has claimed the food.
+    delivery_code:
+      listing.delivery_code ?? (listing.receiver_org ? deliveryCodeFor(listing.id) : undefined),
     timeline: listing.timeline ?? synthesizeTimeline(listing),
     matched_receiver:
       listing.matched_receiver ??
@@ -106,6 +109,11 @@ function seedFixture(listing: Listing): Listing {
         ? { name: ORGS[listing.receiver_org].name, area: ORGS[listing.receiver_org].area }
         : undefined),
   };
+}
+
+/** The receiver's 4-digit delivery code for a listing (one source for receiver and volunteer). */
+export function deliveryCodeFor(listingId: string): string {
+  return codeFor(listingId + "-delivery");
 }
 
 /** Deterministic 4-digit code for a demo listing id. */
@@ -346,7 +354,35 @@ export function listingsForOrg(orgId: string, nowMs = Date.now()): Listing[] {
   expireOverdue(nowMs);
   return listingStore
     .filter((l) => l.donor_org === orgId)
+    .map(donorView)
     .sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0));
+}
+
+/** What a donor may see: never the receiver's delivery code. */
+function donorView(listing: Listing): Listing {
+  const view: Listing = { ...listing };
+  delete view.delivery_code;
+  return view;
+}
+
+/**
+ * Food claimed by a receiver (GET /api/listings as a receiver): what is on its way to them.
+ * Receivers see their delivery code until delivery, never the donor's pickup code.
+ */
+export function listingsForReceiver(orgId: string, nowMs = Date.now()): Listing[] {
+  expireOverdue(nowMs);
+  return listingStore
+    .filter(
+      (l) =>
+        l.receiver_org === orgId &&
+        ["claimed", "volunteer_assigned", "picked_up"].includes(l.status),
+    )
+    .map((l) => {
+      const view: Listing = { ...l, timeline: timelineOf(l) };
+      delete view.pickup_code;
+      return view;
+    })
+    .sort((a, b) => Date.parse(a.pickup_by) - Date.parse(b.pickup_by));
 }
 
 const TERMINAL_STATUSES: Status[] = ["picked_up", "delivered", "expired", "cancelled"];
@@ -363,7 +399,7 @@ function timelineOf(listing: Listing): TimelineEvent[] {
 /** Donor view of one listing (GET /api/listings/:id). pickup_code is dropped once picked up. */
 export function listingDetail(listing: Listing): Listing {
   expireOverdue(Date.now());
-  const detail: Listing = { ...listing, timeline: timelineOf(listing) };
+  const detail: Listing = { ...donorView(listing), timeline: timelineOf(listing) };
   // The pickup code is only useful before pickup; never send it afterwards.
   if (!BEFORE_PICKUP.includes(listing.status)) {
     delete detail.pickup_code;
@@ -394,6 +430,7 @@ export function claimListing(
   const receiver = ORGS[receiverOrgId];
   listing.status = "claimed";
   listing.receiver_org = receiverOrgId;
+  listing.delivery_code = deliveryCodeFor(listing.id);
   listing.matched_receiver = receiver
     ? { name: receiver.name, area: receiver.area, distance_km: distanceKm }
     : undefined;
@@ -407,6 +444,46 @@ export function claimListing(
     },
   ];
   saveStore();
+  return listing;
+}
+
+function advance(listing: Listing, status: Status, nowMs: number): void {
+  listing.status = status;
+  listing.timeline = [
+    ...timelineOf(listing),
+    { type: status, status, at: new Date(nowMs).toISOString(), actor_role: "volunteer" },
+  ];
+  saveStore();
+}
+
+/** A volunteer took the delivery task for a claimed listing. */
+export function assignVolunteer(
+  listingId: string,
+  volunteerName: string,
+  vehicle: string | undefined,
+  nowMs: number,
+): Listing | undefined {
+  const listing = listingStore.find((l) => l.id === listingId);
+  if (!listing || listing.status !== "claimed") return undefined;
+  listing.volunteer = volunteerName;
+  listing.volunteer_vehicle = vehicle;
+  advance(listing, "volunteer_assigned", nowMs);
+  return listing;
+}
+
+/** The volunteer entered the right pickup code. */
+export function markPickedUp(listingId: string, nowMs: number): Listing | undefined {
+  const listing = listingStore.find((l) => l.id === listingId);
+  if (!listing || listing.status !== "volunteer_assigned") return undefined;
+  advance(listing, "picked_up", nowMs);
+  return listing;
+}
+
+/** The volunteer entered the right delivery code. */
+export function markDelivered(listingId: string, nowMs: number): Listing | undefined {
+  const listing = listingStore.find((l) => l.id === listingId);
+  if (!listing || listing.status !== "picked_up") return undefined;
+  advance(listing, "delivered", nowMs);
   return listing;
 }
 

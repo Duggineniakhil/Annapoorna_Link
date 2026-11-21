@@ -1,7 +1,16 @@
 // Demo fixtures (fictional, area-level) used by the UI until the mock API handlers land in task A3.
 // Names and areas follow docs/04-sample-data-plan.md. Times are relative to page load so countdowns
 // look live in the demo.
-import type { Impact, Listing, Offer, Org, Role, Status, Task, TimelineEvent } from "../types/api";
+import type {
+  Impact,
+  Listing,
+  Offer,
+  Org,
+  Role,
+  Status,
+  TaskSeed,
+  TimelineEvent,
+} from "../types/api";
 
 const MIN = 60_000;
 const at = (minutesFromNow: number) => new Date(Date.now() + minutesFromNow * MIN).toISOString();
@@ -253,7 +262,7 @@ export const LISTINGS: Listing[] = [
       area: ORGS["org-annadanam"].area,
       distance_km: 5.1,
     },
-    volunteer: "Ravi K.",
+    volunteer: "Meena",
     volunteer_vehicle: "Bike",
     timeline: [
       event("posted", -20, "donor"),
@@ -359,7 +368,7 @@ export const OFFERS: Offer[] = [
   },
 ];
 
-export const TASKS: Task[] = [
+export const TASKS: TaskSeed[] = [
   {
     id: "tsk-1",
     listing: byId("lst-101"),

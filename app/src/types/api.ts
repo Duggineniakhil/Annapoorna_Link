@@ -112,6 +112,17 @@ export type ReceiverHistoryItem = {
   area: string;
 };
 
+export type TaskStatus = "open" | "accepted" | "picked_up" | "delivered";
+
+export interface TaskPlace {
+  name: string;
+  area: string;
+  lat: number;
+  lng: number;
+}
+
+// Client view of a task. The donor's pickup_code and the receiver's delivery_code are never sent.
+// status, meals, vehicle_fit, pickup, delivery and volunteer_id were added in A8 (B to confirm).
 export interface Task {
   id: string;
   listing: Listing;
@@ -119,6 +130,37 @@ export interface Task {
   receiver_org: string;
   distance_km: number;
   deadline: string;
+  status: TaskStatus;
+  meals: number;
+  /** Whether the volunteer's vehicle suits the task (mock: meals within the vehicle's capacity). */
+  vehicle_fit: boolean;
+  pickup: TaskPlace;
+  delivery: TaskPlace & { serve_by: string };
+  volunteer_id?: string;
+}
+
+/** The fields the mock seeds before status and volunteer are known. */
+export type TaskSeed = Pick<
+  Task,
+  "id" | "listing" | "donor_org" | "receiver_org" | "distance_km" | "deadline"
+>;
+
+export interface VolunteerAvailability {
+  available: boolean;
+}
+
+export interface DeliverInput {
+  code: string;
+  meals_delivered: number;
+}
+
+export interface VolunteerHistoryItem {
+  id: string;
+  items_title: string;
+  meals: number;
+  delivered_at: string;
+  donor_area: string;
+  receiver_area: string;
 }
 
 export interface TimelineEvent {

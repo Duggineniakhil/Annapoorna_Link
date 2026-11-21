@@ -7,9 +7,21 @@ import {
   listingDetail,
   listingStore,
   listingsForOrg,
+  listingsForReceiver,
 } from "./listings";
 import type { ListingInput } from "./listings";
 import type { OfferActionResult } from "./receiver";
+import {
+  acceptTask,
+  availabilityState,
+  setAvailability,
+  submitDelivery,
+  submitPickup,
+  visibleTask,
+  visibleTasks,
+  volunteerHistory,
+} from "./volunteer";
+import type { VolunteerFailure } from "./volunteer";
 import {
   acceptOffer,
   declineOffer,
@@ -160,6 +172,87 @@ const INVALID_NEEDS_INPUT = {
   message_te: "భోజనాల సంఖ్య, సమయాలను (HH:MM) తనిఖీ చేయండి.",
 };
 
+const FORBIDDEN_VOLUNTEER = {
+  error_code: "FORBIDDEN_VOLUNTEER",
+  message: "Only volunteers can see these pages.",
+  message_te: "ఈ పేజీలను వాలంటీర్లు మాత్రమే చూడగలరు.",
+};
+
+const INVALID_AVAILABILITY_INPUT = {
+  error_code: "INVALID_AVAILABILITY_INPUT",
+  message: "Availability must be on or off.",
+  message_te: "అందుబాటు ఆన్ లేదా ఆఫ్ అయి ఉండాలి.",
+};
+
+const TASK_NOT_FOUND = {
+  error_code: "TASK_NOT_FOUND",
+  message: "Task not found.",
+  message_te: "పని కనుగొనబడలేదు.",
+};
+
+const VOLUNTEER_UNAVAILABLE = {
+  error_code: "VOLUNTEER_UNAVAILABLE",
+  message: "Turn on availability to accept tasks.",
+  message_te: "పనులు తీసుకోవడానికి అందుబాటును ఆన్ చేయండి.",
+};
+
+const TASK_ALREADY_ACTIVE = {
+  error_code: "TASK_ALREADY_ACTIVE",
+  message: "Finish your active task before accepting another.",
+  message_te: "మరో పని తీసుకునే ముందు మీ ప్రస్తుత పనిని పూర్తి చేయండి.",
+};
+
+const TASK_NOT_OPEN = {
+  error_code: "TASK_NOT_OPEN",
+  message: "This task was already taken by another volunteer.",
+  message_te: "ఈ పనిని వేరొక వాలంటీర్ ఇప్పటికే తీసుకున్నారు.",
+};
+
+const TASK_NOT_ACCEPTED = {
+  error_code: "TASK_NOT_ACCEPTED",
+  message: "Accept this task before the pickup.",
+  message_te: "పికప్ ముందు ఈ పనిని అంగీకరించండి.",
+};
+
+const TASK_NOT_PICKED_UP = {
+  error_code: "TASK_NOT_PICKED_UP",
+  message: "Confirm the pickup before the delivery.",
+  message_te: "అందించే ముందు పికప్‌ను నిర్ధారించండి.",
+};
+
+const INVALID_CODE_INPUT = {
+  error_code: "VALIDATION_FAILED",
+  message: "Enter the 4-digit code.",
+  message_te: "4 అంకెల కోడ్‌ను నమోదు చేయండి.",
+};
+
+const INVALID_DELIVERY_INPUT = {
+  error_code: "INVALID_DELIVERY_INPUT",
+  message: "Check the number of meals delivered.",
+  message_te: "అందించిన భోజనాల సంఖ్యను తనిఖీ చేయండి.",
+};
+
+const PICKUP_CODE_LOCKED = {
+  error_code: "CODE_LOCKED",
+  message: "Ask the donor to check the code.",
+  message_te: "కోడ్‌ను తనిఖీ చేయమని దాతను అడగండి.",
+};
+
+const DELIVERY_CODE_LOCKED = {
+  error_code: "CODE_LOCKED",
+  message: "Ask the receiver to check the code.",
+  message_te: "కోడ్‌ను తనిఖీ చేయమని స్వీకర్తను అడగండి.",
+};
+
+function wrongCodeBody(triesLeft: number) {
+  return {
+    error_code: "WRONG_CODE",
+    message: `That code is not right. ${triesLeft} tries left.`,
+    message_te: `ఆ కోడ్ సరైనది కాదు. ${triesLeft} ప్రయత్నాలు మిగిలి ఉన్నాయి.`,
+    tries_left: triesLeft,
+  };
+}
+
 function offerActionResponse<T>(result: OfferActionResult<T>): MockResponse {
   if (result.ok) {
     return { status: 200, body: result.value };
@@ -213,6 +306,126 @@ function isListingBody(body: unknown): body is ListingInput {
 
 function orgIdOf(session: MockSession): string {
   return session.org?.id ?? session.user.org_id ?? "";
+}
+
+function isAvailabilityBody(body: unknown): body is { available: boolean } {
+  return (
+    typeof body === "object" &&
+    body !== null &&
+    typeof (body as Record<string, unknown>).available === "boolean"
+  );
+}
+
+/** Maps a volunteer-side failure to its HTTP response. `locked` decides which code-lock message applies. */
+function volunteerFailure(
+  failure: VolunteerFailure,
+  locked: typeof PICKUP_CODE_LOCKED,
+): MockResponse {
+  switch (failure.reason) {
+    case "not_found":
+      return { status: 404, body: { ...TASK_NOT_FOUND } };
+    case "unavailable":
+      return { status: 409, body: { ...VOLUNTEER_UNAVAILABLE } };
+    case "already_active":
+      return { status: 409, body: { ...TASK_ALREADY_ACTIVE } };
+    case "not_open":
+      return { status: 409, body: { ...TASK_NOT_OPEN } };
+    case "not_accepted":
+      return { status: 409, body: { ...TASK_NOT_ACCEPTED } };
+    case "not_picked_up":
+      return { status: 409, body: { ...TASK_NOT_PICKED_UP } };
+    case "invalid_code":
+      return { status: 400, body: { ...INVALID_CODE_INPUT } };
+    case "invalid_meals":
+      return { status: 400, body: { ...INVALID_DELIVERY_INPUT } };
+    case "locked":
+      return { status: 423, body: { ...locked } };
+    case "wrong_code":
+      return { status: 422, body: wrongCodeBody(failure.tries_left ?? 0) };
+  }
+}
+
+/** Volunteer routes (availability, tasks, history). Undefined when the path is not a volunteer route. */
+function handleVolunteerRequest(
+  method: "GET" | "POST" | "PUT",
+  pathname: string,
+  body: unknown,
+  token: string | null,
+): MockResponse | undefined {
+  const availabilityPath = pathname === "/api/volunteer/availability";
+  const historyPath = pathname === "/api/volunteer/history";
+  const tasksPath = pathname === "/api/tasks";
+  const taskMatch = /^\/api\/tasks\/([^/]+)$/.exec(pathname);
+  const actionMatch = /^\/api\/tasks\/([^/]+)\/(accept|pickup|deliver)$/.exec(pathname);
+
+  const isVolunteerRoute =
+    (availabilityPath && (method === "GET" || method === "PUT")) ||
+    (historyPath && method === "GET") ||
+    (tasksPath && method === "GET") ||
+    (taskMatch !== null && method === "GET") ||
+    (actionMatch !== null && method === "POST");
+  if (!isVolunteerRoute) {
+    return undefined;
+  }
+
+  const session = sessionFor(token);
+  if (!session) {
+    return { status: 401, body: { ...UNAUTHORIZED } };
+  }
+  if (session.user.role !== "volunteer") {
+    return { status: 403, body: { ...FORBIDDEN_VOLUNTEER } };
+  }
+  const volunteerId = session.user.id;
+
+  if (availabilityPath) {
+    if (method === "GET") {
+      return { status: 200, body: availabilityState() };
+    }
+    if (!isAvailabilityBody(body)) {
+      return { status: 400, body: { ...INVALID_AVAILABILITY_INPUT } };
+    }
+    return { status: 200, body: setAvailability(body.available) };
+  }
+
+  if (historyPath) {
+    return { status: 200, body: volunteerHistory(volunteerId) };
+  }
+
+  if (tasksPath) {
+    return { status: 200, body: visibleTasks(volunteerId) };
+  }
+
+  if (taskMatch) {
+    const task = visibleTask(volunteerId, taskMatch[1]);
+    return task ? { status: 200, body: task } : { status: 404, body: { ...TASK_NOT_FOUND } };
+  }
+
+  if (!actionMatch) {
+    return undefined;
+  }
+  const taskId = actionMatch[1];
+  const fields: Record<string, unknown> =
+    typeof body === "object" && body !== null ? (body as Record<string, unknown>) : {};
+
+  if (actionMatch[2] === "accept") {
+    const result = acceptTask(volunteerId, taskId);
+    return result.ok
+      ? { status: 200, body: result.value }
+      : volunteerFailure(result, PICKUP_CODE_LOCKED);
+  }
+  if (actionMatch[2] === "pickup") {
+    const result = submitPickup(volunteerId, taskId, fields.code);
+    return result.ok
+      ? { status: 200, body: result.value }
+      : volunteerFailure(result, PICKUP_CODE_LOCKED);
+  }
+  const result = submitDelivery(volunteerId, taskId, {
+    code: fields.code,
+    meals_delivered: fields.meals_delivered,
+  });
+  return result.ok
+    ? { status: 200, body: result.value }
+    : volunteerFailure(result, DELIVERY_CODE_LOCKED);
 }
 
 export async function handleMockRequest(
@@ -285,6 +498,10 @@ export async function handleMockRequest(
     const session = sessionFor(token);
     if (!session) {
       return { status: 401, body: { ...UNAUTHORIZED } };
+    }
+    // Receivers get the food claimed for them (with their delivery code); added in A8.
+    if (session.user.role === "receiver") {
+      return { status: 200, body: listingsForReceiver(orgIdOf(session)) };
     }
     if (session.user.role !== "donor") {
       return { status: 403, body: { ...FORBIDDEN_LISTINGS } };
@@ -434,6 +651,11 @@ export async function handleMockRequest(
       return { status: 403, body: { ...FORBIDDEN_RECEIVER } };
     }
     return { status: 200, body: receiverHistory(orgIdOf(session)) };
+  }
+
+  const volunteerResponse = handleVolunteerRequest(method, pathname, body, token);
+  if (volunteerResponse) {
+    return volunteerResponse;
   }
 
   return { status: 404, body: { ...NOT_FOUND_ROUTE } };

@@ -14,6 +14,7 @@ import { Button } from "../../components/ui/Button";
 import { ListingCard } from "../../components/food/ListingCard";
 import { Countdown } from "../../components/food/FoodBits";
 import { orgArea, orgName } from "../../mocks/fixtures";
+import { IncomingFood } from "./IncomingFood";
 
 const REFRESH_MS = 15_000;
 const CLOSED_CODES: string[] = ["OFFER_EXPIRED", "OFFER_NOT_OPEN"];
@@ -128,6 +129,7 @@ export default function ReceiverOffers() {
       eyebrow={org ? <LocationHeader area={org.area} radiusKm={8} /> : undefined}
       demoData
     >
+      <IncomingFood />
       <FilterChips
         options={FILTERS}
         value={filter}

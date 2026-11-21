@@ -45,7 +45,10 @@ Listing     { id, donor_org, items: ListingItem[], total_meals, veg, allergens: 
 Offer       { id, listing: Listing, rank, score, reasons: [{ en, te }], expires_at, distance_km, eta_min,
               status?: "open"|"accepted"|"declined"|"expired",                 // added in A7 (B to confirm)
               volunteer_first_name?, volunteer_eta_min? }                       // added in A7 (B to confirm)
-Task        { id, listing: Listing, donor_org, receiver_org, distance_km, deadline }
+Task        { id, listing: Listing, donor_org, receiver_org, distance_km, deadline,
+              status: "open"|"accepted"|"picked_up"|"delivered", meals, vehicle_fit,   // added in A8 (B to confirm)
+              pickup: { name, area, lat, lng }, delivery: { name, area, lat, lng, serve_by },  // added in A8 (B to confirm)
+              volunteer_id? }                                                  // added in A8 (B to confirm)
 TimelineEvent { type, status, at, actor_role, note? }
 Impact      { meals, kg, co2e_kg, on_time_rate, median_claim_min, rescue_rate, assumptions: [{ key, label_en, label_te, value, source? }] }
 ```
@@ -71,6 +74,12 @@ Impact      { meals, kg, co2e_kg, on_time_rate, median_claim_min, rescue_rate, a
 | `POST /api/tasks/:id/pickup` | volunteer: `{ code }` | `Listing` |
 | `POST /api/tasks/:id/deliver` | volunteer: `{ code, meals_delivered }` | `Listing` |
 | `PUT /api/volunteer/availability` | `{ available }` | `{ ok }` |
+| `GET /api/tasks/:id` (added in A8, B to confirm) | volunteer: open task or own task; never sends codes | `Task` |
+| `GET /api/volunteer/availability` (added in A8, B to confirm) | volunteer | `{ available }` |
+| `GET /api/volunteer/history` (added in A8, B to confirm) | volunteer: own delivered tasks | `[{ id, items_title, meals, delivered_at, donor_area, receiver_area }]` |
+| `GET /api/listings` for receivers (added in A8, B to confirm) | receiver: own claimed / volunteer_assigned / picked_up listings, with `delivery_code`, no `pickup_code` | `Listing[]` |
+
+Task errors (added in A8, B to confirm): accepting while unavailable or with a task already active is 409 (`VOLUNTEER_UNAVAILABLE`, `TASK_ALREADY_ACTIVE`). A wrong pickup or delivery code is 422 `WRONG_CODE` with `tries_left`; after 5 wrong tries the code is locked, 423 `CODE_LOCKED`. The pickup code is the donor's `listing.pickup_code`; the delivery code is the receiver's `listing.delivery_code`.
 | `GET /api/impact` | `?scope=me|city&from=&to=` | `Impact` (+ `by_area`, `by_donor_type` for city) |
 | `GET /api/map` | sponsor/city: area-level points | `{ donors: Org[], receivers: Org[], recent: [...] }` |
 | `POST /api/voice-post` (P1) | donor: multipart `audio` | `{ draft: { items, veg, allergens, storage, cooked_at }, transcript }` |
