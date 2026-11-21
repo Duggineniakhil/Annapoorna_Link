@@ -2,6 +2,7 @@ import type { Category, Org, Storage, User } from "../types/api";
 import { DEMO_ACCOUNTS } from "./demoData";
 import { emitListingEvent } from "./events";
 import { mapData } from "./map";
+import { impactReport } from "./impact";
 import {
   cancelListing,
   createListing,
@@ -594,6 +595,45 @@ async function route(
       return { status: 409, body: { ...LISTING_INVALID_STATE } };
     }
     return { status: 200, body: listingDetail(result.listing) };
+  }
+
+  if (method === "GET" && pathname === "/api/impact") {
+    const session = sessionFor(token);
+    if (!session) {
+      return { status: 401, body: { ...UNAUTHORIZED } };
+    }
+    const params = new URLSearchParams(path.includes("?") ? path.slice(path.indexOf("?") + 1) : "");
+    const scope = params.get("scope") === "city" ? "city" : "me";
+    // Donors see their own impact; sponsors see the city.
+    const allowed =
+      scope === "me" ? session.user.role === "donor" : session.user.role === "sponsor";
+    if (!allowed) {
+      return {
+        status: 403,
+        body: {
+          error_code: "FORBIDDEN",
+          message: "You cannot see this impact view.",
+          message_te: "మీరు ఈ ప్రభావ వివరాలను చూడలేరు.",
+        },
+      };
+    }
+    const now = Date.now();
+    const monthStart = new Date(now);
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const from = params.get("from") ? Date.parse(params.get("from")!) : monthStart.getTime();
+    const to = params.get("to") ? Date.parse(params.get("to")!) : now;
+    if (Number.isNaN(from) || Number.isNaN(to) || from >= to) {
+      return {
+        status: 400,
+        body: {
+          error_code: "INVALID_RANGE",
+          message: "Check the dates.",
+          message_te: "తేదీలను తనిఖీ చేయండి.",
+        },
+      };
+    }
+    return { status: 200, body: impactReport(scope, orgIdOf(session), from, to, now) };
   }
 
   if (method === "GET" && pathname === "/api/map") {

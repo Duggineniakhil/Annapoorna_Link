@@ -1,16 +1,7 @@
 // Demo fixtures (fictional, area-level) used by the UI until the mock API handlers land in task A3.
 // Names and areas follow docs/04-sample-data-plan.md. Times are relative to page load so countdowns
 // look live in the demo.
-import type {
-  Impact,
-  Listing,
-  Offer,
-  Org,
-  Role,
-  Status,
-  TaskSeed,
-  TimelineEvent,
-} from "../types/api";
+import type { Listing, OfferSeed, Org, Role, Status, TaskSeed, TimelineEvent } from "../types/api";
 import { distanceKm, roundKm } from "../components/map/geo";
 
 const MIN = 60_000;
@@ -340,7 +331,7 @@ export const LISTINGS: Listing[] = [
 
 const byId = (id: string) => LISTINGS.find((l) => l.id === id)!;
 
-export const OFFERS: Offer[] = [
+export const OFFERS: OfferSeed[] = [
   {
     id: "off-1",
     listing: byId("lst-102"),
@@ -396,25 +387,6 @@ export const TASKS: TaskSeed[] = [
     deadline: at(70),
   },
 ];
-
-/** CO₂e factor is a placeholder until a published source is chosen (docs/11 §1). */
-export const DONOR_IMPACT_MONTH: Pick<Impact, "meals" | "kg" | "co2e_kg"> = {
-  meals: 1240,
-  kg: 496,
-  co2e_kg: 1240,
-};
-
-export const CITY_IMPACT_MONTH: Pick<
-  Impact,
-  "meals" | "kg" | "co2e_kg" | "on_time_rate" | "median_claim_min" | "rescue_rate"
-> = {
-  meals: 12480,
-  kg: 4992,
-  co2e_kg: 12480,
-  on_time_rate: 0.94,
-  median_claim_min: 6,
-  rescue_rate: 0.87,
-};
 
 export const orgName = (id?: string) => (id ? (ORGS[id]?.name ?? id) : "");
 export const orgArea = (id?: string) => (id ? (ORGS[id]?.area ?? "") : "");

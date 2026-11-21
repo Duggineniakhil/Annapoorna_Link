@@ -20,7 +20,9 @@ export function AppShell() {
   return (
     <div className="min-h-screen">
       <TopBar />
-      <main className={`mx-auto max-w-xl px-4 py-4 ${role ? "pb-28" : ""}`}>
+      <main
+        className={`mx-auto max-w-xl px-4 py-4 print:max-w-none print:p-0 ${role ? "pb-28" : ""}`}
+      >
         <Suspense fallback={<Loading />}>
           <Outlet />
         </Suspense>

@@ -3,6 +3,7 @@ import { handleMockRequest } from "../mocks/handlers";
 import type {
   DeclineReason,
   DeliverInput,
+  ImpactReport,
   Listing,
   Offer,
   ReceiverHistoryItem,
@@ -260,6 +261,16 @@ export function listTasks(): Promise<Task[]> {
 }
 
 /** GET /api/tasks/:id */
+/** GET /api/impact?scope=me|city&from=&to= (dates as ISO strings). */
+export function getImpact(scope: "me" | "city", from: Date, to: Date): Promise<ImpactReport> {
+  const query = new URLSearchParams({
+    scope,
+    from: from.toISOString(),
+    to: to.toISOString(),
+  });
+  return apiRequest<ImpactReport>("GET", `/api/impact?${query.toString()}`);
+}
+
 export function getTask(id: string): Promise<Task> {
   return apiRequest<Task>("GET", `/api/tasks/${encodeURIComponent(id)}`);
 }

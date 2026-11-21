@@ -29,3 +29,6 @@ export function formatNumber(n: number, lang: Lang): string {
 export function itemsTitle(listing: Listing): string {
   return listing.items.map((item) => item.name).join(", ");
 }
+
+/** 0.94 → "94%". */
+export const pct = (rate: number) => `${Math.round(rate * 100)}%`;

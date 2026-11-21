@@ -43,3 +43,17 @@ body {
 .al-map-pin-receiver {
   border: 3px solid #166534;
 }
+
+/* Printable impact report (A11): one A4 page, white background, colours kept. */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  html,
+  body {
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

@@ -208,6 +208,7 @@ export const listingStore: Listing[] = seedStore();
  * The receiver and volunteer modules then re-apply their saved claims and progress.
  */
 export function reloadListings(): void {
+  deliveredMeals.clear();
   listingStore.splice(0, listingStore.length, ...seedStore());
 }
 
@@ -500,12 +501,26 @@ export function markPickedUp(listingId: string, nowMs: number): Listing | undefi
   return listing;
 }
 
-/** The volunteer entered the right delivery code. */
-export function markDelivered(listingId: string, nowMs: number): Listing | undefined {
+/** Meals the volunteer confirmed at delivery, by listing id (re-applied with task progress). */
+const deliveredMeals = new Map<string, number>();
+
+/** The volunteer entered the right delivery code (and how many meals were handed over). */
+export function markDelivered(
+  listingId: string,
+  nowMs: number,
+  mealsDelivered?: number,
+): Listing | undefined {
   const listing = listingStore.find((l) => l.id === listingId);
   if (!listing || listing.status !== "picked_up") return undefined;
+  if (mealsDelivered !== undefined) deliveredMeals.set(listingId, mealsDelivered);
   advance(listing, "delivered", nowMs);
   return listing;
+}
+
+/** Meals delivered for a delivered listing: the volunteer's count, else the posted meals. */
+export function mealsDeliveredFor(listing: Listing): number | null {
+  if (listing.status !== "delivered") return null;
+  return deliveredMeals.get(listing.id) ?? listing.total_meals;
 }
 
 export function cancelListing(

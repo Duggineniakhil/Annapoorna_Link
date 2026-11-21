@@ -13,7 +13,9 @@ import { FilterChips, type ChipOption } from "../../components/ui/FilterChips";
 import { Icon } from "../../components/ui/Icon";
 import { ListingCard } from "../../components/food/ListingCard";
 import { formatNumber } from "../../components/food/format";
-import { DONOR_IMPACT_MONTH, orgName } from "../../mocks/fixtures";
+import { orgName } from "../../mocks/fixtures";
+import { periodRange } from "../../components/impact/period";
+import { useImpact } from "../../components/impact/useImpact";
 
 const ACTIVE_STATUSES: Status[] = [
   "posted",
@@ -53,6 +55,8 @@ export default function DonorHome() {
     void load();
   }, [load]);
   useLiveRefetch(() => void load());
+  // Same numbers as the impact page (GET /api/impact, this month).
+  const { data: month } = useImpact("me", periodRange("month").from.getTime());
   const mine = posted.filter((l) => l.donor_org === org?.id);
   const active = mine.filter((l) => ACTIVE_STATUSES.includes(l.status));
   const past = mine.filter((l) => PAST_STATUSES.includes(l.status));
@@ -136,19 +140,17 @@ export default function DonorHome() {
       )}
 
       <SectionHeader titleKey="donor.home.thisMonth" allTo="/donor/impact" />
-      <div className="grid grid-cols-3 gap-2">
-        <StatTile value={formatNumber(DONOR_IMPACT_MONTH.meals, lang)} label={t("impact.meals")} />
-        <StatTile
-          value={formatNumber(DONOR_IMPACT_MONTH.kg, lang)}
-          label={t("impact.kg")}
-          tone="turmeric"
-        />
-        <StatTile
-          value={formatNumber(DONOR_IMPACT_MONTH.co2e_kg, lang)}
-          label={t("impact.co2")}
-          tone="white"
-        />
-      </div>
+      {month && (
+        <div className="grid grid-cols-3 gap-2">
+          <StatTile value={formatNumber(month.meals, lang)} label={t("impact.meals")} />
+          <StatTile value={formatNumber(month.kg, lang)} label={t("impact.kg")} tone="turmeric" />
+          <StatTile
+            value={formatNumber(month.co2e_kg, lang)}
+            label={t("impact.co2")}
+            tone="white"
+          />
+        </div>
+      )}
     </Screen>
   );
 }

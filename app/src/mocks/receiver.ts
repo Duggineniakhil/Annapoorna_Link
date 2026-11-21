@@ -1,12 +1,20 @@
 import type {
+  Category,
   DeclineReason,
   Listing,
   Offer,
+  OfferSeed,
   ReceiverHistoryItem,
   ReceiverNeeds,
 } from "../types/api";
-import { OFFERS, ORGS, etaMinFor, orgArea, orgDistanceKm, orgName } from "./fixtures";
-import { claimListing, deliveryCodeFor, listingTakenFor } from "./listings";
+import { OFFERS, ORGS, etaMinFor, orgDistanceKm } from "./fixtures";
+import {
+  claimListing,
+  deliveryCodeFor,
+  listingStore,
+  listingTakenFor,
+  mealsDeliveredFor,
+} from "./listings";
 
 // Receiver-side mock server: offers, needs and history, per receiver org.
 //
@@ -35,15 +43,27 @@ export function isDeclineReason(value: unknown): value is DeclineReason {
 
 type Decision = {
   state: "accepted" | "declined";
+  /** When the kitchen decided (older saved decisions may not have it). */
+  decided_at?: string;
   delivery_code?: string;
-  volunteer_first_name?: string;
-  volunteer_eta_min?: number;
   decline_reason?: DeclineReason;
 };
 
 interface StoredOffer {
-  offer: Offer;
+  offer: OfferSeed;
   receiver_org_id: string;
+}
+
+/** The volunteer shown on an offer: first name and minutes to reach the donor. */
+export type OfferVolunteer = { first_name: string; eta_min: number };
+
+// The volunteer mock registers this (it imports this module, so it cannot be imported here).
+let findVolunteer: (listing: Listing, nowMs: number) => OfferVolunteer | null = () => null;
+
+export function setVolunteerFinder(
+  finder: (listing: Listing, nowMs: number) => OfferVolunteer | null,
+): void {
+  findVolunteer = finder;
 }
 
 function readJson<T>(key: string, fallback: T): T {
@@ -118,16 +138,41 @@ function statusOf(s: StoredOffer, nowMs: number): NonNullable<Offer["status"]> {
   return Date.parse(s.offer.expires_at) <= nowMs ? "expired" : "open";
 }
 
-/** The offer as the API serves it. The delivery code (on the listing) only once accepted. */
-function viewOf(s: StoredOffer, nowMs: number): Offer {
-  const decision = decisions[s.offer.id];
-  const view: Offer = { ...s.offer, status: statusOf(s, nowMs) };
-  if (decision?.state === "accepted") {
-    view.listing = { ...s.offer.listing, delivery_code: decision.delivery_code };
-    view.volunteer_first_name = decision.volunteer_first_name;
-    view.volunteer_eta_min = decision.volunteer_eta_min;
+/** The live listing behind an offer (the demo store), else the offer's copy. */
+function currentListing(s: StoredOffer): Listing {
+  return listingStore.find((l) => l.id === s.offer.listing.id) ?? s.offer.listing;
+}
+
+/**
+ * The listing as a kitchen may see it: never the donor's pickup code; the delivery code, the
+ * matched kitchen and the volunteer only when this kitchen is the one that claimed it.
+ */
+function receiverView(listing: Listing, orgId: string): Listing {
+  const view: Listing = { ...listing };
+  delete view.pickup_code;
+  if (listing.receiver_org !== orgId) {
+    delete view.delivery_code;
+    delete view.matched_receiver;
+    delete view.volunteer;
+    delete view.volunteer_vehicle;
+    if (listing.receiver_org) delete view.receiver_org;
   }
   return view;
+}
+
+/** The offer as the API serves it (doc 12: status and volunteer fields always present). */
+function viewOf(s: StoredOffer, nowMs: number): Offer {
+  const status = statusOf(s, nowMs);
+  const live = currentListing(s);
+  // Only an open offer or this kitchen's accepted food has a volunteer to show.
+  const volunteer = status === "open" || status === "accepted" ? findVolunteer(live, nowMs) : null;
+  return {
+    ...s.offer,
+    listing: receiverView(live, s.receiver_org_id),
+    status,
+    volunteer_first_name: volunteer?.first_name ?? null,
+    volunteer_eta_min: volunteer?.eta_min ?? null,
+  };
 }
 
 /** Receiver orgs that were offered this listing (they hear when it is taken or cancelled). */
@@ -171,8 +216,8 @@ function findOpen(
 }
 
 /**
- * POST /api/offers/:id/accept → Listing (contract). Claims the donor's listing, gives the
- * receiver a delivery code and assigns the demo volunteer.
+ * POST /api/offers/:id/accept → Listing (doc 12): the claimed listing with this kitchen's
+ * delivery_code and no pickup_code. A volunteer is assigned when one accepts the task.
  */
 export function acceptOffer(
   orgId: string,
@@ -184,15 +229,17 @@ export function acceptOffer(
   const s = found.stored;
   decisions[offerId] = {
     state: "accepted",
+    decided_at: new Date(nowMs).toISOString(),
     delivery_code: deliveryCodeFor(s.offer.listing.id),
-    volunteer_first_name: "Ravi",
-    volunteer_eta_min: Math.max(1, Math.round(s.offer.eta_min)),
   };
   writeJson(DECISIONS_KEY, decisions);
   const claimed =
     claimListing(s.offer.listing.id, orgId, s.offer.distance_km, nowMs) ??
     ({ ...s.offer.listing, status: "claimed", receiver_org: orgId } satisfies Listing);
-  return { ok: true, value: { ...claimed, delivery_code: decisions[offerId].delivery_code } };
+  return {
+    ok: true,
+    value: receiverView({ ...claimed, delivery_code: decisions[offerId].delivery_code }, orgId),
+  };
 }
 
 /** POST /api/offers/:id/decline → { ok } (contract). The reason is optional. */
@@ -204,7 +251,11 @@ export function declineOffer(
 ): OfferActionResult<{ ok: true }> {
   const found = findOpen(orgId, offerId, nowMs);
   if (!found.ok) return found;
-  decisions[offerId] = { state: "declined", decline_reason: reason };
+  decisions[offerId] = {
+    state: "declined",
+    decided_at: new Date(nowMs).toISOString(),
+    decline_reason: reason,
+  };
   writeJson(DECISIONS_KEY, decisions);
   return { ok: true, value: { ok: true } };
 }
@@ -271,12 +322,17 @@ export function saveReceiverNeeds(orgId: string, input: ReceiverNeeds): Receiver
   return { ...needsStore[orgId] };
 }
 
-// History (GET /api/receiver/history), per receiver org.
+// History (GET /api/receiver/history), per receiver org (doc 12).
+// Offers this kitchen decided or saw expire, plus food received before this demo session.
+
+const HISTORY_LIMIT = 50;
 
 const HISTORY_SEED: {
   id: string;
   receiver_org: string;
-  items_title: string;
+  item: string;
+  category: Category;
+  veg: boolean;
   meals: number;
   hours_ago: number;
   donor_org: string;
@@ -284,7 +340,9 @@ const HISTORY_SEED: {
   {
     id: "rcv-1",
     receiver_org: "org-annadanam",
-    items_title: "Veg pulao, Raita",
+    item: "Veg pulao",
+    category: "rice_dish",
+    veg: true,
     meals: 60,
     hours_ago: 2,
     donor_org: "org-sri-sai",
@@ -292,7 +350,9 @@ const HISTORY_SEED: {
   {
     id: "rcv-2",
     receiver_org: "org-annadanam",
-    items_title: "Chicken biryani",
+    item: "Chicken biryani",
+    category: "rice_dish",
+    veg: false,
     meals: 40,
     hours_ago: 26,
     donor_org: "org-spiceroute",
@@ -300,7 +360,9 @@ const HISTORY_SEED: {
   {
     id: "rcv-3",
     receiver_org: "org-annadanam",
-    items_title: "Chapati, Dal",
+    item: "Chapati, Dal",
+    category: "bread",
+    veg: true,
     meals: 45,
     hours_ago: 50,
     donor_org: "org-sri-sai",
@@ -308,7 +370,9 @@ const HISTORY_SEED: {
   {
     id: "rcv-4",
     receiver_org: "org-asha",
-    items_title: "Curd rice",
+    item: "Curd rice",
+    category: "dairy_based",
+    veg: true,
     meals: 30,
     hours_ago: 3,
     donor_org: "org-green-valley",
@@ -316,7 +380,9 @@ const HISTORY_SEED: {
   {
     id: "rcv-5",
     receiver_org: "org-asha",
-    items_title: "Sambar rice, Vada",
+    item: "Sambar rice, Vada",
+    category: "rice_dish",
+    veg: true,
     meals: 50,
     hours_ago: 27,
     donor_org: "org-green-valley",
@@ -324,23 +390,92 @@ const HISTORY_SEED: {
   {
     id: "rcv-6",
     receiver_org: "org-asha",
-    items_title: "Gulab jamun",
+    item: "Gulab jamun",
+    category: "sweet",
+    veg: true,
     meals: 20,
     hours_ago: 74,
     donor_org: "org-sri-sai",
   },
 ];
 
-/** Newest first. */
+/** A delivered listing for a history row from before this session. */
+function pastListing(row: (typeof HISTORY_SEED)[number], deliveredMs: number): Listing {
+  const iso = (minutesBefore: number) =>
+    new Date(deliveredMs - minutesBefore * MINUTE_MS).toISOString();
+  const receiver = ORGS[row.receiver_org];
+  return {
+    id: `lst-${row.id}`,
+    donor_org: row.donor_org,
+    items: [{ name: row.item, category: row.category, qty_meals: row.meals }],
+    total_meals: row.meals,
+    veg: row.veg,
+    allergens: [],
+    storage: "hot",
+    cooked_at: iso(180),
+    pickup_by: iso(30),
+    status: "delivered",
+    created_at: iso(120),
+    posted_in_ms: 45_000,
+    receiver_org: row.receiver_org,
+    matched_receiver: receiver ? { name: receiver.name, area: receiver.area } : undefined,
+    timeline: [
+      { type: "posted", status: "posted", at: iso(120), actor_role: "donor" },
+      { type: "claimed", status: "claimed", at: iso(112), actor_role: "receiver" },
+      { type: "picked_up", status: "picked_up", at: iso(60), actor_role: "volunteer" },
+      { type: "delivered", status: "delivered", at: iso(0), actor_role: "volunteer" },
+    ],
+    safety: {
+      max_pickup_by: iso(30),
+      serve_by: iso(-120),
+      guidance_en: "Keep covered and hot. Deliver and serve quickly.",
+      guidance_te: "మూతపెట్టి వేడిగా ఉంచండి. త్వరగా చేరవేసి వడ్డించండి.",
+    },
+  };
+}
+
+function lastEventAt(listing: Listing, status: string): string | undefined {
+  return listing.timeline?.filter((e) => e.status === status).pop()?.at;
+}
+
+/** Newest first, at most 50. */
 export function receiverHistory(orgId: string, nowMs = Date.now()): ReceiverHistoryItem[] {
-  return HISTORY_SEED.filter((row) => row.receiver_org === orgId)
-    .map((row) => ({
-      id: row.id,
-      items_title: row.items_title,
-      meals: row.meals,
-      received_at: new Date(nowMs - row.hours_ago * 60 * MINUTE_MS).toISOString(),
-      donor_name: orgName(row.donor_org),
-      area: orgArea(row.donor_org),
-    }))
-    .sort((a, b) => Date.parse(b.received_at) - Date.parse(a.received_at));
+  const fromOffers: ReceiverHistoryItem[] = offerStore
+    .filter((s) => s.receiver_org_id === orgId)
+    .flatMap((s) => {
+      const status = statusOf(s, nowMs);
+      if (status === "open") return [];
+      const live = currentListing(s);
+      const decision = decisions[s.offer.id];
+      const at =
+        (status === "accepted" && lastEventAt(live, live.status)) ||
+        decision?.decided_at ||
+        (status === "expired"
+          ? new Date(Math.min(nowMs, Date.parse(s.offer.expires_at))).toISOString()
+          : new Date(nowMs).toISOString());
+      return [
+        {
+          offer_id: s.offer.id,
+          offer_status: status,
+          listing: receiverView(live, orgId),
+          meals_delivered: status === "accepted" ? mealsDeliveredFor(live) : null,
+          at,
+        },
+      ];
+    });
+  const seeded: ReceiverHistoryItem[] = HISTORY_SEED.filter(
+    (row) => row.receiver_org === orgId,
+  ).map((row) => {
+    const deliveredMs = nowMs - row.hours_ago * 60 * MINUTE_MS;
+    return {
+      offer_id: row.id,
+      offer_status: "accepted",
+      listing: pastListing(row, deliveredMs),
+      meals_delivered: row.meals,
+      at: new Date(deliveredMs).toISOString(),
+    };
+  });
+  return [...fromOffers, ...seeded]
+    .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))
+    .slice(0, HISTORY_LIMIT);
 }

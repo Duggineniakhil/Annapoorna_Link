@@ -99,8 +99,10 @@ describe("receiver data per kitchen", () => {
 
   it("history only shows the kitchen's own deliveries", async () => {
     const res = await handleMockRequest("GET", "/api/receiver/history", undefined, ASHA);
-    const rows = res.body as { id: string }[];
-    expect(rows.map((r) => r.id).sort()).toEqual(["rcv-4", "rcv-5", "rcv-6"]);
+    const rows = res.body as { offer_id: string; listing: { receiver_org?: string } }[];
+    const past = rows.filter((r) => r.offer_id.startsWith("rcv-")).map((r) => r.offer_id);
+    expect(past.sort()).toEqual(["rcv-4", "rcv-5", "rcv-6"]);
+    expect(rows.every((r) => r.listing.receiver_org !== "org-annadanam")).toBe(true);
   });
 });
 

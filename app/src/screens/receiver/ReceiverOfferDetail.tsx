@@ -219,17 +219,27 @@ export default function ReceiverOfferDetail() {
             </Card>
           )}
 
-          {(offer.volunteer_first_name || offer.volunteer_eta_min !== undefined) && (
+          {(status === "open" || status === "accepted") && (
             <Card className="flex flex-col gap-1 p-4">
-              {offer.volunteer_first_name && (
-                <p className="font-bold text-ink">
-                  {t("receiver.offer.volunteer", { name: offer.volunteer_first_name })}
-                </p>
-              )}
-              {offer.volunteer_eta_min !== undefined && (
-                <p className="text-sm text-ink/70">
-                  {t("receiver.offer.volunteerEta", { min: offer.volunteer_eta_min })}
-                </p>
+              {!offer.volunteer_first_name ? (
+                <p className="text-ink/70">{t("receiver.offer.noVolunteer")}</p>
+              ) : (
+                <>
+                  {/* The assigned volunteer, or else the best free one (doc 12). */}
+                  <p className="font-bold text-ink">
+                    {t(
+                      offer.listing.volunteer
+                        ? "receiver.offer.volunteer"
+                        : "receiver.offer.volunteerCandidate",
+                      { name: offer.volunteer_first_name },
+                    )}
+                  </p>
+                  <p className="text-sm text-ink/70">
+                    {["picked_up", "delivered"].includes(offer.listing.status)
+                      ? t("receiver.offer.volunteerPickedUp")
+                      : t("receiver.offer.volunteerToDonor", { min: offer.volunteer_eta_min ?? 0 })}
+                  </p>
+                </>
               )}
             </Card>
           )}

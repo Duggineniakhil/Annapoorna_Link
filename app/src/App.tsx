@@ -1,4 +1,4 @@
-import { lazy, type ComponentType } from "react";
+import { lazy } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
 import { RootRedirect, SectionGuard } from "./components/RoleGuard";
@@ -9,16 +9,11 @@ import { LiveEventsProvider } from "./hooks/useLiveEvents";
 import Login from "./screens/common/Login";
 
 // Lazy-load every screen except login so the first load stays small.
-function lazyNamed<T extends Record<string, ComponentType>>(load: () => Promise<T>, name: keyof T) {
-  return lazy(async () => ({ default: (await load())[name] }));
-}
-
-const placeholders = () => import("./screens/placeholders");
-
 const DonorHome = lazy(() => import("./screens/donor/DonorHome"));
 const DonorPost = lazy(() => import("./screens/donor/DonorPost"));
 const DonorListingDetail = lazy(() => import("./screens/donor/DonorListingDetail"));
-const DonorImpact = lazyNamed(placeholders, "DonorImpact");
+const DonorImpact = lazy(() => import("./screens/donor/DonorImpact"));
+const DonorImpactReport = lazy(() => import("./screens/donor/DonorImpactReport"));
 const ReceiverOffers = lazy(() => import("./screens/receiver/ReceiverOffers"));
 const ReceiverOfferDetail = lazy(() => import("./screens/receiver/ReceiverOfferDetail"));
 const ReceiverNeeds = lazy(() => import("./screens/receiver/ReceiverNeeds"));
@@ -45,6 +40,7 @@ const router = createBrowserRouter([
           { path: "/donor/post", element: <DonorPost /> },
           { path: "/donor/listings/:id", element: <DonorListingDetail /> },
           { path: "/donor/impact", element: <DonorImpact /> },
+          { path: "/donor/impact/report", element: <DonorImpactReport /> },
 
           { path: "/receiver", element: <ReceiverOffers /> },
           { path: "/receiver/offers/:id", element: <ReceiverOfferDetail /> },

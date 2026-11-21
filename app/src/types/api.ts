@@ -88,11 +88,18 @@ export interface Offer {
   expires_at: string;
   distance_km: number;
   eta_min: number;
-  // Added in A7 (B to confirm). The receiver's delivery code is listing.delivery_code.
-  status?: "open" | "accepted" | "declined" | "expired";
-  volunteer_first_name?: string;
-  volunteer_eta_min?: number;
+  // Contract (doc 12). The receiver's delivery code is listing.delivery_code, once accepted.
+  status: OfferStatus;
+  /** The assigned volunteer, or else the best available candidate; null if nobody can make it. */
+  volunteer_first_name?: string | null;
+  /** Minutes for that volunteer to reach the donor; null (or missing) with the name. */
+  volunteer_eta_min?: number | null;
 }
+
+export type OfferStatus = "open" | "accepted" | "declined" | "expired";
+
+/** An offer as the demo data seeds it, before status and volunteer are worked out. */
+export type OfferSeed = Omit<Offer, "status" | "volunteer_first_name" | "volunteer_eta_min">;
 
 export type DeclineReason = "too_far" | "cant_accept_type" | "no_space" | "closing";
 
@@ -103,13 +110,15 @@ export type ReceiverNeeds = {
   open_to: string; // HH:MM
 };
 
+/** GET /api/receiver/history item (doc 12): newest first, at most 50. */
 export type ReceiverHistoryItem = {
-  id: string;
-  items_title: string;
-  meals: number;
-  received_at: string;
-  donor_name: string;
-  area: string;
+  offer_id: string;
+  offer_status: OfferStatus;
+  listing: Listing;
+  /** Meals the volunteer confirmed delivering; null until delivered. */
+  meals_delivered: number | null;
+  /** When it last changed: delivered, decided or expired. */
+  at: string;
 };
 
 export type TaskStatus = "open" | "accepted" | "picked_up" | "delivered";
@@ -203,4 +212,25 @@ export interface MapData {
   donors: Org[];
   receivers: Org[];
   recent: MapDelivery[];
+}
+
+/** One bar of the weekly chart: meals delivered in the week starting week_start (A11, B to confirm). */
+export interface ImpactWeek {
+  week_start: string;
+  meals: number;
+}
+
+/** A breakdown row (by area or donor type) on the city dashboard (A11, B to confirm). */
+export interface ImpactBreakdown {
+  key: string;
+  meals: number;
+}
+
+/** GET /api/impact: Impact plus the period, the weekly series, and breakdowns for scope=city. */
+export interface ImpactReport extends Impact {
+  from: string;
+  to: string;
+  weekly: ImpactWeek[];
+  by_area?: ImpactBreakdown[];
+  by_donor_type?: ImpactBreakdown[];
 }

@@ -55,7 +55,7 @@ export function TopBar() {
   const item = "flex min-h-[48px] w-full items-center gap-3 px-4 text-left hover:bg-leaf-50";
 
   return (
-    <header className="sticky top-0 z-10 border-b border-ink/5 bg-cream/95 backdrop-blur">
+    <header className="sticky top-0 z-10 print:hidden border-b border-ink/5 bg-cream/95 backdrop-blur">
       <div className="mx-auto flex max-w-xl items-center justify-between gap-2 px-4 py-2">
         {/* "/" sends a logged-in user to their role home and everyone else to login. */}
         <Link to="/" className="flex min-h-[48px] items-center gap-2">

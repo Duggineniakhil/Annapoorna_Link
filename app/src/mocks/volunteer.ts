@@ -1,9 +1,9 @@
 import type { Listing, Task, VolunteerAvailability, VolunteerHistoryItem } from "../types/api";
 import { DEMO_ACCOUNTS } from "./demoData";
-import { ORGS } from "./fixtures";
+import { ORGS, etaMinFor } from "./fixtures";
 import { assignVolunteer, listingStore, markDelivered, markPickedUp } from "./listings";
 // Receiver decisions re-apply their claims at load; tasks are derived from those claims.
-import "./receiver";
+import { setVolunteerFinder, type OfferVolunteer } from "./receiver";
 
 // Volunteer-side mock server. There is no separate task list: a delivery task exists for every
 // listing a kitchen has claimed. Accepting, pickup and delivery move the shared listing forward,
@@ -117,7 +117,7 @@ function applyProgress(): void {
     const at = st.delivered_at ? Date.parse(st.delivered_at) : Date.now();
     if (name && st.progress) assignVolunteer(listingId, name, vehicleOf(st.volunteer_id!), at);
     if (st.progress === "picked_up" || st.progress === "delivered") markPickedUp(listingId, at);
-    if (st.progress === "delivered") markDelivered(listingId, at);
+    if (st.progress === "delivered") markDelivered(listingId, at, st.meals_delivered);
   }
 }
 applyProgress();
@@ -239,6 +239,70 @@ function hasActiveTask(volunteerId: string): boolean {
   );
 }
 
+// Volunteer shown on a kitchen's offer (doc 12): the assigned volunteer, or else the best
+// available candidate, with minutes to reach the donor; null if nobody can make it.
+
+/** Where each demo volunteer starts from (area level). */
+const VOLUNTEER_BASE: Record<string, { lat: number; lng: number }> = {
+  "user-ravi": { lat: 17.4925, lng: 78.401 }, // Kukatpally
+};
+/**
+ * Other demo volunteers in the city (no login): they can be the best candidate on an offer.
+ * One is busy while a listing names them as its volunteer.
+ */
+const CITY_VOLUNTEERS: { name: string; base: { lat: number; lng: number } }[] = [
+  { name: "Arjun", base: { lat: 17.4501, lng: 78.3885 } }, // Madhapur
+  { name: "Salma", base: { lat: 17.3984, lng: 78.4302 } }, // Mehdipatnam
+];
+/** Used when the assigned volunteer has no known base (seeded demo names). */
+const DEFAULT_ETA_MIN = 15;
+const MINUTE = 60_000;
+
+const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name;
+
+function etaToDonor(volunteerId: string, donorOrg: string): number | undefined {
+  const base = VOLUNTEER_BASE[volunteerId];
+  const donor = ORGS[donorOrg];
+  return base && donor ? etaMinFor(distanceKm(base, donor)) : undefined;
+}
+
+export function volunteerForListing(listing: Listing, nowMs = Date.now()): OfferVolunteer | null {
+  if (listing.status === "expired" || listing.status === "cancelled") return null;
+  if (listing.volunteer) {
+    if (listing.status === "picked_up" || listing.status === "delivered") {
+      return { first_name: firstName(listing.volunteer), eta_min: 0 };
+    }
+    const account = DEMO_ACCOUNTS.find((a) => a.user.display_name === listing.volunteer);
+    const eta = account ? etaToDonor(account.user.id, listing.donor_org) : undefined;
+    return { first_name: firstName(listing.volunteer), eta_min: eta ?? DEFAULT_ETA_MIN };
+  }
+  // Nobody assigned yet: the nearest free volunteer who reaches the donor before pickup-by.
+  const minutesLeft = (Date.parse(listing.pickup_by) - nowMs) / MINUTE;
+  const donor = ORGS[listing.donor_org];
+  const busy = (name: string) =>
+    listingStore.some(
+      (l) =>
+        l.volunteer === name && (l.status === "volunteer_assigned" || l.status === "picked_up"),
+    );
+  const candidates = [
+    ...DEMO_ACCOUNTS.filter((a) => a.user.role === "volunteer")
+      // The demo volunteer's availability switch (A8) applies to them.
+      .filter((a) => store.available && !hasActiveTask(a.user.id))
+      .map((a) => ({ name: a.user.display_name, eta: etaToDonor(a.user.id, listing.donor_org) })),
+    ...CITY_VOLUNTEERS.filter((v) => !busy(v.name)).map((v) => ({
+      name: v.name,
+      eta: donor ? etaMinFor(distanceKm(v.base, donor)) : undefined,
+    })),
+  ]
+    .filter((c): c is { name: string; eta: number } => c.eta !== undefined && c.eta <= minutesLeft)
+    .sort((a, b) => a.eta - b.eta);
+  return candidates[0]
+    ? { first_name: firstName(candidates[0].name), eta_min: candidates[0].eta }
+    : null;
+}
+
+setVolunteerFinder(volunteerForListing);
+
 /** POST /api/tasks/:id/accept → Task. Claimed listing → volunteer assigned. */
 export function acceptTask(
   volunteerId: string,
@@ -347,7 +411,7 @@ export function submitDelivery(
   st.meals_delivered = meals;
   st.delivered_at = new Date(nowMs).toISOString();
   save();
-  markDelivered(listing.id, nowMs);
+  markDelivered(listing.id, nowMs, meals);
   return { ok: true, value: toTask(listing, volunteerId)!.listing };
 }
 
