@@ -64,7 +64,23 @@ onDoubtAnswered(callback)  // fires when a queued doubt gets its answer
 
 ### 2.5 Local database tables (IndexedDB / Dexie): agree on names
 `profiles`, `attempts`, `doubts`, `mastery`, `audioCache`, `meta` (lastSavedAt, deviceId).
-A owns `profiles`; B owns `attempts`, `doubts`, `mastery`, and the sync logic over them.
+A owns `profiles`, `meta` and `audioCache`; B owns `attempts`, `doubts`, `mastery`, and the sync logic over them.
+
+### 2.6 Decisions (agreed 21 Nov). These override anything above that differs.
+| # | Topic | Decision | Affects |
+|---|---|---|---|
+| D1 | **Queued voice doubts** | `/api/sync` takes JSON text records only; audio never goes through sync. B's sync module processes queued doubts: `/api/stt` → `/api/tutor` → store the answer locally → delete the audio blob → fire `onDoubtAnswered`. A only calls `queueDoubt` / `onDoubtAnswered` through `app/src/services/syncAdapter.ts`. | A7, A8, B9, B11 |
+| D2 | **Recording format** | A detects the supported type in this order: `audio/webm;codecs=opus`, `audio/ogg;codecs=opus`, `audio/mp4`, and sends it with the correct Content-Type. **`/api/stt` also accepts `audio/mp4`** and converts on the server. Main target is Android Chrome; iOS is best-effort. | A7, B1, B3 |
+| D3 | **Learner state** | B's engine owns the shape **and** persistence of `learnerState`: `loadLearnerState(learnerId)` / `saveLearnerState(state)` in `app/src/engine/`, stored in `attempts` and `mastery`. A passes `openedConceptIds` when loading. Until it exists, A uses `app/src/services/engineAdapter.ts` with a stand-in in `app/src/mocks/`. | A9, A10, A11, B8 |
+| D4 | **Option keys** | `options[]` is an array of Telugu strings; keys are `"A"`–`"D"` by array position.<br>• **mcq:** `correct` is the key string (e.g. `"B"`); `option_misconception` has an entry for every wrong key.<br>• **tf:** options `["ఒప్పు", "తప్పు"]` (keys A, B); `correct` is `"A"` or `"B"`; the wrong key has a misconception.<br>• **fill:** `options: []`; `correct` is an array of accepted answers, e.g. `["న్యూటన్", "N"]`. | A5, A9, B6, B8 |
+| D5 | **Parent summary audio** | Fixed sentence templates with pre-generated audio played in sequence. Phrase keys: `summary_intro`, `days_0`…`days_7`, `chapter_<chapterId>_green \| _yellow \| _red`, `summary_outro`. A creates `content/phrases.json` (`[{ key, text_te }]`); B's script generates `content/audio/phrases/<key>.ogg`. The child's name is not spoken. Fallback: live `/api/tts` when online, skip when offline. | A11, B7 |
+| D6 | **Guardian (parent PIN)** | Stored in `meta` under key `guardian`: `{ pinHash, salt, learnerIds }`. Not a profile, so it never appears in the profile picker. | A3, A11 |
+| D7 | **PIN hashing** | PBKDF2-SHA256 via WebCrypto, 100,000 iterations, random 16-byte salt per profile and for the guardian. PINs and hashes never leave the device and are never synced. | A3 |
+| D8 | **Asset locations** | The frontend serves `content/` as static files at `/content/`.<br>• **Audio:** `content/audio/<chapterId>/<conceptId>.ogg`, `content/audio/<chapterId>/doubts/<doubtId>.ogg`, `content/audio/phrases/<key>.ogg`; `audio_url` like `"/content/audio/force/force-what-is.ogg"`. B's script writes and commits the audio.<br>• **Images:** `content/images/<chapterId>/<name>.webp` (≤ 40 KB), owned by A.<br>• **Database schema:** `app/src/db/schema.ts`, created by A (A3), defines every table; B uses it and never creates a second database. | A3, A5, A6, B7, B8, B9 |
+| D9 | **Config & URLs** | Frontend env vars: `VITE_API_BASE_URL`, `VITE_USE_MOCKS` (default `true`). B creates the backend URL (B2). After A2, A gives B the live frontend URL for `ALLOWED_ORIGIN`. | A1, A2, B1, B2 |
+| D10 | **IDs** | Chapter ids: `force`, `friction`.<br>Concept ids: `force-what-is`, `force-contact`, `force-field`, `force-net`, `force-effects-motion`, `force-effects-shape`, `pressure-what-is`, `pressure-fluids`, `friction-what-is`, `friction-cause`, `friction-factors`, `friction-types`, `friction-necessary-evil`, `friction-increase-reduce`, `friction-fluid`.<br>Question ids: `F1-Q1` / `R1-Q1`.<br>`syllabus_ref`: `TS-SCERT-8-PS-Ch1` (Force), `TS-SCERT-8-PS-Ch2` (Friction). | A5, B5, B6, B7, B13 |
+| D11 | **Telugu review** | All Telugu text is **draft** until checked by the reviewer: <!-- name / role -->. Strings stay in `app/src/i18n/te.ts` and the content packs so changes are quick. | A5, A13 |
+| D12 | **Hosting** | Frontend on **Vercel** (free plan). Codebenders provides no hosting. | A2 |
 
 ## 3. Member A: Frontend, Offline & Content
 
