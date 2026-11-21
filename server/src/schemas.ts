@@ -135,7 +135,8 @@ export const ListingWithTimelineSchema = ListingSchema.extend({
   timeline: z.array(TimelineEventSchema),
 });
 
-export const OfferStatusSchema = z.enum(["pending", "accepted", "declined", "expired"]);
+// API name for a waiting offer is "open" (stored as "pending" in the database).
+export const OfferStatusSchema = z.enum(["open", "accepted", "declined", "expired"]);
 export type OfferStatus = z.infer<typeof OfferStatusSchema>;
 
 export const OfferSchema = z.object({
@@ -163,6 +164,10 @@ export const ReceiverHistoryItemSchema = z.object({
 });
 export type ReceiverHistoryItem = z.infer<typeof ReceiverHistoryItemSchema>;
 
+export const TaskStatusSchema = z.enum(["open", "accepted", "picked_up", "delivered"]);
+
+const TaskPlaceSchema = z.object({ name: z.string(), area: z.string(), lat: z.number(), lng: z.number() });
+
 export const TaskSchema = z.object({
   id: z.string(),
   listing: ListingSchema,
@@ -170,6 +175,12 @@ export const TaskSchema = z.object({
   receiver_org: OrgSchema,
   distance_km: z.number().min(0),
   deadline: IsoDate,
+  status: TaskStatusSchema,
+  meals: z.number().int().min(0),
+  vehicle_fit: z.boolean(), // the signed-in volunteer's vehicle can carry the meals
+  pickup: TaskPlaceSchema,
+  delivery: TaskPlaceSchema.extend({ serve_by: IsoDate }),
+  volunteer_id: z.string().optional(),
 });
 export type Task = z.infer<typeof TaskSchema>;
 

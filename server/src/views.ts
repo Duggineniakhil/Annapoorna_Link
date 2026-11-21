@@ -123,7 +123,7 @@ export function toOffer(repo: DemoRepo, o: OfferRow, viewer: AuthContext, now: D
   }
   return {
     id: o.id,
-    status: o.status as Offer["status"],
+    status: publicOfferStatus(o.status),
     listing: toListing(repo, l, viewer),
     rank: o.rank,
     score: o.score,
@@ -141,12 +141,35 @@ export function toTask(repo: DemoRepo, l: ListingRow, viewer: AuthContext): Task
   const donor = required(repo.orgById(l.donor_org_id));
   const pickup = required(repo.pickupFor(l.id));
   const receiver = required(repo.orgById(pickup.receiver_org_id));
-  return {
+  const listing = toListing(repo, l, viewer);
+  const me = repo.userById(viewer.userId);
+  const place = (o: OrgRow) => ({ name: o.name, area: o.area, lat: o.lat, lng: o.lng });
+  const task: Task = {
     id: l.id,
-    listing: toListing(repo, l, viewer),
+    listing,
     donor_org: toOrg(donor),
     receiver_org: toOrg(receiver),
     distance_km: distanceKm(donor, receiver),
     deadline: l.pickup_by,
+    status: TASK_STATUS[l.status] ?? (pickup.volunteer_user_id ? "accepted" : "open"),
+    meals: l.total_meals,
+    vehicle_fit: (me?.capacity_meals ?? 0) >= l.total_meals,
+    pickup: place(donor),
+    delivery: { ...place(receiver), serve_by: listing.safety.serve_by },
   };
+  if (pickup.volunteer_user_id) task.volunteer_id = pickup.volunteer_user_id;
+  return task;
+}
+
+// Listing status -> task status. A claimed listing with no volunteer yet is "open".
+const TASK_STATUS: Record<string, Task["status"]> = {
+  claimed: "open",
+  volunteer_assigned: "accepted",
+  picked_up: "picked_up",
+  delivered: "delivered",
+};
+
+// Offers are stored as "pending"; the API calls them "open".
+export function publicOfferStatus(s: string): Offer["status"] {
+  return s === "pending" ? "open" : (s as Offer["status"]);
 }

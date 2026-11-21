@@ -74,7 +74,7 @@ describe("full flow", () => {
     const one = await request(built.app).get(`/api/offers/${offer.id}`).set("Authorization", rcv);
     expect(one.status).toBe(200);
     const parsed = OfferSchema.parse(one.body);
-    expect(parsed.status).toBe("pending");
+    expect(parsed.status).toBe("open");
     expect(parsed).toHaveProperty("volunteer_first_name");
     expect(parsed).toHaveProperty("volunteer_eta_min");
     expect(parsed.listing.delivery_code).toBeUndefined(); // not claimed yet
@@ -92,7 +92,10 @@ describe("full flow", () => {
     const vol = carVolunteer();
     const task = await request(built.app).post(`/api/tasks/${posted.id}/accept`).set("Authorization", vol);
     expect(task.status).toBe(200);
-    TaskSchema.parse(task.body);
+    const parsedTask = TaskSchema.parse(task.body);
+    expect(parsedTask).toMatchObject({ status: "accepted", meals: 150, vehicle_fit: true });
+    expect(parsedTask.pickup.name).toBe("Sri Sai Caterers");
+    expect(parsedTask.volunteer_id).toBeDefined();
     const second = await request(built.app).post(`/api/tasks/${posted.id}/accept`).set("Authorization", carVolunteer());
     expect(second.status).toBe(409);
 

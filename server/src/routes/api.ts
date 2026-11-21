@@ -11,7 +11,7 @@ import { haversineKm, volunteerLocation } from "../matching/index.js";
 import type { Flow } from "../services/flow.js";
 import type { Hub } from "../realtime.js";
 import { runWeddingNight } from "../services/scenario.js";
-import { isListingParty, toListing, toOffer, toOrg, toTask, toTimeline, toUser } from "../views.js";
+import { isListingParty, publicOfferStatus, toListing, toOffer, toOrg, toTask, toTimeline, toUser } from "../views.js";
 
 export interface ApiDeps {
   flow: Flow;
@@ -119,7 +119,7 @@ export function createApiRouter(d: ApiDeps): Router {
       const claimedAt = repo.eventsFor(l.id).find((e) => e.type === "claimed")?.created_at;
       items.push({
         offer_id: o.id,
-        offer_status: o.status as ReceiverHistoryItem["offer_status"],
+        offer_status: publicOfferStatus(o.status),
         listing: toListing(repo, l, a),
         meals_delivered: mine ? (pickup?.meals_delivered ?? null) : null,
         at: (o.status === "accepted" ? (pickup?.delivered_at ?? claimedAt) : undefined) ?? o.expires_at,
