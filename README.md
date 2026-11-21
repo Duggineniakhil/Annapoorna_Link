@@ -65,18 +65,18 @@ It's 10:30 PM and a wedding reception in Kukatpally has just ended. 150 plates o
  Postgres (Supabase)                 Gnani speech-to-text + AI model (voice post, optional)
 ```
 - **Matching score:** `0.4 × proximity + 0.3 × need + 0.2 × time slack + 0.1 × reliability`, after eligibility checks (veg-only, open hours, need, arrival before pickup-by). Weights are in config and covered by unit tests.
-- **State machine:** posted → offered → claimed → volunteer assigned → picked up → delivered (or expired / cancelled). Only the server changes status, inside transactions.
+- **State machine:** posted → offered → claimed → volunteer assigned → picked up → delivered (or expired / cancelled). Only the server changes status, one checked transition at a time (double taps get "not possible right now"), and each change is written to Postgres in a single transaction.
+- **Offer cascade:** the top kitchen gets 10 minutes to accept, then the next; after 5 offers the food is opened to every eligible kitchen and the first to accept gets it. A scheduler expires food at pickup-by.
 - **Safety windows:** from published food-handling guidance (hot / room / chilled, stricter for dairy and non-veg). The donor can choose an earlier pickup, never a later one.
 
 ### Tech stack
-<!-- TODO: update to what you actually used -->
 | Layer | Technology |
 |---|---|
 | Frontend | React + Vite + TypeScript, PWA, Tailwind CSS, Leaflet + OpenStreetMap |
-| Backend | Node.js + Express + TypeScript, zod |
-| Database | Postgres (Supabase) |
-| Realtime | Server-Sent Events |
-| Voice (optional) | Gnani speech-to-text + an AI model |
+| Backend | Node.js + Express + TypeScript, zod, helmet, per-user rate limits; Vitest + supertest (80 tests) |
+| Database | Postgres (Supabase) via postgres.js, tracked migrations; the API keeps a working copy in memory and writes every change through |
+| Realtime | Server-Sent Events, with 15 s polling as a fallback |
+| Voice (optional) | Gnani speech-to-text (Prisma v3, English and Telugu) + an AI model that turns the transcript into a draft listing |
 | Hosting | Vercel + Render/Railway |
 | Built with | **Codebenders IDE** |
 
@@ -97,17 +97,27 @@ It's 10:30 PM and a wedding reception in Kukatpally has just ended. 150 plates o
 | City authorities (later) | Less food waste to landfill | City licence + data |
 
 ## 📈 Results (demo data)
-<!-- TODO: paste the `npm run metrics` table: median time to claim/deliver, on-time rate, posting time -->
+From `npm run metrics` on the seeded demo data (30 days, 120 listings). **These are generated, not measured with real users**: replace them with live numbers after a real demo run.
+
+| Metric | Value |
+|---|---|
+| Time posted to claimed (median / p90) | 5 min / 6 min |
+| Time posted to delivered (median / p90) | 23 min / 39 min |
+| Rescue rate (delivered, excluding cancelled) | 93.1% |
+| Expiry rate (expired, excluding cancelled) | 6.9% |
+| Offers sent before delivery (mean / median) | 2.04 / 2 |
+
+Run `cd server && npm run metrics` against the database for the full table (posting time, on-time rate, meals and kg by area and donor type).
 
 ## 🛠️ Built with Codebenders
 The whole application was built in the **Codebenders IDE** during the hackathon build window (21 Nov 11:30 AM to 22 Nov 11:59 PM IST), using chat-to-build with the Nexon agent. [CODEBENDERS_USAGE.md](CODEBENDERS_USAGE.md) documents the timeline, key prompts, the iterations that mattered and where we corrected the output.
 
 ## 🚀 Run locally
 ```bash
-git clone https://github.com/Duggineniakhil/Vidya_Nestham.git
-cd Vidya_Nestham
+git clone https://github.com/Duggineniakhil/Annapoorna_Link.git
+cd Annapoorna_Link
 
-# backend
+# backend (without DATABASE_URL it runs in memory on the seeded demo data)
 cd server && cp .env.example .env   # fill in your own values
 npm install && npm run migrate && npm run seed && npm run dev
 
@@ -119,7 +129,9 @@ cd app && npm install && npm run dev
 | `DATABASE_URL` | Postgres connection |
 | `JWT_SECRET` | Demo auth tokens |
 | `ALLOWED_ORIGIN` | Frontend URL for CORS |
-| `GNANI_API_KEY`, `AI_API_KEY` | Optional voice post |
+| `GNANI_API_KEY`, `AI_API_KEY`, `AI_MODEL` | Optional voice post (without both keys, voice post answers "busy" and nothing else changes) |
+| `DEMO_MODE` | `true` lets any signed-in user start the wedding-night demo (default: sponsor only) |
+| `VOICE_DAILY_PER_DONOR`, `VOICE_DAILY_GLOBAL` | Daily voice-post caps (30 and 500) |
 | `VITE_API_BASE_URL`, `VITE_USE_MOCKS` | Frontend config |
 
 > Never commit `.env`.
@@ -127,7 +139,7 @@ cd app && npm install && npm run dev
 ## 📁 Project structure
 ```
 app/                  PWA frontend (role-based screens, EN/TE, map, live updates)
-server/               API, matching engine, state machine, impact, seed data
+server/               API, matching engine, state machine, impact, seed data (see server/README.md)
 docs/                 Problem research, spec, architecture, business model, plans
 CODEBENDERS_USAGE.md  How we built it with Codebenders
 ```
