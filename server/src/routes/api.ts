@@ -10,6 +10,7 @@ import { computeImpact } from "../impact/calc.js";
 import { haversineKm, volunteerLocation } from "../matching/index.js";
 import type { Flow } from "../services/flow.js";
 import type { Hub } from "../realtime.js";
+import type { VoiceService } from "../voice/service.js";
 import { runWeddingNight } from "../services/scenario.js";
 import { isListingParty, publicOfferStatus, toListing, toOffer, toOrg, toTask, toTimeline, toUser } from "../views.js";
 
@@ -18,6 +19,7 @@ export interface ApiDeps {
   hub: Hub;
   jwtSecret: string;
   demoMode: boolean;
+  voice?: VoiceService;
   voiceLimiter: (req: Request, res: Response, next: (e?: unknown) => void) => void;
   dbStatus: () => Promise<string>;
 }
@@ -210,11 +212,15 @@ export function createApiRouter(d: ApiDeps): Router {
     res.status(202).json({ started: true });
   });
 
-  // ---- voice post (P1): gated until the speech and model keys are configured ----
-  router.post("/voice-post", d.voiceLimiter, auth, requireRole("donor"), upload.single("audio"), (req) => {
-    if (!req.file) throw new AppError("VALIDATION_FAILED");
-    // ponytail: Gnani STT + model extraction not wired yet (needs provider details, doc 14 B12).
-    throw new AppError("SERVER_BUSY");
+  // ---- voice post (P1): audio in, a draft listing out. Never posts, never stores audio ----
+  router.post("/voice-post", d.voiceLimiter, auth, requireRole("donor"), upload.single("audio"), (req, res, next) => {
+    void (async () => {
+      if (!d.voice) throw new AppError("SERVER_BUSY"); // speech or model key not configured
+      if (!req.file) throw new AppError("VALIDATION_FAILED");
+      const a = me(req);
+      const asked = typeof req.body?.lang === "string" ? req.body.lang : repo.userById(a.userId)?.lang;
+      res.json(await d.voice.draft(a.userId, req.file.buffer, req.file.mimetype, asked === "te" ? "te-IN" : "en-IN"));
+    })().catch(next);
   });
 
   // ---- realtime (SSE); token comes as ?token= because EventSource cannot set headers ----

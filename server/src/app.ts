@@ -15,6 +15,8 @@ import { Hub } from "./realtime.js";
 import { createApiRouter } from "./routes/api.js";
 import { createGuidanceRouter } from "./routes/guidance.js";
 import { Flow } from "./services/flow.js";
+import { AnthropicExtractor, GnaniTranscriber } from "./voice/providers.js";
+import { VoiceService } from "./voice/service.js";
 
 export interface AppOptions {
   config: Config;
@@ -24,6 +26,15 @@ export interface AppOptions {
   now?: () => Date;
   rateLimits?: RateLimitOptions;
   persister?: Persister;
+  voice?: VoiceService; // defaults to Gnani + the model when both keys are set
+}
+
+function defaultVoice(c: Config): VoiceService | undefined {
+  if (!c.GNANI_API_KEY || !c.AI_API_KEY) return undefined;
+  return new VoiceService(new GnaniTranscriber(c.GNANI_API_KEY), new AnthropicExtractor(c.AI_API_KEY, c.AI_MODEL), {
+    perDonorPerDay: c.VOICE_DAILY_PER_DONOR,
+    globalPerDay: c.VOICE_DAILY_GLOBAL,
+  });
 }
 
 export interface BuiltApp {
@@ -39,6 +50,7 @@ export function createApp(opts: AppOptions): BuiltApp {
   const repo = opts.repo ?? new DemoRepo();
   const hub = new Hub();
   const flow = new Flow(repo, hub, opts.now, opts.persister);
+  const voice = opts.voice ?? defaultVoice(config);
   const limits = createRateLimiters(config.JWT_SECRET, opts.rateLimits ?? DEFAULT_RATE_LIMITS);
 
   const app = express();
@@ -64,6 +76,7 @@ export function createApp(opts: AppOptions): BuiltApp {
       hub,
       jwtSecret: config.JWT_SECRET,
       demoMode: config.DEMO_MODE,
+      voice,
       voiceLimiter: limits.voice,
       dbStatus: async () => (opts.db ? await checkDb(opts.db) : "memory"),
     }),

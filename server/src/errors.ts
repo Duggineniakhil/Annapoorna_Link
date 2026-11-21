@@ -9,6 +9,7 @@ export type ErrorCode =
   | "CODE_LOCKED"
   | "RATE_LIMITED"
   | "SERVER_BUSY"
+  | "STT_EMPTY"
   | "INTERNAL_ERROR";
 
 export interface ErrorEntry {
@@ -28,6 +29,7 @@ export const ERROR_CATALOGUE: Record<ErrorCode, ErrorEntry> = {
   CODE_LOCKED: { status: 423, message: "Too many wrong tries. Ask the other person to confirm the code.", message_te: "చాలా తప్పు ప్రయత్నాలు. కోడ్ నిర్ధారించమని ఇతరులను అడగండి." },
   RATE_LIMITED: { status: 429, message: "Too many requests. Please wait a few minutes.", message_te: "చాలా ఎక్కువ అభ్యర్థనలు. దయచేసి కొన్ని నిమిషాలు ఆగండి." },
   SERVER_BUSY: { status: 503, message: "The service is busy. Please try again shortly.", message_te: "సేవ బిజీగా ఉంది. కొద్ది సేపటి తర్వాత మళ్లీ ప్రయత్నించండి." },
+  STT_EMPTY: { status: 422, message: "Could not hear clearly. Please try again.", message_te: "స్పష్టంగా వినపడలేదు. దయచేసి మళ్లీ ప్రయత్నించండి." },
   INTERNAL_ERROR: { status: 500, message: "Something went wrong on our side. Please try again.", message_te: "మా వైపు ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి." },
 };
 

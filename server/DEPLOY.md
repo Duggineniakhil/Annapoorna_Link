@@ -51,3 +51,8 @@ If a secret is pasted in chat or a log, change it in Supabase (database password
 ## 5. Demo mode and resetting the demo
 - `DEMO_MODE=true` lets any signed-in user start the wedding-night scenario (`POST /api/demo/scenario`). By default only the sponsor account can.
 - `npm run demo:reset` restores the seeded demo data (same as `npm run seed`; set `ALLOW_DEMO_RESET=true` when `NODE_ENV=production`). **Restart the API afterwards**: it keeps its working state in memory and loads it from the database on boot.
+
+## 6. Voice post (optional)
+- Set `GNANI_API_KEY` (speech to text) and `AI_API_KEY` (model that turns the transcript into a draft). With either missing, `POST /api/voice-post` answers 503 and nothing else is affected. `AI_MODEL` picks the model.
+- Gnani accepts WAV, MP3, OGG, FLAC, AAC and M4A, up to 30 seconds. **It does not accept WebM**, which Chrome records by default. Either record WAV/M4A in the app, or install `ffmpeg` on the server (it is used to convert WebM). Uploads are capped at 400 KB.
+- Daily caps (India time, per server process): `VOICE_DAILY_PER_DONOR` (30) and `VOICE_DAILY_GLOBAL` (500). Audio is never stored and transcripts are never logged.

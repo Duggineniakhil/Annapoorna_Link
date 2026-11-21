@@ -12,6 +12,9 @@ const baseSchema = z.object({
   DATABASE_URL: z.string().default(""),
   GNANI_API_KEY: z.string().default(""),
   AI_API_KEY: z.string().default(""),
+  AI_MODEL: z.string().default("claude-haiku-5-5"),
+  VOICE_DAILY_PER_DONOR: z.coerce.number().int().min(1).default(30),
+  VOICE_DAILY_GLOBAL: z.coerce.number().int().min(1).default(500),
   USE_STUBS: z
     .enum(["true", "false"])
     .default("true")
