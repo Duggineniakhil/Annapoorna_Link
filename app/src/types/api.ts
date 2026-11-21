@@ -188,3 +188,19 @@ export interface Impact {
   rescue_rate: number;
   assumptions: ImpactAssumption[];
 }
+
+/** One delivery on the sponsor activity map (added in A10, B to confirm). */
+export interface MapDelivery {
+  listing_id: string;
+  donor_org: string;
+  receiver_org: string;
+  meals: number;
+  delivered_at: string;
+}
+
+/** GET /api/map. recent = deliveries in the last 24 h. */
+export interface MapData {
+  donors: Org[];
+  receivers: Org[];
+  recent: MapDelivery[];
+}

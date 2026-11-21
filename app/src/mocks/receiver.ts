@@ -5,7 +5,7 @@ import type {
   ReceiverHistoryItem,
   ReceiverNeeds,
 } from "../types/api";
-import { OFFERS, ORGS, orgArea, orgName } from "./fixtures";
+import { OFFERS, ORGS, etaMinFor, orgArea, orgDistanceKm, orgName } from "./fixtures";
 import { claimListing, deliveryCodeFor, listingTakenFor } from "./listings";
 
 // Receiver-side mock server: offers, needs and history, per receiver org.
@@ -70,18 +70,24 @@ function writeJson(key: string, value: unknown): void {
 function seedOffers(nowMs: number): StoredOffer[] {
   const receivers = Object.values(ORGS).filter((o) => o.type === "receiver");
   return receivers.flatMap((receiver) =>
-    OFFERS.filter((offer) => !receiver.veg_only || offer.listing.veg).map((offer) => ({
-      receiver_org_id: receiver.id,
-      offer: {
-        ...offer,
-        // Offer ids are unique per receiver: the first receiver keeps the seed id.
-        id: receiver.id === "org-annadanam" ? offer.id : `${offer.id}-${receiver.id.slice(4)}`,
-        expires_at:
-          offer.id === EXPIRES_WHILE_OPEN_ID
-            ? new Date(nowMs + EXPIRES_WHILE_OPEN_MS).toISOString()
-            : offer.expires_at,
-      },
-    })),
+    OFFERS.filter((offer) => !receiver.veg_only || offer.listing.veg).map((offer) => {
+      // Distance from the donor's area to this kitchen: the same number the map shows.
+      const km = orgDistanceKm(offer.listing.donor_org, receiver.id) ?? offer.distance_km;
+      return {
+        receiver_org_id: receiver.id,
+        offer: {
+          ...offer,
+          distance_km: km,
+          eta_min: etaMinFor(km),
+          // Offer ids are unique per receiver: the first receiver keeps the seed id.
+          id: receiver.id === "org-annadanam" ? offer.id : `${offer.id}-${receiver.id.slice(4)}`,
+          expires_at:
+            offer.id === EXPIRES_WHILE_OPEN_ID
+              ? new Date(nowMs + EXPIRES_WHILE_OPEN_MS).toISOString()
+              : offer.expires_at,
+        },
+      };
+    }),
   );
 }
 

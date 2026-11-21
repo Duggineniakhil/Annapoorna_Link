@@ -23,3 +23,23 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Map pins (A10): emoji in a round badge, big enough to tap. */
+.al-map-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  font-size: 20px;
+  line-height: 1;
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.3);
+}
+.al-map-pin-donor {
+  border: 3px solid #f59e0b;
+}
+.al-map-pin-receiver {
+  border: 3px solid #166534;
+}

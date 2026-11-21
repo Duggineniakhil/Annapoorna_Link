@@ -9,7 +9,7 @@ import type {
   TimelineEvent,
 } from "../types/api";
 import { isPickupAllowed, maxPickupBy, serveByFor, totalMeals } from "../lib/quickPost";
-import { LISTINGS, ORGS } from "./fixtures";
+import { LISTINGS, ORGS, orgDistanceKm } from "./fixtures";
 
 const CATEGORIES: Category[] = [
   "rice_dish",
@@ -103,11 +103,20 @@ function seedFixture(listing: Listing): Listing {
     delivery_code:
       listing.delivery_code ?? (listing.receiver_org ? deliveryCodeFor(listing.id) : undefined),
     timeline: listing.timeline ?? synthesizeTimeline(listing),
-    matched_receiver:
-      listing.matched_receiver ??
-      (listing.receiver_org && ORGS[listing.receiver_org]
-        ? { name: ORGS[listing.receiver_org].name, area: ORGS[listing.receiver_org].area }
-        : undefined),
+    matched_receiver: listing.matched_receiver
+      ? {
+          ...listing.matched_receiver,
+          distance_km:
+            orgDistanceKm(listing.donor_org, listing.receiver_org) ??
+            listing.matched_receiver.distance_km,
+        }
+      : listing.receiver_org && ORGS[listing.receiver_org]
+        ? {
+            name: ORGS[listing.receiver_org].name,
+            area: ORGS[listing.receiver_org].area,
+            distance_km: orgDistanceKm(listing.donor_org, listing.receiver_org),
+          }
+        : undefined,
   };
 }
 

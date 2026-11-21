@@ -49,11 +49,3 @@ export function VolunteerHistory() {
     </Screen>
   );
 }
-
-export function SponsorMap() {
-  return (
-    <Screen titleKey="sponsor.map.title" demoData>
-      <ComingSoon />
-    </Screen>
-  );
-}

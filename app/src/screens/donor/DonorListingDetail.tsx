@@ -12,12 +12,15 @@ import { Icon } from "../../components/ui/Icon";
 import { ListingCard } from "../../components/food/ListingCard";
 import { formatClock } from "../../components/food/format";
 import { SafetyCard } from "../../components/SafetyCard";
+import { AreaMap } from "../../components/map/AreaMap";
+import { routeBetweenOrgs } from "../../components/map/route";
 
 // Donor listing detail: the listing card, status timeline, matched receiver and volunteer,
 // pickup code (before pickup), cancel (before pickup), expired notice and the safety card.
 // The listing is refetched on live updates (and every 15 seconds while live updates are paused).
 
 const CANCELLABLE: Status[] = ["posted", "offered", "claimed", "volunteer_assigned"];
+const CLAIMED_ON: Status[] = ["claimed", "volunteer_assigned", "picked_up", "delivered"];
 const CODE_HIDDEN: Status[] = ["picked_up", "delivered", "expired", "cancelled"];
 
 const STATUS_KEY: Record<Status, MessageKey> = {
@@ -61,6 +64,16 @@ export default function DonorListingDetail() {
     void load();
   }, [load]);
   useLiveRefetch(() => void load(), id);
+
+  // Once a kitchen has the food, show where it is going (area level).
+  const route =
+    listing && listing.receiver_org && CLAIMED_ON.includes(listing.status)
+      ? routeBetweenOrgs(
+          listing.donor_org,
+          listing.receiver_org,
+          listing.matched_receiver?.distance_km,
+        )
+      : undefined;
 
   async function cancelListing() {
     if (!listing) return;
@@ -179,6 +192,15 @@ export default function DonorListingDetail() {
                 </div>
               )}
             </Card>
+          )}
+
+          {route && (
+            <AreaMap
+              points={route.points}
+              lines={route.lines}
+              distanceKm={route.distanceKm}
+              label={t("map.label")}
+            />
           )}
 
           {listing.pickup_code && !CODE_HIDDEN.includes(listing.status) && (

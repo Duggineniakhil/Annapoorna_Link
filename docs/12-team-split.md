@@ -83,7 +83,7 @@ Task errors (added in A8, B to confirm): accepting while unavailable or with a t
 
 Live events (added in A9, B to confirm): `GET /api/events` sends `{ type: "listing_status", listing_id, status, at }` only to the parties of the listing: the donor org, the receiver org that claimed it, kitchens that were offered it (only for `claimed` / `cancelled` / `expired`, so their offer closes), and volunteers (every status from `claimed` on, since claimed food is a task). Events carry no names; the app looks up the listing when it needs one. The app falls back to polling every 15 s after 3 failed connections.
 | `GET /api/impact` | `?scope=me|city&from=&to=` | `Impact` (+ `by_area`, `by_donor_type` for city) |
-| `GET /api/map` | sponsor/city: area-level points | `{ donors: Org[], receivers: Org[], recent: [...] }` |
+| `GET /api/map` | sponsor/city: area-level points | `{ donors: Org[], receivers: Org[], recent: [{ listing_id, donor_org, receiver_org, meals, delivered_at }] }`; `recent` = last 24 h (item shape added in A10, B to confirm) |
 | `POST /api/voice-post` (P1) | donor: multipart `audio` | `{ draft: { items, veg, allergens, storage, cooked_at }, transcript }` |
 | `GET /api/events` | SSE; token as `?token=` | stream of `{ type: "listing_status"\|"offer"\|"task", listing_id, status, at }` |
 | `POST /api/demo/scenario` | sponsor/demo: `{ name: "wedding_night" }` | `{ started: true }` |

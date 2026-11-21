@@ -13,8 +13,11 @@ import { ListingCard } from "../../components/food/ListingCard";
 import { formatClock, formatNumber } from "../../components/food/format";
 import { SafetyCard } from "../../components/SafetyCard";
 import { orgArea, orgName } from "../../mocks/fixtures";
+import { useAuth } from "../../auth/AuthContext";
+import { AreaMap } from "../../components/map/AreaMap";
+import { routeBetweenOrgs } from "../../components/map/route";
 
-// Receiver offer detail: listing, match reasons, distance and ETA, map placeholder, timeline,
+// Receiver offer detail: listing, match reasons, distance and ETA, area map, timeline,
 // the delivery code once accepted, the volunteer, and the safety card. Refetched on live updates.
 
 const CLOSED_CODES: string[] = ["OFFER_EXPIRED", "OFFER_NOT_OPEN"];
@@ -31,6 +34,7 @@ export default function ReceiverOfferDetail() {
   const { t, lang } = useT();
   const { id = "" } = useParams();
   const [offer, setOffer] = useState<Offer | null>(null);
+  const { org } = useAuth();
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -99,6 +103,11 @@ export default function ReceiverOfferDetail() {
 
   const status = offer?.status ?? "open";
   const code = offer?.listing.delivery_code;
+  // The donor's area and this kitchen, with the offer's distance.
+  const route = offer
+    ? routeBetweenOrgs(offer.listing.donor_org, org?.id, offer.distance_km)
+    : undefined;
+
   const timeline: { key: string; label: string; at: string }[] =
     offer && offer.listing.timeline && offer.listing.timeline.length > 0
       ? offer.listing.timeline.map((event, i) => ({
@@ -171,10 +180,14 @@ export default function ReceiverOfferDetail() {
             </ul>
           </Card>
 
-          <div className="flex flex-col items-center gap-1 rounded-2xl border-2 border-dashed border-leaf-800/15 p-6 text-center text-ink/60">
-            <h2 className="font-bold text-ink">{t("receiver.offer.map")}</h2>
-            <p>{t("receiver.offer.mapPlaceholder")}</p>
-          </div>
+          {route && (
+            <AreaMap
+              points={route.points}
+              lines={route.lines}
+              distanceKm={route.distanceKm}
+              label={t("map.label")}
+            />
+          )}
 
           <Card className="flex flex-col gap-3 p-4">
             <h2 className="font-bold text-ink">{t("receiver.offer.timeline")}</h2>

@@ -284,8 +284,6 @@ export const en = {
   "receiver.offer.volunteer": "Volunteer: {name}",
   "receiver.offer.volunteerEta": "Volunteer arrives in about {min} min",
   "receiver.offer.timeline": "Timeline",
-  "receiver.offer.map": "Map",
-  "receiver.offer.mapPlaceholder": "Map coming soon.",
   "receiver.offer.distance": "{km} km away",
   "receiver.offer.notFound": "This offer could not be found.",
   "receiver.decline.title": "Why can't you take this? (optional)",
@@ -342,6 +340,19 @@ export const en = {
   "toast.receiver.volunteerOnWay": "Volunteer on the way",
   "toast.volunteer.newTask": "New task nearby",
   "live.paused": "Live updates paused, refreshing every 15 s",
+  // Maps (A10)
+  "map.legend.donor": "Donor",
+  "map.legend.receiver": "Receiver",
+  "map.distance": "{km} km apart",
+  "map.textOnly": "Map unavailable. Showing areas only.",
+  "map.label": "Map of the pickup and drop areas",
+  "sponsor.map.label": "Map of donors, receivers and recent deliveries",
+  "sponsor.map.filterLabel": "Donor type",
+  "sponsor.map.summary": "{count} deliveries in the last 24 h · {meals} meals",
+  "sponsor.map.none": "No deliveries in the last 24 hours for this donor type.",
+  "sponsor.map.recent": "Recent deliveries",
+  "sponsor.map.route": "{from} → {to}",
+  "sponsor.map.loading": "Loading map…",
+  "sponsor.map.error": "Could not load the map data. Try again.",
 } as const;
-
 export type MessageKey = keyof typeof en;

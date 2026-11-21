@@ -1,6 +1,7 @@
 import type { Category, Org, Storage, User } from "../types/api";
 import { DEMO_ACCOUNTS } from "./demoData";
 import { emitListingEvent } from "./events";
+import { mapData } from "./map";
 import {
   cancelListing,
   createListing,
@@ -593,6 +594,24 @@ async function route(
       return { status: 409, body: { ...LISTING_INVALID_STATE } };
     }
     return { status: 200, body: listingDetail(result.listing) };
+  }
+
+  if (method === "GET" && pathname === "/api/map") {
+    const session = sessionFor(token);
+    if (!session) {
+      return { status: 401, body: { ...UNAUTHORIZED } };
+    }
+    if (session.user.role !== "sponsor") {
+      return {
+        status: 403,
+        body: {
+          error_code: "FORBIDDEN",
+          message: "Only sponsors can see the activity map.",
+          message_te: "కార్యకలాపాల మ్యాప్‌ను స్పాన్సర్లు మాత్రమే చూడగలరు.",
+        },
+      };
+    }
+    return { status: 200, body: mapData() };
   }
 
   if (method === "GET" && pathname === "/api/offers") {

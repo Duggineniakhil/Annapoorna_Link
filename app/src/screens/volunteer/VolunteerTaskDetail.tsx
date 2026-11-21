@@ -16,6 +16,8 @@ import { useT } from "../../i18n";
 import type { MessageKey } from "../../i18n/en";
 import { ApiError, deliverTask, getTask, submitPickupCode } from "../../services/api";
 import { useLiveRefetch } from "../../hooks/useLiveEvents";
+import { AreaMap } from "../../components/map/AreaMap";
+import { routeBetween } from "../../components/map/route";
 import type { Task } from "../../types/api";
 
 // Volunteer task stepper: go to pickup, enter pickup code, go to delivery, enter delivery code.
@@ -352,6 +354,9 @@ export default function VolunteerTaskDetail() {
     }
   }
 
+  // Steps 1 and 3: pickup and drop areas with the line between them.
+  const route = routeBetween(task.pickup, task.delivery, task.distance_km);
+
   return (
     <Screen
       titleKey={STEP_TITLE[step]}
@@ -361,6 +366,14 @@ export default function VolunteerTaskDetail() {
       {step === 1 && (
         <div className="flex flex-col gap-4">
           <PlaceBlock label={t("task.from")} name={task.pickup.name} area={task.pickup.area} />
+          {route && (
+            <AreaMap
+              points={route.points}
+              lines={route.lines}
+              distanceKm={route.distanceKm}
+              label={t("map.label")}
+            />
+          )}
           <Button
             variant="secondary"
             size="lg"
@@ -408,6 +421,14 @@ export default function VolunteerTaskDetail() {
         <div className="flex flex-col gap-4">
           <PlaceBlock label={t("task.to")} name={task.delivery.name} area={task.delivery.area} />
           <Countdown deadline={task.delivery.serve_by} kind="deliver" />
+          {route && (
+            <AreaMap
+              points={route.points}
+              lines={route.lines}
+              distanceKm={route.distanceKm}
+              label={t("map.label")}
+            />
+          )}
           <Button
             variant="secondary"
             size="lg"

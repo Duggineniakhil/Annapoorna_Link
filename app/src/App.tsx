@@ -27,7 +27,7 @@ const VolunteerTasks = lazy(() => import("./screens/volunteer/VolunteerTasks"));
 const VolunteerTaskDetail = lazy(() => import("./screens/volunteer/VolunteerTaskDetail"));
 const VolunteerHistory = lazy(() => import("./screens/volunteer/VolunteerHistory"));
 const SponsorDashboard = lazy(() => import("./screens/sponsor/SponsorDashboard"));
-const SponsorMap = lazyNamed(placeholders, "SponsorMap");
+const SponsorMap = lazy(() => import("./screens/sponsor/SponsorMap"));
 const About = lazy(() => import("./screens/common/About"));
 const NotFound = lazy(() => import("./screens/common/NotFound"));
 

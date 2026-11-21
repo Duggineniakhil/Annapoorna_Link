@@ -11,6 +11,7 @@ import type {
   TaskSeed,
   TimelineEvent,
 } from "../types/api";
+import { distanceKm, roundKm } from "../components/map/geo";
 
 const MIN = 60_000;
 const at = (minutesFromNow: number) => new Date(Date.now() + minutesFromNow * MIN).toISOString();
@@ -42,6 +43,15 @@ export const ORGS: Record<string, Org> = {
     area: "Madhapur",
     lat: 17.4483,
     lng: 78.3915,
+  },
+  "org-lakshmi-gardens": {
+    id: "org-lakshmi-gardens",
+    type: "donor",
+    donor_type: "wedding_hall",
+    name: "Lakshmi Gardens Function Hall",
+    area: "Kondapur",
+    lat: 17.4699,
+    lng: 78.3578,
   },
   "org-asha": {
     id: "org-asha",
@@ -408,3 +418,19 @@ export const CITY_IMPACT_MONTH: Pick<
 
 export const orgName = (id?: string) => (id ? (ORGS[id]?.name ?? id) : "");
 export const orgArea = (id?: string) => (id ? (ORGS[id]?.area ?? "") : "");
+/**
+ * Straight-line km between two orgs, one decimal: the same number the maps show, so offers,
+ * listings and tasks all agree. Undefined if either org is unknown.
+ */
+export function orgDistanceKm(a?: string, b?: string): number | undefined {
+  const from = a ? ORGS[a] : undefined;
+  const to = b ? ORGS[b] : undefined;
+  return from && to ? roundKm(distanceKm(from, to)) : undefined;
+}
+
+/** Rough city ride time for a distance (demo only). */
+export const etaMinFor = (km: number) => Math.round(5 + km * 2.5);
+
+/** Area-level coordinates of an org (no street addresses). */
+export const orgLocation = (id?: string) =>
+  id && ORGS[id] ? { lat: ORGS[id].lat, lng: ORGS[id].lng } : undefined;
