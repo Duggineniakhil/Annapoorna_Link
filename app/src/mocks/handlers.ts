@@ -1,6 +1,13 @@
 import type { Category, Org, Storage, User } from "../types/api";
 import { DEMO_ACCOUNTS } from "./demoData";
-import { createListing, guidanceFor, listingStore, listingsForOrg } from "./listings";
+import {
+  cancelListing,
+  createListing,
+  guidanceFor,
+  listingDetail,
+  listingStore,
+  listingsForOrg,
+} from "./listings";
 import type { ListingInput } from "./listings";
 
 export interface MockResponse {
@@ -97,6 +104,12 @@ const LISTING_NOT_FOUND = {
   error_code: "NOT_FOUND",
   message: "Listing not found.",
   message_te: "జాబితా కనుగొనబడలేదు.",
+};
+
+const LISTING_INVALID_STATE = {
+  error_code: "INVALID_STATE",
+  message: "This listing can no longer be cancelled.",
+  message_te: "ఈ జాబితాను ఇప్పుడు రద్దు చేయలేరు.",
 };
 
 function parseQuery(path: string): Record<string, string> {
@@ -253,15 +266,26 @@ export async function handleMockRequest(
     if (!listing || listing.donor_org !== orgIdOf(session)) {
       return { status: 404, body: { ...LISTING_NOT_FOUND } };
     }
-    return {
-      status: 200,
-      body: {
-        ...listing,
-        timeline: [
-          { type: "posted", status: "posted", at: listing.created_at, actor_role: "donor" },
-        ],
-      },
-    };
+    return { status: 200, body: listingDetail(listing) };
+  }
+
+  const cancelMatch = /^\/api\/listings\/([^/]+)\/cancel$/.exec(pathname);
+  if (method === "POST" && cancelMatch) {
+    const session = sessionFor(token);
+    if (!session) {
+      return { status: 401, body: { ...UNAUTHORIZED } };
+    }
+    if (session.user.role !== "donor") {
+      return { status: 403, body: { ...FORBIDDEN_LISTINGS } };
+    }
+    const result = cancelListing(orgIdOf(session), cancelMatch[1], Date.now());
+    if (!result.ok) {
+      if (result.reason === "not_found") {
+        return { status: 404, body: { ...LISTING_NOT_FOUND } };
+      }
+      return { status: 409, body: { ...LISTING_INVALID_STATE } };
+    }
+    return { status: 200, body: listingDetail(result.listing) };
   }
 
   return { status: 404, body: { ...NOT_FOUND_ROUTE } };

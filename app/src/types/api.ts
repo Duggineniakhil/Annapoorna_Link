@@ -66,6 +66,9 @@ export interface Listing {
   posted_in_ms: number;
   receiver_org?: string;
   volunteer?: string;
+  volunteer_vehicle?: string;
+  matched_receiver?: { name: string; area: string; distance_km?: number };
+  timeline?: TimelineEvent[];
   pickup_code?: string;
   delivery_code?: string;
   safety: {

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import type { Listing } from "../../types/api";
+import type { Listing, Status } from "../../types/api";
 import { useT } from "../../i18n";
 import { Card } from "../ui/Card";
 import { Icon } from "../ui/Icon";
@@ -13,6 +13,9 @@ import {
   VegMark,
 } from "./FoodBits";
 import { itemsTitle } from "./format";
+
+// The pickup countdown only matters while the food is still waiting to be picked up.
+const PICKUP_PENDING: Status[] = ["posted", "offered", "claimed", "volunteer_assigned"];
 
 /** Meals as the hero number of every card. */
 export function MealsBadge({ meals }: { meals: number }) {
@@ -91,7 +94,7 @@ export function ListingCard({
         <StorageTag storage={listing.storage} />
       </div>
       <AllergenLine allergens={listing.allergens} />
-      {showCountdown && (
+      {showCountdown && PICKUP_PENDING.includes(listing.status) && (
         <div>
           <Countdown deadline={listing.pickup_by} />
         </div>

@@ -1,32 +1,65 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import type { Listing } from "../../types/api";
+import type { Listing, Status } from "../../types/api";
 import { apiRequest } from "../../services/api";
 import { useAuth } from "../../auth/AuthContext";
 import { useT } from "../../i18n";
 import { Screen } from "../../components/Screen";
 import { EmptyState } from "../../components/EmptyState";
+import { StatusBadge } from "../../components/StatusBadge";
 import { SectionHeader, StatTile } from "../../components/ui/Card";
+import { FilterChips, type ChipOption } from "../../components/ui/FilterChips";
 import { Icon } from "../../components/ui/Icon";
 import { ListingCard } from "../../components/food/ListingCard";
 import { formatNumber } from "../../components/food/format";
-import { DONOR_IMPACT_MONTH, LISTINGS, orgName } from "../../mocks/fixtures";
+import { DONOR_IMPACT_MONTH, orgName } from "../../mocks/fixtures";
+
+const ACTIVE_STATUSES: Status[] = [
+  "posted",
+  "offered",
+  "claimed",
+  "volunteer_assigned",
+  "picked_up",
+];
+const PAST_STATUSES: Status[] = ["delivered", "expired", "cancelled"];
+const REFRESH_MS = 15_000;
+
+type Tab = "active" | "past";
+const TAB_OPTIONS: ChipOption<Tab>[] = [
+  { value: "active", labelKey: "donor.home.tabActive" },
+  { value: "past", labelKey: "donor.home.tabPast" },
+];
 
 export default function DonorHome() {
   const { t, lang } = useT();
   const { user, org } = useAuth();
   const name = org?.name ?? user?.display_name ?? "";
   const area = org?.area ?? "";
-  // New posts come from the API; the seeded demo listings come from fixtures until A5.
+  const [tab, setTab] = useState<Tab>("active");
+  // All listings come from the API (the mock server seeds demo listings in every status).
   const [posted, setPosted] = useState<Listing[]>([]);
   useEffect(() => {
-    apiRequest<Listing[]>("GET", "/api/listings")
-      .then(setPosted)
-      .catch(() => setPosted([]));
+    let cancelled = false;
+    const load = () => {
+      apiRequest<Listing[]>("GET", "/api/listings")
+        .then((data) => {
+          if (!cancelled) setPosted(data);
+        })
+        .catch(() => {
+          if (!cancelled) setPosted([]);
+        });
+    };
+    load();
+    const id = window.setInterval(load, REFRESH_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
   }, []);
-  const active = [...posted, ...LISTINGS].filter(
-    (l) => l.donor_org === org?.id && l.status !== "delivered" && l.status !== "cancelled",
-  );
+  const mine = posted.filter((l) => l.donor_org === org?.id);
+  const active = mine.filter((l) => ACTIVE_STATUSES.includes(l.status));
+  const past = mine.filter((l) => PAST_STATUSES.includes(l.status));
+  const shown = tab === "active" ? active : past;
 
   return (
     <Screen
@@ -53,27 +86,52 @@ export default function DonorHome() {
         </span>
       </Link>
 
-      <SectionHeader titleKey="donor.home.active" />
-      {active.length === 0 ? (
-        <EmptyState icon="🍽️" message={t("donor.home.empty")} />
+      <FilterChips
+        options={TAB_OPTIONS}
+        value={tab}
+        onChange={setTab}
+        labelKey="donor.home.tabsLabel"
+      />
+
+      <SectionHeader titleKey={tab === "active" ? "donor.home.active" : "donor.home.past"} />
+      {shown.length === 0 ? (
+        <EmptyState
+          icon="🍽️"
+          message={t(tab === "active" ? "donor.home.empty" : "donor.home.emptyPast")}
+        />
       ) : (
         <ul className="flex flex-col gap-3">
-          {active.map((listing) => (
+          {shown.map((listing) => (
             <li key={listing.id}>
               <ListingCard
                 listing={listing}
                 donorName={name}
                 area={area}
                 to={`/donor/listings/${listing.id}`}
-                showSteps
+                showSteps={tab === "active"}
               >
-                {listing.receiver_org && (
-                  <p className="flex items-center gap-1 text-sm text-ink/70">
-                    <Icon name="arrowRight" className="h-4 w-4 text-leaf-700" />
-                    {t("donor.home.goingTo", { name: orgName(listing.receiver_org) })}
-                    {listing.volunteer && ` · ${listing.volunteer}`}
-                  </p>
-                )}
+                <div className="flex flex-col gap-1">
+                  {tab === "past" && (
+                    <div>
+                      <StatusBadge status={listing.status} />
+                    </div>
+                  )}
+                  {listing.matched_receiver ? (
+                    <p className="flex items-center gap-1 text-sm text-ink/70">
+                      <Icon name="arrowRight" className="h-4 w-4 text-leaf-700" />
+                      {listing.matched_receiver.name} · {listing.matched_receiver.area}
+                      {listing.volunteer && ` · ${listing.volunteer}`}
+                    </p>
+                  ) : (
+                    listing.receiver_org && (
+                      <p className="flex items-center gap-1 text-sm text-ink/70">
+                        <Icon name="arrowRight" className="h-4 w-4 text-leaf-700" />
+                        {t("donor.home.goingTo", { name: orgName(listing.receiver_org) })}
+                        {listing.volunteer && ` · ${listing.volunteer}`}
+                      </p>
+                    )
+                  )}
+                </div>
               </ListingCard>
             </li>
           ))}

@@ -38,6 +38,9 @@ ListingItem { name, category, qty_meals, qty_kg? }
 Listing     { id, donor_org, items: ListingItem[], total_meals, veg, allergens: Allergen[], storage, cooked_at,
               pickup_by, status, created_at, posted_in_ms,
               receiver_org?, volunteer?, pickup_code?, delivery_code?,   // codes only for the right role
+              matched_receiver?: { name, area, distance_km? },          // added in A5 (B to confirm)
+              volunteer_vehicle?,                                        // added in A5 (B to confirm)
+              timeline?: TimelineEvent[],                                // on GET /api/listings/:id
               safety: { max_pickup_by, serve_by, guidance_en, guidance_te } }
 Offer       { id, listing: Listing, rank, score, reasons: [{ en, te }], expires_at, distance_km, eta_min }
 Task        { id, listing: Listing, donor_org, receiver_org, distance_km, deadline }

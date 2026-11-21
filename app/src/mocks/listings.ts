@@ -1,5 +1,15 @@
-import type { Allergen, Category, Listing, ListingItem, Storage } from "../types/api";
+import type {
+  Allergen,
+  Category,
+  Listing,
+  ListingItem,
+  Role,
+  Status,
+  Storage,
+  TimelineEvent,
+} from "../types/api";
 import { isPickupAllowed, maxPickupBy, serveByFor, totalMeals } from "../lib/quickPost";
+import { LISTINGS, ORGS } from "./fixtures";
 
 const CATEGORIES: Category[] = [
   "rice_dish",
@@ -51,14 +61,17 @@ export interface ListingInput {
   posted_in_ms: number;
 }
 
-// Mock listings survive a page refresh (browser only), so a demo isn't lost on reload.
+// The mock store holds the demo listings (re-seeded on every load so their times stay relative
+// to now) plus listings the donor posts, which are kept in localStorage so a demo survives a
+// page refresh.
 const STORE_KEY = "al.mock.listings";
+const FIXTURE_IDS = new Set(LISTINGS.map((l) => l.id));
 
-function loadStore(): Listing[] {
+function loadPosted(): Listing[] {
   try {
     const raw = typeof localStorage === "undefined" ? null : localStorage.getItem(STORE_KEY);
     const parsed: unknown = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? (parsed as Listing[]) : [];
+    return Array.isArray(parsed) ? (parsed as Listing[]).filter((l) => !FIXTURE_IDS.has(l.id)) : [];
   } catch {
     return [];
   }
@@ -67,14 +80,84 @@ function loadStore(): Listing[] {
 function saveStore(): void {
   try {
     if (typeof localStorage !== "undefined") {
-      localStorage.setItem(STORE_KEY, JSON.stringify(listingStore));
+      const posted = listingStore.filter((l) => !FIXTURE_IDS.has(l.id));
+      localStorage.setItem(STORE_KEY, JSON.stringify(posted));
     }
   } catch {
     // Storage unavailable; listings stay in memory for this session.
   }
 }
 
-export const listingStore: Listing[] = loadStore();
+/** Demo listings as the mock server would hold them: a pickup code and a full timeline. */
+function seedFixture(listing: Listing): Listing {
+  return {
+    ...listing,
+    // Guidance text must match the listing's storage (doc 10 §2).
+    safety: {
+      ...listing.safety,
+      guidance_en: GUIDANCE[listing.storage].en,
+      guidance_te: GUIDANCE[listing.storage].te,
+    },
+    pickup_code: listing.pickup_code ?? codeFor(listing.id),
+    timeline: listing.timeline ?? synthesizeTimeline(listing),
+    matched_receiver:
+      listing.matched_receiver ??
+      (listing.receiver_org && ORGS[listing.receiver_org]
+        ? { name: ORGS[listing.receiver_org].name, area: ORGS[listing.receiver_org].area }
+        : undefined),
+  };
+}
+
+/** Deterministic 4-digit code for a demo listing id. */
+function codeFor(id: string): string {
+  let h = 0;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) % 9000;
+  return String(1000 + h);
+}
+
+/** Random 4-digit handover code (D4). */
+function newCode(): string {
+  return String(1000 + Math.floor(Math.random() * 9000));
+}
+
+const FLOW: Status[] = [
+  "posted",
+  "offered",
+  "claimed",
+  "volunteer_assigned",
+  "picked_up",
+  "delivered",
+];
+const ACTOR: Record<Status, Role> = {
+  posted: "donor",
+  offered: "receiver",
+  claimed: "receiver",
+  volunteer_assigned: "volunteer",
+  picked_up: "volunteer",
+  delivered: "volunteer",
+  expired: "donor",
+  cancelled: "donor",
+};
+
+/** Timeline for a listing that has none: every step up to its status, two minutes apart. */
+function synthesizeTimeline(listing: Listing): TimelineEvent[] {
+  const start = Date.parse(listing.created_at);
+  const upto = FLOW.indexOf(listing.status);
+  const steps = upto >= 0 ? FLOW.slice(0, upto + 1) : ["posted" as Status, listing.status];
+  return steps.map((status, i) => ({
+    type: status,
+    status,
+    at: new Date(start + i * 2 * 60_000).toISOString(),
+    actor_role: ACTOR[status],
+  }));
+}
+
+function nextId(): string {
+  const used = new Set(listingStore.map((l) => l.id));
+  let n = listingStore.filter((l) => !FIXTURE_IDS.has(l.id)).length + 1;
+  while (used.has("lst-" + String(n).padStart(3, "0"))) n++;
+  return "lst-" + String(n).padStart(3, "0");
+}
 
 // Guidance copied from docs/10 §2.
 // TE strings are a draft and need native speaker review.
@@ -92,6 +175,12 @@ const GUIDANCE: Record<Storage, { en: string; te: string }> = {
     te: "రవాణా సమయంలో చల్లగా ఉంచండి. చేరిన వెంటనే వడ్డించండి.",
   },
 };
+
+// Declared after the helpers above, which the seeding calls at module load.
+export const listingStore: Listing[] = [
+  ...loadPosted(),
+  ...(typeof localStorage === "undefined" ? [] : LISTINGS.map(seedFixture)),
+];
 
 export function guidanceFor(input: {
   items: { category: Category; veg: boolean }[];
@@ -204,7 +293,7 @@ export function createListing(
   });
 
   const listing: Listing = {
-    id: "lst-" + String(listingStore.length + 1).padStart(3, "0"),
+    id: nextId(),
     donor_org: donorOrgId,
     items,
     total_meals: totalMeals(items),
@@ -216,7 +305,10 @@ export function createListing(
     status: "posted",
     created_at: new Date(nowMs).toISOString(),
     posted_in_ms: input.posted_in_ms,
-    pickup_code: "4812",
+    pickup_code: newCode(),
+    timeline: [
+      { type: "posted", status: "posted", at: new Date(nowMs).toISOString(), actor_role: "donor" },
+    ],
     safety: {
       max_pickup_by: guidance.max_pickup_by,
       serve_by: guidance.serve_by,
@@ -229,8 +321,80 @@ export function createListing(
   return { ok: true, listing };
 }
 
-export function listingsForOrg(orgId: string): Listing[] {
+const BEFORE_PICKUP: Status[] = ["posted", "offered", "claimed", "volunteer_assigned"];
+
+/**
+ * Server-side auto-expiry (doc 10): a listing not picked up by pickup_by becomes expired.
+ * Run on every read so the demo shows the expired state without a background job.
+ */
+export function expireOverdue(nowMs: number): void {
+  let changed = false;
+  for (const listing of listingStore) {
+    if (BEFORE_PICKUP.includes(listing.status) && Date.parse(listing.pickup_by) <= nowMs) {
+      listing.timeline = [
+        ...timelineOf(listing),
+        { type: "expired", status: "expired", at: listing.pickup_by, actor_role: "donor" },
+      ];
+      listing.status = "expired";
+      changed = true;
+    }
+  }
+  if (changed) saveStore();
+}
+
+export function listingsForOrg(orgId: string, nowMs = Date.now()): Listing[] {
+  expireOverdue(nowMs);
   return listingStore
     .filter((l) => l.donor_org === orgId)
     .sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0));
+}
+
+const TERMINAL_STATUSES: Status[] = ["picked_up", "delivered", "expired", "cancelled"];
+
+/** Listings stored before timelines existed get a single 'posted' event. */
+function timelineOf(listing: Listing): TimelineEvent[] {
+  return (
+    listing.timeline ?? [
+      { type: "posted", status: "posted", at: listing.created_at, actor_role: "donor" },
+    ]
+  );
+}
+
+/** Donor view of one listing (GET /api/listings/:id). pickup_code is dropped once picked up. */
+export function listingDetail(listing: Listing): Listing {
+  expireOverdue(Date.now());
+  const detail: Listing = { ...listing, timeline: timelineOf(listing) };
+  // The pickup code is only useful before pickup; never send it afterwards.
+  if (!BEFORE_PICKUP.includes(listing.status)) {
+    delete detail.pickup_code;
+  }
+  return detail;
+}
+
+export function cancelListing(
+  donorOrgId: string,
+  listingId: string,
+  nowMs: number,
+): { ok: true; listing: Listing } | { ok: false; reason: "not_found" | "invalid_state" } {
+  expireOverdue(nowMs);
+  const listing = listingStore.find((l) => l.id === listingId && l.donor_org === donorOrgId);
+  if (!listing) {
+    return { ok: false, reason: "not_found" };
+  }
+  if (TERMINAL_STATUSES.includes(listing.status)) {
+    return { ok: false, reason: "invalid_state" };
+  }
+  const history = timelineOf(listing);
+  listing.status = "cancelled";
+  listing.timeline = [
+    ...history,
+    {
+      type: "cancelled",
+      status: "cancelled",
+      at: new Date(nowMs).toISOString(),
+      actor_role: "donor",
+    },
+  ];
+  saveStore();
+  return { ok: true, listing };
 }
