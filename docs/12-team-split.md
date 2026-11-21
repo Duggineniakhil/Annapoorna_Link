@@ -43,12 +43,12 @@ Listing     { id, donor_org, items: ListingItem[], total_meals, veg, allergens: 
               timeline?: TimelineEvent[],                                // on GET /api/listings/:id
               safety: { max_pickup_by, serve_by, guidance_en, guidance_te } }
 Offer       { id, listing: Listing, rank, score, reasons: [{ en, te }], expires_at, distance_km, eta_min,
-              status?: "open"|"accepted"|"declined"|"expired",                 // added in A7 (B to confirm)
-              volunteer_first_name?, volunteer_eta_min? }                       // added in A7 (B to confirm)
+              status: "open"|"accepted"|"declined"|"expired",                  // "open" = awaiting the receiver
+              volunteer_first_name?: string|null, volunteer_eta_min?: number|null }  // assigned volunteer, else best candidate
 Task        { id, listing: Listing, donor_org, receiver_org, distance_km, deadline,
-              status: "open"|"accepted"|"picked_up"|"delivered", meals, vehicle_fit,   // added in A8 (B to confirm)
-              pickup: { name, area, lat, lng }, delivery: { name, area, lat, lng, serve_by },  // added in A8 (B to confirm)
-              volunteer_id? }                                                  // added in A8 (B to confirm)
+              status: "open"|"accepted"|"picked_up"|"delivered", meals, vehicle_fit,
+              pickup: { name, area, lat, lng }, delivery: { name, area, lat, lng, serve_by },
+              volunteer_id? }
 TimelineEvent { type, status, at, actor_role, note? }
 Impact      { meals, kg, co2e_kg, on_time_rate, median_claim_min, rescue_rate, assumptions: [{ key, label_en, label_te, value, source? }] }
 ```
@@ -65,7 +65,9 @@ Impact      { meals, kg, co2e_kg, on_time_rate, median_claim_min, rescue_rate, a
 | `GET /api/listings/:id` | party to the listing | `Listing` + `timeline: TimelineEvent[]` |
 | `POST /api/listings/:id/cancel` | donor | `Listing` |
 | `GET /api/offers` | receiver: pending offers | `Offer[]` |
-| `POST /api/offers/:id/accept` · `/decline` | receiver | `Listing` / `{ ok }` |
+| `GET /api/offers/:id` | receiver: own offer, any status | `Offer` |
+| `POST /api/offers/:id/accept` · `/decline` | receiver | `Listing` (includes the receiver's `delivery_code`) / `{ ok }` |
+| `GET /api/receiver/history` | receiver: past offers, newest first (max 50) | `[{ offer_id, offer_status, listing: Listing, meals_delivered \| null, at }]` |
 | `GET /api/receiver/needs` · `PUT /api/receiver/needs` | receiver: `{ meals_needed, veg_only, open_from, open_to }` | needs |
 | `GET /api/offers/:id` (added in A7, B to confirm) | receiver: own offer; delivery code is `listing.delivery_code` once accepted | `Offer` |
 | `GET /api/receiver/history` (added in A7, B to confirm) | receiver | `[{ id, items_title, meals, received_at, donor_name, area }]` |
