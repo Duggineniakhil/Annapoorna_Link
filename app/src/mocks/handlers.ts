@@ -3,6 +3,7 @@ import { DEMO_ACCOUNTS } from "./demoData";
 import { emitListingEvent } from "./events";
 import { mapData } from "./map";
 import { impactReport } from "./impact";
+import { MIN_AUDIO_BYTES, STT_EMPTY, VOICE_DELAY_MS, voiceDraft } from "./voice";
 import {
   cancelListing,
   createListing,
@@ -595,6 +596,34 @@ async function route(
       return { status: 409, body: { ...LISTING_INVALID_STATE } };
     }
     return { status: 200, body: listingDetail(result.listing) };
+  }
+
+  if (method === "POST" && pathname === "/api/voice-post") {
+    const session = sessionFor(token);
+    if (!session) {
+      return { status: 401, body: { ...UNAUTHORIZED } };
+    }
+    if (session.user.role !== "donor") {
+      return { status: 403, body: { ...FORBIDDEN_LISTINGS } };
+    }
+    const audio =
+      typeof FormData !== "undefined" && body instanceof FormData ? body.get("audio") : null;
+    if (!(audio instanceof Blob)) {
+      return {
+        status: 400,
+        body: {
+          error_code: "VALIDATION_FAILED",
+          message: "Send the recording as audio.",
+          message_te: "రికార్డింగ్‌ను ఆడియోగా పంపండి.",
+        },
+      };
+    }
+    await new Promise((resolve) => setTimeout(resolve, VOICE_DELAY_MS));
+    if (audio.size < MIN_AUDIO_BYTES) {
+      return { status: 422, body: { ...STT_EMPTY } };
+    }
+    const lang = (body as FormData).get("lang") === "te" ? "te" : "en";
+    return { status: 200, body: voiceDraft(lang) };
   }
 
   if (method === "GET" && pathname === "/api/impact") {

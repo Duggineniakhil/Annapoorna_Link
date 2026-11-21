@@ -4,6 +4,7 @@ import type {
   DeclineReason,
   DeliverInput,
   ImpactReport,
+  VoicePostResult,
   Listing,
   Offer,
   ReceiverHistoryItem,
@@ -170,7 +171,9 @@ export async function apiRequest<T>(
 
   try {
     const headers: Record<string, string> = { Accept: "application/json" };
-    if (body !== undefined) {
+    // FormData (voice upload) sets its own multipart Content-Type with the boundary.
+    const isForm = typeof FormData !== "undefined" && body instanceof FormData;
+    if (body !== undefined && !isForm) {
       headers["Content-Type"] = "application/json";
     }
     if (token) {
@@ -179,7 +182,7 @@ export async function apiRequest<T>(
     const res = await fetch(config.apiBaseUrl + path, {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: isForm ? (body as FormData) : body !== undefined ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });
     status = res.status;
@@ -261,6 +264,18 @@ export function listTasks(): Promise<Task[]> {
 }
 
 /** GET /api/tasks/:id */
+/**
+ * POST /api/voice-post (multipart): field "audio" with the recording (its own Content-Type,
+ * e.g. audio/webm;codecs=opus) and an optional "lang" hint for speech-to-text.
+ * Returns a draft to prefill Quick Post; nothing is posted.
+ */
+export function postVoice(audio: Blob, filename: string): Promise<VoicePostResult> {
+  const form = new FormData();
+  form.append("audio", audio, filename);
+  form.append("lang", currentLang());
+  return apiRequest<VoicePostResult>("POST", "/api/voice-post", form, { timeoutMs: 30_000 });
+}
+
 /** GET /api/impact?scope=me|city&from=&to= (dates as ISO strings). */
 export function getImpact(scope: "me" | "city", from: Date, to: Date): Promise<ImpactReport> {
   const query = new URLSearchParams({

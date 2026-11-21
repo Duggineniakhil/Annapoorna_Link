@@ -389,5 +389,24 @@ export const en = {
   "receiver.offer.volunteerToDonor": "About {min} min to reach the donor",
   "receiver.offer.volunteerPickedUp": "Food picked up",
   "receiver.offer.noVolunteer": "No volunteer is free for this pickup yet.",
+  // Voice post (A12)
+  "voice.button": "Hold to speak",
+  "voice.hint": "Say the food, how much, when it was cooked and how it is kept.",
+  "voice.recording": "Listening… release to send",
+  "voice.secondsLeft": "{s} s left",
+  "voice.sending": "Filling the form from what you said…",
+  "voice.tooShort": "Keep holding the button while you speak.",
+  "voice.ready": "Microphone ready. Hold the button and speak.",
+  "voice.heard": "We heard",
+  "voice.filled": "The form below is filled in. Check each step, then tap Post.",
+  "voice.retry": "Try again",
+  "voice.error": "Voice posting is not working right now. Please fill the form.",
+  "voice.denied":
+    "The microphone is blocked, so voice posting is off. You can fill the form below.",
+  "voice.explain.title": "Post by voice",
+  "voice.explain.body":
+    "We use your microphone only while you hold the button. The recording is sent to our speech service to fill this form. Nothing is posted until you tap Post.",
+  "voice.explain.allow": "Allow microphone",
+  "voice.explain.later": "Not now",
 } as const;
 export type MessageKey = keyof typeof en;

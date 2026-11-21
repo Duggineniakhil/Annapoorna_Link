@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Allergen, Category, Listing, Storage } from "../../types/api";
+import type { Allergen, Category, Listing, Storage, VoiceDraft } from "../../types/api";
 import { useT } from "../../i18n";
 import { useAuth } from "../../auth/AuthContext";
 import { useNow } from "../../hooks/useNow";
@@ -10,6 +10,7 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { Icon, type IconName } from "../../components/ui/Icon";
 import { VegMark } from "../../components/food/FoodBits";
+import { VoicePost } from "../../components/VoicePost";
 import { formatClock, formatDuration } from "../../components/food/format";
 import { maxPickupBy } from "../../lib/quickPost";
 import {
@@ -441,6 +442,57 @@ export default function DonorPost() {
     setRepeated(true);
   };
 
+  /**
+   * Voice post (A12): prefill the form from the draft. Known dishes light up their chips; anything
+   * else becomes an "other" item. The donor still reviews it and taps Post.
+   */
+  const applyDraft = (draft: VoiceDraft) => {
+    const next: DraftItem[] = draft.items.map((item) => {
+      const name = item.name.trim();
+      const dish = DISHES.find(
+        (d) => d.name.toLowerCase() === name.toLowerCase() || d.name_te === name,
+      );
+      const base = dish
+        ? {
+            dishId: dish.id,
+            name: dish.name,
+            name_te: dish.name_te,
+            category: dish.category,
+            veg: dish.veg,
+            allergens: dish.allergens,
+          }
+        : {
+            name,
+            category: item.category,
+            veg: draft.veg && !detectNonVeg(name),
+            allergens: allergensFromName(name),
+          };
+      return {
+        key: newKey(),
+        ...base,
+        qtyMeals: item.qty_meals,
+        useKg: item.qty_kg !== undefined,
+        qtyKg: item.qty_kg ?? 0,
+      };
+    });
+    setItems(next);
+    setStorage(draft.storage);
+    const cooked = new Date(draft.cooked_at);
+    if (!Number.isNaN(cooked.getTime()) && cooked.getTime() <= Date.now()) {
+      setCookedAt(floorToMinute(cooked));
+      setCookedPreset("custom");
+    }
+    // Allergens are stored as changes from the dishes' defaults.
+    const defaults = defaultAllergens(next);
+    setExtraAllergens(draft.allergens.filter((a) => !defaults.includes(a)));
+    setRemovedAllergens(defaults.filter((a) => !draft.allergens.includes(a)));
+    setVegOverride(listingIsVeg(next) && !draft.veg ? false : null);
+    setPickup({ kind: "latest" });
+    setClampedNote(false);
+    setRepeated(false);
+    setError(null);
+  };
+
   const canSubmit =
     !submitting && !windowPassed && items.length > 0 && items.every((i) => itemMeals(i) > 0);
 
@@ -509,6 +561,7 @@ export default function DonorPost() {
           {t("post.repeat")}
         </Button>
       )}
+      <VoicePost onDraft={applyDraft} />
       {repeated && (
         <p role="status" className="rounded-2xl bg-leaf-50 p-3 text-sm font-medium text-leaf-900">
           {t("post.repeated")}

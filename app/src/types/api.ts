@@ -234,3 +234,17 @@ export interface ImpactReport extends Impact {
   by_area?: ImpactBreakdown[];
   by_donor_type?: ImpactBreakdown[];
 }
+
+/** The form prefill from POST /api/voice-post (doc 12). The donor reviews it and taps Post. */
+export interface VoiceDraft {
+  items: ListingItem[];
+  veg: boolean;
+  allergens: Allergen[];
+  storage: Storage;
+  cooked_at: string;
+}
+
+export interface VoicePostResult {
+  draft: VoiceDraft;
+  transcript: string;
+}
