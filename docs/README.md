@@ -18,6 +18,7 @@ ACE Builders Hackathon 2026 · **Problem Statement 3: The Last-Mile Tutor** · T
 | 10 | [10-concept-cards-force-friction.md](10-concept-cards-force-friction.md) | 15 Telugu concept cards (Force ×8, Friction ×7), term list to verify, misconception library. **Reference draft: see the AI-content warning inside** |
 | 11 | [11-question-bank-force-friction.md](11-question-bank-force-friction.md) | 55 Telugu practice questions (MCQ, true/false, fill-in) with misconception tags and feedback. **Reference draft: same warning** |
 | 12 | [12-team-split.md](12-team-split.md) | Two-member build split: ownership, shared contracts (content pack, API, engine, sync), task lists, timeline with sync points, fallback plan |
+| 13 | [13-prompts-member-a.md](13-prompts-member-a.md) | Ready-to-paste Codebenders prompts for Member A (A1–A15), with checks after each and a dependency table |
 
 ## Judging criteria → where the evidence lives
 | Criterion | Weight | What judges must see | Evidence |
