@@ -11,6 +11,7 @@ import { LogoMark } from "../../components/TopBar";
 import { Button } from "../../components/ui/Button";
 import { Icon, type IconName } from "../../components/ui/Icon";
 import { formatNumber } from "../../components/food/format";
+import { RunDemoButton } from "../../components/demo/RunDemoButton";
 
 type AccountSummary = { account_id: string; role: Role; label: string; area: string };
 
@@ -119,6 +120,7 @@ export default function Login() {
   return (
     <div className="flex flex-col gap-6">
       <Hero />
+      <RunDemoButton />
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">

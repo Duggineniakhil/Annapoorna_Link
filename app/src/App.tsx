@@ -26,6 +26,7 @@ const VolunteerHistory = lazy(() => import("./screens/volunteer/VolunteerHistory
 const SponsorDashboard = lazy(() => import("./screens/sponsor/SponsorDashboard"));
 const SponsorMap = lazy(() => import("./screens/sponsor/SponsorMap"));
 const About = lazy(() => import("./screens/common/About"));
+const DemoGuide = lazy(() => import("./screens/common/DemoGuide"));
 const NotFound = lazy(() => import("./screens/common/NotFound"));
 
 const router = createBrowserRouter([
@@ -59,6 +60,7 @@ const router = createBrowserRouter([
           { path: "/sponsor/map", element: <SponsorMap /> },
 
           { path: "/about", element: <About /> },
+          { path: "/demo-guide", element: <DemoGuide /> },
           { path: "*", element: <NotFound /> },
         ],
       },

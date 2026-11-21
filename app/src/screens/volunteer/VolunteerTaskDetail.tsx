@@ -362,6 +362,7 @@ export default function VolunteerTaskDetail() {
       titleKey={STEP_TITLE[step]}
       title={t(STEP_TITLE[step])}
       eyebrow={<Progress step={step} />}
+      demoData
     >
       {step === 1 && (
         <div className="flex flex-col gap-4">

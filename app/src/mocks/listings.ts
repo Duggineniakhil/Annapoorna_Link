@@ -478,6 +478,19 @@ function advance(listing: Listing, status: Status, nowMs: number): void {
   saveStore();
 }
 
+/** Matching sent the listing to kitchens (used by the demo scenario). */
+export function markOffered(listingId: string, nowMs: number): Listing | undefined {
+  const listing = listingStore.find((l) => l.id === listingId);
+  if (!listing || listing.status !== "posted") return undefined;
+  listing.status = "offered";
+  listing.timeline = [
+    ...timelineOf(listing),
+    { type: "offered", status: "offered", at: new Date(nowMs).toISOString(), actor_role: "donor" },
+  ];
+  saveStore();
+  return listing;
+}
+
 /** A volunteer took the delivery task for a claimed listing. */
 export function assignVolunteer(
   listingId: string,

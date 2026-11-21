@@ -2,6 +2,7 @@ import type { Category, Org, Storage, User } from "../types/api";
 import { DEMO_ACCOUNTS } from "./demoData";
 import { emitListingEvent } from "./events";
 import { mapData } from "./map";
+import { SCENARIO_NAMES, runWeddingNight } from "./scenario";
 import { impactReport } from "./impact";
 import { MIN_AUDIO_BYTES, STT_EMPTY, VOICE_DELAY_MS, voiceDraft } from "./voice";
 import {
@@ -132,6 +133,18 @@ const LISTING_NOT_FOUND = {
   error_code: "NOT_FOUND",
   message: "Listing not found.",
   message_te: "జాబితా కనుగొనబడలేదు.",
+};
+
+const SCENARIO_INVALID = {
+  error_code: "VALIDATION_FAILED",
+  message: "Unknown demo scenario.",
+  message_te: "తెలియని డెమో దృశ్యం.",
+};
+
+const SCENARIO_RUNNING = {
+  error_code: "INVALID_STATE",
+  message: "A demo is already running. Wait for it to finish.",
+  message_te: "ఒక డెమో ఇప్పటికే నడుస్తోంది. అది పూర్తయ్యే వరకు ఆగండి.",
 };
 
 const LISTING_INVALID_STATE = {
@@ -492,6 +505,18 @@ async function route(
       ? { token: newToken, user: account.user, org: account.org }
       : { token: newToken, user: account.user };
     return { status: 200, body: responseBody };
+  }
+
+  // Demo scenario (B13): like the server with DEMO_MODE=true, any signed-in user may start it.
+  if (method === "POST" && pathname === "/api/demo/scenario") {
+    if (!sessionFor(token)) return { status: 401, body: { ...UNAUTHORIZED } };
+    const name =
+      typeof body === "object" && body !== null ? (body as { name?: unknown }).name : undefined;
+    if (!SCENARIO_NAMES.includes(name as (typeof SCENARIO_NAMES)[number])) {
+      return { status: 400, body: { ...SCENARIO_INVALID } };
+    }
+    if (runWeddingNight() === null) return { status: 409, body: { ...SCENARIO_RUNNING } };
+    return { status: 202, body: { started: true } };
   }
 
   if (method === "GET" && pathname === "/api/me") {

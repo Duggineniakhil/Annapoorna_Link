@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { DonorType } from "../../types/api";
 import type { MessageKey } from "../../i18n/en";
 import { useT } from "../../i18n";
+import { RunDemoButton } from "../../components/demo/RunDemoButton";
 import { Screen } from "../../components/Screen";
 import { Card, SectionHeader } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
@@ -93,6 +94,7 @@ export default function SponsorDashboard() {
         </Card>
       )}
       {data && <HowWeCalculate impact={data} city />}
+      <RunDemoButton />
     </Screen>
   );
 }

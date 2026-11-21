@@ -1,11 +1,9 @@
 import type { MouseEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { config } from "../config";
 import { useT } from "../i18n";
-import { DEMO_ACCOUNTS } from "../mocks/demoData";
+import { DemoAccountList } from "./demo/DemoAccountList";
 import { LanguageToggle } from "./LanguageToggle";
-import { ROLE_HOME } from "./roles";
 import { Icon } from "./ui/Icon";
 import OfflineBanner from "./OfflineBanner";
 import { useSettings } from "./SettingsProvider";
@@ -98,23 +96,13 @@ export function LogoMark({ className = "h-9 w-9" }: { className?: string }) {
 
 export function TopBar() {
   const { t } = useT();
-  const { user, org, isLoggedIn, switchAccount, logout } = useAuth();
+  const { user, org, isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
 
   const onLogout = (e: MouseEvent<HTMLButtonElement>) => {
     closeMenu(e);
     logout();
     navigate("/login", { replace: true });
-  };
-
-  const onSwitch = async (e: MouseEvent<HTMLButtonElement>, accountId: string) => {
-    closeMenu(e);
-    try {
-      const next = await switchAccount(accountId);
-      navigate(ROLE_HOME[next.role], { replace: true });
-    } catch {
-      // Failed switch keeps the previous session; the user stays on this screen.
-    }
   };
 
   const item = "flex min-h-[48px] w-full items-center gap-3 px-4 text-left hover:bg-leaf-50";
@@ -155,6 +143,10 @@ export function TopBar() {
                 <Icon name="info" className="h-5 w-5 text-leaf-700" />
                 {t("nav.about")}
               </Link>
+              <Link to="/demo-guide" onClick={closeMenu} className={item}>
+                <Icon name="clipboard" className="h-5 w-5 text-leaf-700" />
+                {t("demo.guide.title")}
+              </Link>
               {isLoggedIn ? (
                 <button type="button" onClick={onLogout} className={item}>
                   <Icon name="logout" className="h-5 w-5 text-leaf-700" />
@@ -162,23 +154,10 @@ export function TopBar() {
                 </button>
               ) : null}
               <SettingsSection />
-              {config.useMocks && isLoggedIn ? (
+              {isLoggedIn ? (
                 <div className="border-t border-ink/5 pt-1">
                   <p className="px-4 py-1 text-xs font-bold text-ink/60">{t("menu.switchDemo")}</p>
-                  {DEMO_ACCOUNTS.filter((acc) => acc.user.id !== user?.id).map((acc) => (
-                    <button
-                      key={acc.account_id}
-                      type="button"
-                      onClick={(e) => void onSwitch(e, acc.account_id)}
-                      className={item}
-                    >
-                      <Icon name="user" className="h-5 w-5 shrink-0 text-leaf-700" />
-                      <span className="flex flex-col leading-tight">
-                        <span>{acc.label}</span>
-                        <span className="text-xs text-ink/60">{t(`role.${acc.role}`)}</span>
-                      </span>
-                    </button>
-                  ))}
+                  <DemoAccountList variant="menu" onPicked={closeMenu} />
                 </div>
               ) : null}
             </div>

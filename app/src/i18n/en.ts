@@ -441,5 +441,74 @@ export const en = {
   "about.version": "Version {version} · {mode}",
   "about.mode.demo": "Demo mode",
   "about.mode.live": "Live",
+  // Voice errors, demo mode (A14)
+  "voice.notHeard": "Couldn't hear clearly. Please hold the button and try again.",
+  "voice.badAudio": "We couldn't use that recording. Please hold the button and record again.",
+  "voice.limit": "Voice posting has reached today's limit. Please fill the form below.",
+  "voice.useForm": "You can also fill the form below.",
+  "demo.run.title": "See the whole rescue in one minute",
+  "demo.run.body":
+    "Sri Sai Caterers posts 150 plates from a wedding. A kitchen accepts, a volunteer picks up and delivers. You watch it as the caterer.",
+  "demo.run.button": "Run wedding-night demo",
+  "demo.run.starting": "Starting the demo…",
+  "demo.panel.label": "Demo progress",
+  "demo.panel.running": "Demo running",
+  "demo.panel.done": "Demo finished: food delivered",
+  "demo.panel.stopped": "Demo stopped",
+  "demo.panel.close": "Close demo progress",
+  "demo.panel.joined": "A demo was already running, so you are watching that one.",
+  "demo.step.posted": "Posted",
+  "demo.step.offered": "Offered to kitchens",
+  "demo.step.claimed": "Claimed by a kitchen",
+  "demo.step.picked_up": "Picked up",
+  "demo.step.delivered": "Delivered",
+  "demo.step.doneSr": "(done)",
+  "demo.accounts.current": "Signed in now",
+  "demo.guide.link": "How to demo it by hand",
+  "demo.guide.title": "Demo guide",
+  "demo.guide.intro":
+    "Two ways to show Annapoorna Link: one tap that plays a whole rescue, or by hand with three screens, the way real people would use it.",
+  "demo.guide.oneTapTitle": "1. One tap",
+  "demo.guide.byHandTitle": "2. By hand",
+  "demo.guide.byHandIntro":
+    "Open two browser windows side by side on a laptop, and the app on a phone. Each window keeps its own sign-in.",
+  "demo.guide.window1": "Window 1",
+  "demo.guide.donorWho": "Donor: Sri Sai Caterers",
+  "demo.guide.donor1": "Sign in as Sri Sai Caterers and tap Post food.",
+  "demo.guide.donor2":
+    'Hold the mic and say "40 plates veg biryani, cooked half an hour ago, kept hot", or fill the form. Check it and tap Post.',
+  "demo.guide.donor3": "Open the new post. It shows the 4-digit pickup code and updates by itself.",
+  "demo.guide.window2": "Window 2",
+  "demo.guide.receiverWho": "Kitchen: Annadanam Community Kitchen",
+  "demo.guide.receiver1":
+    "Sign in as Annadanam Community Kitchen. The new offer appears within seconds.",
+  "demo.guide.receiver2":
+    "Open it and tap Accept. The 4-digit delivery code appears. Window 1 now shows who is taking the food.",
+  "demo.guide.phone": "Phone",
+  "demo.guide.volunteerWho": "Volunteer: Ravi K.",
+  "demo.guide.volunteer1": "Sign in as Ravi K. and turn on availability. Accept the pickup task.",
+  "demo.guide.volunteer2": "At the caterer, type the pickup code from window 1.",
+  "demo.guide.volunteer3":
+    "At the kitchen, type the delivery code from window 2 and the meals handed over.",
+  "demo.guide.live":
+    "Every step shows up in the other windows straight away. When it is delivered, the donor's impact numbers and the sponsor dashboard and map count the meals.",
+  "demo.guide.codesTitle": "The two codes",
+  "demo.guide.pickupCode": "Pickup code:",
+  "demo.guide.pickupCodeBody":
+    "only the donor sees it. The volunteer types it when collecting, so the donor knows the right person took the food.",
+  "demo.guide.deliveryCode": "Delivery code:",
+  "demo.guide.deliveryCodeBody":
+    "only the kitchen that accepted sees it. The volunteer types it on arrival, which confirms the food reached them.",
+  "demo.guide.codeTries": "Codes are 4 digits. After 5 wrong tries a code locks.",
+  "demo.guide.accountsTitle": "Demo accounts",
+  "demo.guide.accountsBody":
+    "Tap one to sign in as it. Switching never changes the language. You can also switch from the account menu at the top.",
+  "demo.guide.tipsTitle": "Tips",
+  "demo.guide.tipTabs":
+    "Ravi rides a two-wheeler that carries 40 meals, so post 40 plates or fewer when he delivers.",
+  "demo.guide.tipOffline":
+    "In offline demo mode (no server), only windows in the same browser share data, and the kitchen's offers are preset. Use the live app for the phone.",
+  "demo.guide.tipLanguage": "Tap తెలుగు at the top to show the whole flow in Telugu.",
+  "demo.guide.tipData": "All names, places and numbers are fictional demo data.",
 } as const;
 export type MessageKey = keyof typeof en;
