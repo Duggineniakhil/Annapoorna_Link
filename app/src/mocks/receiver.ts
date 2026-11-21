@@ -90,16 +90,19 @@ const decisions: Record<string, Decision> = readJson(DECISIONS_KEY, {});
 
 // Demo listings are re-seeded on load, so re-apply saved accepts: the donor keeps seeing who
 // claimed the food, and other kitchens stop being offered it.
-for (const stored of offerStore) {
-  if (decisions[stored.offer.id]?.state === "accepted") {
-    claimListing(
-      stored.offer.listing.id,
-      stored.receiver_org_id,
-      stored.offer.distance_km,
-      Date.now(),
-    );
+function applyAcceptedClaims(): void {
+  for (const stored of offerStore) {
+    if (decisions[stored.offer.id]?.state === "accepted") {
+      claimListing(
+        stored.offer.listing.id,
+        stored.receiver_org_id,
+        stored.offer.distance_km,
+        Date.now(),
+      );
+    }
   }
 }
+applyAcceptedClaims();
 
 function statusOf(s: StoredOffer, nowMs: number): NonNullable<Offer["status"]> {
   const decision = decisions[s.offer.id];
@@ -119,6 +122,11 @@ function viewOf(s: StoredOffer, nowMs: number): Offer {
     view.volunteer_eta_min = decision.volunteer_eta_min;
   }
   return view;
+}
+
+/** Receiver orgs that were offered this listing (they hear when it is taken or cancelled). */
+export function orgsOfferedListing(listingId: string): string[] {
+  return offerStore.filter((s) => s.offer.listing.id === listingId).map((s) => s.receiver_org_id);
 }
 
 /** GET /api/offers: pending offers (open or just expired) for the org, best rank first. */
@@ -227,6 +235,18 @@ function defaultNeeds(orgId: string): ReceiverNeeds {
 }
 
 const needsStore: Record<string, ReceiverNeeds> = readJson(NEEDS_KEY, {});
+
+function replaceContents<T>(target: Record<string, T>, source: Record<string, T>): void {
+  for (const key of Object.keys(target)) delete target[key];
+  Object.assign(target, source);
+}
+
+/** Re-reads decisions and needs from localStorage (another tab changed them). */
+export function reloadReceiverState(): void {
+  replaceContents(decisions, readJson<Record<string, Decision>>(DECISIONS_KEY, {}));
+  replaceContents(needsStore, readJson<Record<string, ReceiverNeeds>>(NEEDS_KEY, {}));
+  applyAcceptedClaims();
+}
 
 export function receiverNeeds(orgId: string): ReceiverNeeds {
   const saved = needsStore[orgId];

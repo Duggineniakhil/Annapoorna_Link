@@ -185,10 +185,22 @@ const GUIDANCE: Record<Storage, { en: string; te: string }> = {
 };
 
 // Declared after the helpers above, which the seeding calls at module load.
-export const listingStore: Listing[] = [
-  ...loadPosted(),
-  ...(typeof localStorage === "undefined" ? [] : LISTINGS.map(seedFixture)),
-];
+function seedStore(): Listing[] {
+  return [
+    ...loadPosted(),
+    ...(typeof localStorage === "undefined" ? [] : LISTINGS.map(seedFixture)),
+  ];
+}
+
+export const listingStore: Listing[] = seedStore();
+
+/**
+ * Rebuilds the store from localStorage and the demo seeds (another tab changed the mock server).
+ * The receiver and volunteer modules then re-apply their saved claims and progress.
+ */
+export function reloadListings(): void {
+  listingStore.splice(0, listingStore.length, ...seedStore());
+}
 
 export function guidanceFor(input: {
   items: { category: Category; veg: boolean }[];

@@ -3,6 +3,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
 import { RootRedirect, SectionGuard } from "./components/RoleGuard";
 import { AuthProvider } from "./auth/AuthContext";
+import { ToastProvider } from "./components/ToastProvider";
+import LiveStatusNote from "./components/LiveStatusNote";
+import { LiveEventsProvider } from "./hooks/useLiveEvents";
 import Login from "./screens/common/Login";
 
 // Lazy-load every screen except login so the first load stays small.
@@ -66,7 +69,12 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <AuthProvider>
-      <RouterProvider router={router} />
+      <ToastProvider>
+        <LiveEventsProvider>
+          <LiveStatusNote />
+          <RouterProvider router={router} />
+        </LiveEventsProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 }

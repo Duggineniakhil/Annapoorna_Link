@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Listing, Status } from "../../types/api";
 import { apiRequest } from "../../services/api";
 import { useAuth } from "../../auth/AuthContext";
+import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import { useT } from "../../i18n";
 import { Screen } from "../../components/Screen";
 import { EmptyState } from "../../components/EmptyState";
@@ -22,7 +23,6 @@ const ACTIVE_STATUSES: Status[] = [
   "picked_up",
 ];
 const PAST_STATUSES: Status[] = ["delivered", "expired", "cancelled"];
-const REFRESH_MS = 15_000;
 
 type Tab = "active" | "past";
 const TAB_OPTIONS: ChipOption<Tab>[] = [
@@ -38,24 +38,21 @@ export default function DonorHome() {
   const [tab, setTab] = useState<Tab>("active");
   // All listings come from the API (the mock server seeds demo listings in every status).
   const [posted, setPosted] = useState<Listing[]>([]);
-  useEffect(() => {
-    let cancelled = false;
-    const load = () => {
+  const load = useCallback(
+    () =>
       apiRequest<Listing[]>("GET", "/api/listings")
         .then((data) => {
-          if (!cancelled) setPosted(data);
+          setPosted(data);
         })
         .catch(() => {
-          if (!cancelled) setPosted([]);
-        });
-    };
-    load();
-    const id = window.setInterval(load, REFRESH_MS);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
-  }, []);
+          setPosted([]);
+        }),
+    [],
+  );
+  useEffect(() => {
+    void load();
+  }, [load]);
+  useLiveRefetch(() => void load());
   const mine = posted.filter((l) => l.donor_org === org?.id);
   const active = mine.filter((l) => ACTIVE_STATUSES.includes(l.status));
   const past = mine.filter((l) => PAST_STATUSES.includes(l.status));

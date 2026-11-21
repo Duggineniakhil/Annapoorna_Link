@@ -111,12 +111,23 @@ const taskIdOf = (listingId: string) => `tsk-${listingId}`;
 const listingIdOf = (taskId: string) => (taskId.startsWith("tsk-") ? taskId.slice(4) : taskId);
 
 // Re-apply saved progress to the freshly seeded demo listings.
-for (const [listingId, st] of Object.entries(store.tasks)) {
-  const name = st.volunteer_id ? volunteerName(st.volunteer_id) : undefined;
-  const at = st.delivered_at ? Date.parse(st.delivered_at) : Date.now();
-  if (name && st.progress) assignVolunteer(listingId, name, vehicleOf(st.volunteer_id!), at);
-  if (st.progress === "picked_up" || st.progress === "delivered") markPickedUp(listingId, at);
-  if (st.progress === "delivered") markDelivered(listingId, at);
+function applyProgress(): void {
+  for (const [listingId, st] of Object.entries(store.tasks)) {
+    const name = st.volunteer_id ? volunteerName(st.volunteer_id) : undefined;
+    const at = st.delivered_at ? Date.parse(st.delivered_at) : Date.now();
+    if (name && st.progress) assignVolunteer(listingId, name, vehicleOf(st.volunteer_id!), at);
+    if (st.progress === "picked_up" || st.progress === "delivered") markPickedUp(listingId, at);
+    if (st.progress === "delivered") markDelivered(listingId, at);
+  }
+}
+applyProgress();
+
+/** Re-reads availability and task progress from localStorage (another tab changed them). */
+export function reloadVolunteerState(): void {
+  const fresh = readJson<Partial<VolunteerStore>>(STORE_KEY, {});
+  store.available = typeof fresh.available === "boolean" ? fresh.available : true;
+  store.tasks = fresh.tasks ?? {};
+  applyProgress();
 }
 
 function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {

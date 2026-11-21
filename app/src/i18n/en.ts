@@ -332,6 +332,16 @@ export const en = {
   "volunteer.meals.label": "Meals delivered",
   "volunteer.meals.invalid": "Enter a number from 1 to {max}.",
   "volunteer.code.label": "Code digit",
+
+  // Live updates and toasts
+  "toast.donor.accepted": "A receiver accepted your food",
+  "toast.donor.acceptedBy": "{name} accepted your food",
+  "toast.donor.picked": "A volunteer picked up your food",
+  "toast.donor.delivered": "Your food was delivered",
+  "toast.receiver.offer": "New food offer nearby",
+  "toast.receiver.volunteerOnWay": "Volunteer on the way",
+  "toast.volunteer.newTask": "New task nearby",
+  "live.paused": "Live updates paused, refreshing every 15 s",
 } as const;
 
 export type MessageKey = keyof typeof en;

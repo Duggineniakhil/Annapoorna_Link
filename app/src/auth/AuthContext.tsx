@@ -85,46 +85,66 @@ export function readStoredSession(
   return { token, user, org: parseOrg(rawOrg) };
 }
 
-function getStorage(): Storage | null {
+// The session is kept per tab (sessionStorage) and as the browser default (localStorage).
+// A tab keeps its own account across refreshes, so a demo can show the donor in one window and
+// the receiver in another; a new tab starts with the account last signed in.
+function storages(): Storage[] {
+  const list: Storage[] = [];
   try {
-    return localStorage;
+    list.push(sessionStorage);
   } catch {
-    return null;
+    // sessionStorage unavailable.
   }
+  try {
+    list.push(localStorage);
+  } catch {
+    // localStorage unavailable.
+  }
+  return list;
 }
 
 function clearStoredSession(): void {
-  try {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(ORG_KEY);
-  } catch {
-    // Storage unavailable; nothing persisted to clear.
+  for (const storage of storages()) {
+    try {
+      storage.removeItem(TOKEN_KEY);
+      storage.removeItem(USER_KEY);
+      storage.removeItem(ORG_KEY);
+    } catch {
+      // Storage unavailable; nothing persisted to clear.
+    }
   }
 }
 
-function hydrateSession(): SessionState {
-  const storage = getStorage();
-  const stored = storage ? readStoredSession(storage) : null;
-  if (!stored) {
-    clearStoredSession();
-    return EMPTY_SESSION;
-  }
-  return { token: stored.token, user: stored.user, org: stored.org };
-}
-
-function writeStoredSession(token: string, user: User, org: Org | null): void {
+function writeTo(storage: Storage, token: string, user: User, org: Org | null): void {
   try {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    storage.setItem(TOKEN_KEY, token);
+    storage.setItem(USER_KEY, JSON.stringify(user));
     if (org) {
-      localStorage.setItem(ORG_KEY, JSON.stringify(org));
+      storage.setItem(ORG_KEY, JSON.stringify(org));
     } else {
-      localStorage.removeItem(ORG_KEY);
+      storage.removeItem(ORG_KEY);
     }
   } catch {
     // Storage unavailable; in-memory state still reflects the session.
   }
+}
+
+function hydrateSession(): SessionState {
+  const [first, ...rest] = storages();
+  for (const storage of [first, ...rest].filter(Boolean)) {
+    const stored = readStoredSession(storage);
+    if (stored) {
+      // Pin this tab to the account it opened with.
+      if (first && storage !== first) writeTo(first, stored.token, stored.user, stored.org);
+      return { token: stored.token, user: stored.user, org: stored.org };
+    }
+  }
+  clearStoredSession();
+  return EMPTY_SESSION;
+}
+
+function writeStoredSession(token: string, user: User, org: Org | null): void {
+  for (const storage of storages()) writeTo(storage, token, user, org);
 }
 
 const AuthContext = createContext<AuthValue | null>(null);

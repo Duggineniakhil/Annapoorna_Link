@@ -331,4 +331,14 @@ export const te: Record<MessageKey, string> = {
   "volunteer.meals.label": "అందించిన భోజనాలు",
   "volunteer.meals.invalid": "1 నుండి {max} మధ్య సంఖ్య నమోదు చేయండి.",
   "volunteer.code.label": "కోడ్ అంకె",
+
+  // Live updates and toasts (Telugu drafts: native review needed)
+  "toast.donor.accepted": "ఒక స్వీకర్త మీ ఆహారాన్ని అంగీకరించారు",
+  "toast.donor.acceptedBy": "{name} మీ ఆహారాన్ని అంగీకరించారు",
+  "toast.donor.picked": "వాలంటీర్ మీ ఆహారాన్ని తీసుకెళ్లారు",
+  "toast.donor.delivered": "మీ ఆహారం అందజేయబడింది",
+  "toast.receiver.offer": "దగ్గరలో కొత్త ఆహార ఆఫర్",
+  "toast.receiver.volunteerOnWay": "వాలంటీర్ వస్తున్నారు",
+  "toast.volunteer.newTask": "దగ్గరలో కొత్త పని",
+  "live.paused": "లైవ్ అప్‌డేట్లు ఆగాయి, ప్రతి 15 సెకన్లకు రిఫ్రెష్ చేస్తున్నాం",
 };

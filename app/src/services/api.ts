@@ -101,8 +101,13 @@ function isAbortError(err: unknown): boolean {
   return isRecord(err) && err.name === "AbortError";
 }
 
+/** This tab's token first (see AuthContext), then the browser default. */
 function readToken(): string | null {
   try {
+    if (typeof sessionStorage !== "undefined") {
+      const own = sessionStorage.getItem(TOKEN_KEY);
+      if (own) return own;
+    }
     return localStorage.getItem(TOKEN_KEY);
   } catch {
     return null;
@@ -111,8 +116,10 @@ function readToken(): string | null {
 
 function expireSession(): void {
   try {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    for (const storage of [sessionStorage, localStorage]) {
+      storage.removeItem(TOKEN_KEY);
+      storage.removeItem(USER_KEY);
+    }
   } catch {
     // Storage unavailable; still notify listeners below.
   }

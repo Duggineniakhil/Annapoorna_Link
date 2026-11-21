@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import type { Listing, Status, TimelineEvent } from "../../types/api";
 import type { MessageKey } from "../../i18n/en";
 import { useT } from "../../i18n";
 import { useAuth } from "../../auth/AuthContext";
+import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import { ApiError, apiRequest } from "../../services/api";
 import { Screen } from "../../components/Screen";
 import { Card } from "../../components/ui/Card";
@@ -14,9 +15,7 @@ import { SafetyCard } from "../../components/SafetyCard";
 
 // Donor listing detail: the listing card, status timeline, matched receiver and volunteer,
 // pickup code (before pickup), cancel (before pickup), expired notice and the safety card.
-// The listing is refetched every 15 seconds.
-
-const REFRESH_MS = 15_000;
+// The listing is refetched on live updates (and every 15 seconds while live updates are paused).
 
 const CANCELLABLE: Status[] = ["posted", "offered", "claimed", "volunteer_assigned"];
 const CODE_HIDDEN: Status[] = ["picked_up", "delivered", "expired", "cancelled"];
@@ -45,26 +44,23 @@ export default function DonorListingDetail() {
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = () =>
+  // Keeps the previous listing on refetch; only the first load shows the loading state.
+  const load = useCallback(
+    () =>
       apiRequest<Listing>("GET", `/api/listings/${id ?? ""}`)
         .then((l) => {
-          if (cancelled) return;
           setListing(l);
           setError(null);
         })
         .catch((err: unknown) => {
-          if (cancelled) return;
           setError(err instanceof Error ? err.message : String(err));
-        });
-    load();
-    const timer = setInterval(load, REFRESH_MS);
-    return () => {
-      cancelled = true;
-      clearInterval(timer);
-    };
-  }, [id]);
+        }),
+    [id],
+  );
+  useEffect(() => {
+    void load();
+  }, [load]);
+  useLiveRefetch(() => void load(), id);
 
   async function cancelListing() {
     if (!listing) return;

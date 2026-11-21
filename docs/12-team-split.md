@@ -80,6 +80,8 @@ Impact      { meals, kg, co2e_kg, on_time_rate, median_claim_min, rescue_rate, a
 | `GET /api/listings` for receivers (added in A8, B to confirm) | receiver: own claimed / volunteer_assigned / picked_up listings, with `delivery_code`, no `pickup_code` | `Listing[]` |
 
 Task errors (added in A8, B to confirm): accepting while unavailable or with a task already active is 409 (`VOLUNTEER_UNAVAILABLE`, `TASK_ALREADY_ACTIVE`). A wrong pickup or delivery code is 422 `WRONG_CODE` with `tries_left`; after 5 wrong tries the code is locked, 423 `CODE_LOCKED`. The pickup code is the donor's `listing.pickup_code`; the delivery code is the receiver's `listing.delivery_code`.
+
+Live events (added in A9, B to confirm): `GET /api/events` sends `{ type: "listing_status", listing_id, status, at }` only to the parties of the listing: the donor org, the receiver org that claimed it, kitchens that were offered it (only for `claimed` / `cancelled` / `expired`, so their offer closes), and volunteers (every status from `claimed` on, since claimed food is a task). Events carry no names; the app looks up the listing when it needs one. The app falls back to polling every 15 s after 3 failed connections.
 | `GET /api/impact` | `?scope=me|city&from=&to=` | `Impact` (+ `by_area`, `by_donor_type` for city) |
 | `GET /api/map` | sponsor/city: area-level points | `{ donors: Org[], receivers: Org[], recent: [...] }` |
 | `POST /api/voice-post` (P1) | donor: multipart `audio` | `{ draft: { items, veg, allergens, storage, cooked_at }, transcript }` |

@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import type { DeclineReason, Offer } from "../../types/api";
 import type { MessageKey } from "../../i18n/en";
 import { useT } from "../../i18n";
+import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import { ApiError, acceptOffer, declineOffer, getOffer } from "../../services/api";
 import { Screen } from "../../components/Screen";
 import { EmptyState } from "../../components/EmptyState";
@@ -14,9 +15,8 @@ import { SafetyCard } from "../../components/SafetyCard";
 import { orgArea, orgName } from "../../mocks/fixtures";
 
 // Receiver offer detail: listing, match reasons, distance and ETA, map placeholder, timeline,
-// the delivery code once accepted, the volunteer, and the safety card. Refetched every 15 seconds.
+// the delivery code once accepted, the volunteer, and the safety card. Refetched on live updates.
 
-const REFRESH_MS = 15_000;
 const CLOSED_CODES: string[] = ["OFFER_EXPIRED", "OFFER_NOT_OPEN"];
 
 const REASONS: DeclineReason[] = ["too_far", "cant_accept_type", "no_space", "closing"];
@@ -58,9 +58,9 @@ export default function ReceiverOfferDetail() {
 
   useEffect(() => {
     void load();
-    const timer = window.setInterval(() => void load(), REFRESH_MS);
-    return () => window.clearInterval(timer);
   }, [load]);
+  // Live events are about listings, so match on the offer's listing id.
+  useLiveRefetch(() => void load(), offer?.listing.id);
 
   function actionMessage(err: unknown): string {
     const closed = err instanceof ApiError && CLOSED_CODES.includes(err.error_code);

@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { TopBar } from "./TopBar";
 import { BottomNav } from "./BottomNav";
 import { roleFromPath } from "./roles";
+import { useLiveToasts } from "../hooks/useLiveToasts";
 
 function Loading() {
   return (
@@ -13,6 +14,7 @@ function Loading() {
 }
 
 export function AppShell() {
+  useLiveToasts();
   const { pathname } = useLocation();
   const role = roleFromPath(pathname);
   return (

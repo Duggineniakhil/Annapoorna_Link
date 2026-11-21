@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Listing } from "../../types/api";
+import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import { useT } from "../../i18n";
 import { apiRequest } from "../../services/api";
 import { Card } from "../../components/ui/Card";
@@ -9,8 +10,6 @@ import { MealsBadge } from "../../components/food/ListingCard";
 import { itemsTitle } from "../../components/food/format";
 import { orgArea, orgName } from "../../mocks/fixtures";
 
-const REFRESH_MS = 15_000;
-
 /**
  * "On its way to you": food this kitchen has claimed, with its progress and the delivery code
  * to show the volunteer on arrival. Hidden when nothing is on the way.
@@ -19,19 +18,17 @@ export function IncomingFood() {
   const { t } = useT();
   const [listings, setListings] = useState<Listing[]>([]);
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = () =>
+  const load = useCallback(
+    () =>
       apiRequest<Listing[]>("GET", "/api/listings")
-        .then((data) => !cancelled && setListings(data))
-        .catch(() => undefined); // the offers below still work; retry on the next tick
+        .then((data) => setListings(data))
+        .catch(() => undefined), // the offers below still work; retry on the next update
+    [],
+  );
+  useEffect(() => {
     void load();
-    const id = window.setInterval(() => void load(), REFRESH_MS);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
-  }, []);
+  }, [load]);
+  useLiveRefetch(() => void load());
 
   if (listings.length === 0) return null;
 

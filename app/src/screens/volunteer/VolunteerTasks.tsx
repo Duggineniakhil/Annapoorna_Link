@@ -17,8 +17,7 @@ import {
   listTasks,
   setVolunteerAvailability,
 } from "../../services/api";
-
-const REFRESH_MS = 15_000;
+import { useLiveRefetch } from "../../hooks/useLiveEvents";
 
 type AcceptFailureKind = "notOpen" | "alreadyActive" | "network" | "generic";
 type AcceptFailure = { id: string; kind: AcceptFailureKind };
@@ -164,9 +163,9 @@ export default function VolunteerTasks() {
 
   useEffect(() => {
     void refresh();
-    const id = window.setInterval(() => void refresh(), REFRESH_MS);
-    return () => window.clearInterval(id);
   }, [refresh]);
+
+  useLiveRefetch(refresh);
 
   async function changeAvailability(next: boolean) {
     const prev = available;

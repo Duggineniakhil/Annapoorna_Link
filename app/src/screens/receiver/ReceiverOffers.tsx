@@ -4,6 +4,7 @@ import type { DeclineReason, Offer } from "../../types/api";
 import type { MessageKey } from "../../i18n/en";
 import { useT } from "../../i18n";
 import { useAuth } from "../../auth/AuthContext";
+import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import { useNow } from "../../hooks/useNow";
 import { ApiError, acceptOffer, declineOffer, listOffers } from "../../services/api";
 import { Screen } from "../../components/Screen";
@@ -16,7 +17,6 @@ import { Countdown } from "../../components/food/FoodBits";
 import { orgArea, orgName } from "../../mocks/fixtures";
 import { IncomingFood } from "./IncomingFood";
 
-const REFRESH_MS = 15_000;
 const CLOSED_CODES: string[] = ["OFFER_EXPIRED", "OFFER_NOT_OPEN"];
 
 type Filter = "all" | "veg" | "soon";
@@ -63,9 +63,8 @@ export default function ReceiverOffers() {
 
   useEffect(() => {
     void load();
-    const id = window.setInterval(() => void load(), REFRESH_MS);
-    return () => window.clearInterval(id);
   }, [load]);
+  useLiveRefetch(() => void load());
 
   function actionMessage(err: unknown): string {
     const closed = err instanceof ApiError && CLOSED_CODES.includes(err.error_code);

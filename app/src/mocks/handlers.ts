@@ -1,5 +1,6 @@
 import type { Category, Org, Storage, User } from "../types/api";
 import { DEMO_ACCOUNTS } from "./demoData";
+import { emitListingEvent } from "./events";
 import {
   cancelListing,
   createListing,
@@ -428,7 +429,35 @@ function handleVolunteerRequest(
     : volunteerFailure(result, DELIVERY_CODE_LOCKED);
 }
 
+/** The listing a successful POST changed: the listing itself, or a task's listing. */
+function changedListingId(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null) return undefined;
+  const b = body as { id?: unknown; status?: unknown; donor_org?: unknown; listing?: unknown };
+  if (typeof b.listing === "object" && b.listing !== null) {
+    const id = (b.listing as { id?: unknown }).id;
+    return typeof id === "string" ? id : undefined;
+  }
+  return typeof b.id === "string" && typeof b.donor_org === "string" && typeof b.status === "string"
+    ? b.id
+    : undefined;
+}
+
 export async function handleMockRequest(
+  method: "GET" | "POST" | "PUT",
+  path: string,
+  body: unknown,
+  token: string | null,
+): Promise<MockResponse> {
+  const res = await route(method, path, body, token);
+  // Live updates (A9): every change to a listing is sent to the parties, in this tab and others.
+  if (method === "POST" && res.status >= 200 && res.status < 300) {
+    const listingId = changedListingId(res.body);
+    if (listingId) emitListingEvent(listingId);
+  }
+  return res;
+}
+
+async function route(
   method: "GET" | "POST" | "PUT",
   path: string,
   body: unknown,

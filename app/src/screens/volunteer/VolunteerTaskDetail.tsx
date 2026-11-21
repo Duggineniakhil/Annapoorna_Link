@@ -15,12 +15,12 @@ import { Button, ButtonLink } from "../../components/ui/Button";
 import { useT } from "../../i18n";
 import type { MessageKey } from "../../i18n/en";
 import { ApiError, deliverTask, getTask, submitPickupCode } from "../../services/api";
+import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import type { Task } from "../../types/api";
 
 // Volunteer task stepper: go to pickup, enter pickup code, go to delivery, enter delivery code.
-// The task is refetched every 15 s until it is delivered.
+// The task is refetched on live events (polling fallback) until it is delivered.
 
-const REFRESH_MS = 15_000;
 const CODE_LENGTH = 4;
 const TOTAL_STEPS = 4;
 const EMPTY_CODE: string[] = ["", "", "", ""];
@@ -254,13 +254,11 @@ export default function VolunteerTaskDetail() {
     void load();
   }, [load]);
 
-  useEffect(() => {
-    if (done) return;
-    const timer = window.setInterval(() => {
-      void load();
-    }, REFRESH_MS);
-    return () => window.clearInterval(timer);
-  }, [done, load]);
+  const refetchIfOpen = () => {
+    if (!done) void load();
+  };
+  // Live events are about listings, so match on the task's listing id.
+  useLiveRefetch(refetchIfOpen, task?.listing.id);
 
   if (!task) {
     return (
