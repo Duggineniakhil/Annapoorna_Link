@@ -1,5 +1,12 @@
 import { config } from "../config";
 import { handleMockRequest } from "../mocks/handlers";
+import type {
+  DeclineReason,
+  Listing,
+  Offer,
+  ReceiverHistoryItem,
+  ReceiverNeeds,
+} from "../types/api";
 
 export const TOKEN_KEY = "al.token";
 export const USER_KEY = "al.user";
@@ -162,4 +169,43 @@ export async function apiRequest<T>(
     return undefined as T;
   }
   return settle<T>(status, parsed, lang);
+}
+
+// Receiver API (docs/12-team-split.md). Thin typed wrappers over apiRequest.
+
+/** GET /api/offers: open and expired offers for the receiver's org. */
+export function listOffers(): Promise<Offer[]> {
+  return apiRequest<Offer[]>("GET", "/api/offers");
+}
+
+/** GET /api/offers/:id */
+export function getOffer(id: string): Promise<Offer> {
+  return apiRequest<Offer>("GET", `/api/offers/${encodeURIComponent(id)}`);
+}
+
+/** POST /api/offers/:id/accept → the claimed Listing (with this receiver's delivery_code). */
+export function acceptOffer(id: string): Promise<Listing> {
+  return apiRequest<Listing>("POST", `/api/offers/${encodeURIComponent(id)}/accept`);
+}
+
+/** POST /api/offers/:id/decline with an optional reason. */
+export function declineOffer(id: string, reason?: DeclineReason): Promise<{ ok: boolean }> {
+  return apiRequest<{ ok: boolean }>("POST", `/api/offers/${encodeURIComponent(id)}/decline`, {
+    reason,
+  });
+}
+
+/** GET /api/receiver/needs */
+export function getReceiverNeeds(): Promise<ReceiverNeeds> {
+  return apiRequest<ReceiverNeeds>("GET", "/api/receiver/needs");
+}
+
+/** PUT /api/receiver/needs */
+export function saveReceiverNeeds(input: ReceiverNeeds): Promise<ReceiverNeeds> {
+  return apiRequest<ReceiverNeeds>("PUT", "/api/receiver/needs", input);
+}
+
+/** GET /api/receiver/history, newest first. */
+export function getReceiverHistory(): Promise<ReceiverHistoryItem[]> {
+  return apiRequest<ReceiverHistoryItem[]>("GET", "/api/receiver/history");
 }

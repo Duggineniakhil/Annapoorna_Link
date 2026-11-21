@@ -9,6 +9,18 @@ import {
   listingsForOrg,
 } from "./listings";
 import type { ListingInput } from "./listings";
+import type { OfferActionResult } from "./receiver";
+import {
+  acceptOffer,
+  declineOffer,
+  isDeclineReason,
+  isReceiverNeeds,
+  offerForOrg,
+  offersForOrg,
+  receiverHistory,
+  receiverNeeds,
+  saveReceiverNeeds,
+} from "./receiver";
 
 export interface MockResponse {
   status: number;
@@ -111,6 +123,55 @@ const LISTING_INVALID_STATE = {
   message: "This listing can no longer be cancelled.",
   message_te: "ఈ జాబితాను ఇప్పుడు రద్దు చేయలేరు.",
 };
+
+const FORBIDDEN_RECEIVER = {
+  error_code: "FORBIDDEN",
+  message: "Only receivers can see these pages.",
+  message_te: "ఈ పేజీలను స్వీకర్తలు మాత్రమే చూడగలరు.",
+};
+
+const OFFER_NOT_FOUND = {
+  error_code: "NOT_FOUND",
+  message: "Offer not found.",
+  message_te: "ఆఫర్ కనుగొనబడలేదు.",
+};
+
+const OFFER_EXPIRED = {
+  error_code: "OFFER_EXPIRED",
+  message: "This offer has expired.",
+  message_te: "ఈ ఆఫర్ గడువు ముగిసింది.",
+};
+
+const OFFER_NOT_OPEN = {
+  error_code: "OFFER_NOT_OPEN",
+  message: "This offer is no longer open.",
+  message_te: "ఈ ఆఫర్ ఇప్పుడు తెరిచి లేదు.",
+};
+
+const INVALID_DECLINE_REASON = {
+  error_code: "VALIDATION_FAILED",
+  message: "Choose a valid decline reason.",
+  message_te: "సరైన తిరస్కరణ కారణాన్ని ఎంచుకోండి.",
+};
+
+const INVALID_NEEDS_INPUT = {
+  error_code: "VALIDATION_FAILED",
+  message: "Check the meals number and the times (HH:MM).",
+  message_te: "భోజనాల సంఖ్య, సమయాలను (HH:MM) తనిఖీ చేయండి.",
+};
+
+function offerActionResponse<T>(result: OfferActionResult<T>): MockResponse {
+  if (result.ok) {
+    return { status: 200, body: result.value };
+  }
+  if (result.reason === "not_found") {
+    return { status: 404, body: { ...OFFER_NOT_FOUND } };
+  }
+  if (result.reason === "expired") {
+    return { status: 409, body: { ...OFFER_EXPIRED } };
+  }
+  return { status: 409, body: { ...OFFER_NOT_OPEN } };
+}
 
 function parseQuery(path: string): Record<string, string> {
   const out: Record<string, string> = {};
@@ -286,6 +347,93 @@ export async function handleMockRequest(
       return { status: 409, body: { ...LISTING_INVALID_STATE } };
     }
     return { status: 200, body: listingDetail(result.listing) };
+  }
+
+  if (method === "GET" && pathname === "/api/offers") {
+    const session = sessionFor(token);
+    if (!session) {
+      return { status: 401, body: { ...UNAUTHORIZED } };
+    }
+    if (session.user.role !== "receiver") {
+      return { status: 403, body: { ...FORBIDDEN_RECEIVER } };
+    }
+    return { status: 200, body: offersForOrg(orgIdOf(session)) };
+  }
+
+  const offerIdMatch = /^\/api\/offers\/([^/]+)$/.exec(pathname);
+  if (method === "GET" && offerIdMatch) {
+    const session = sessionFor(token);
+    if (!session) {
+      return { status: 401, body: { ...UNAUTHORIZED } };
+    }
+    if (session.user.role !== "receiver") {
+      return { status: 403, body: { ...FORBIDDEN_RECEIVER } };
+    }
+    const offer = offerForOrg(orgIdOf(session), offerIdMatch[1]);
+    if (!offer) {
+      return { status: 404, body: { ...OFFER_NOT_FOUND } };
+    }
+    return { status: 200, body: offer };
+  }
+
+  const acceptMatch = /^\/api\/offers\/([^/]+)\/accept$/.exec(pathname);
+  if (method === "POST" && acceptMatch) {
+    const session = sessionFor(token);
+    if (!session) {
+      return { status: 401, body: { ...UNAUTHORIZED } };
+    }
+    if (session.user.role !== "receiver") {
+      return { status: 403, body: { ...FORBIDDEN_RECEIVER } };
+    }
+    return offerActionResponse(acceptOffer(orgIdOf(session), acceptMatch[1], Date.now()));
+  }
+
+  const declineMatch = /^\/api\/offers\/([^/]+)\/decline$/.exec(pathname);
+  if (method === "POST" && declineMatch) {
+    const session = sessionFor(token);
+    if (!session) {
+      return { status: 401, body: { ...UNAUTHORIZED } };
+    }
+    if (session.user.role !== "receiver") {
+      return { status: 403, body: { ...FORBIDDEN_RECEIVER } };
+    }
+    const rawReason =
+      typeof body === "object" && body !== null
+        ? (body as Record<string, unknown>).reason
+        : undefined;
+    if (rawReason !== undefined && !isDeclineReason(rawReason)) {
+      return { status: 400, body: { ...INVALID_DECLINE_REASON } };
+    }
+    const reason = isDeclineReason(rawReason) ? rawReason : undefined;
+    return offerActionResponse(declineOffer(orgIdOf(session), declineMatch[1], reason, Date.now()));
+  }
+
+  if (pathname === "/api/receiver/needs" && (method === "GET" || method === "PUT")) {
+    const session = sessionFor(token);
+    if (!session) {
+      return { status: 401, body: { ...UNAUTHORIZED } };
+    }
+    if (session.user.role !== "receiver") {
+      return { status: 403, body: { ...FORBIDDEN_RECEIVER } };
+    }
+    if (method === "GET") {
+      return { status: 200, body: receiverNeeds(orgIdOf(session)) };
+    }
+    if (!isReceiverNeeds(body)) {
+      return { status: 400, body: { ...INVALID_NEEDS_INPUT } };
+    }
+    return { status: 200, body: saveReceiverNeeds(orgIdOf(session), body) };
+  }
+
+  if (method === "GET" && pathname === "/api/receiver/history") {
+    const session = sessionFor(token);
+    if (!session) {
+      return { status: 401, body: { ...UNAUTHORIZED } };
+    }
+    if (session.user.role !== "receiver") {
+      return { status: 403, body: { ...FORBIDDEN_RECEIVER } };
+    }
+    return { status: 200, body: receiverHistory(orgIdOf(session)) };
   }
 
   return { status: 404, body: { ...NOT_FOUND_ROUTE } };

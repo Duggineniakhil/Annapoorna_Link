@@ -88,7 +88,29 @@ export interface Offer {
   expires_at: string;
   distance_km: number;
   eta_min: number;
+  // Added in A7 (B to confirm). The receiver's delivery code is listing.delivery_code.
+  status?: "open" | "accepted" | "declined" | "expired";
+  volunteer_first_name?: string;
+  volunteer_eta_min?: number;
 }
+
+export type DeclineReason = "too_far" | "cant_accept_type" | "no_space" | "closing";
+
+export type ReceiverNeeds = {
+  meals_needed: number;
+  veg_only: boolean;
+  open_from: string; // HH:MM
+  open_to: string; // HH:MM
+};
+
+export type ReceiverHistoryItem = {
+  id: string;
+  items_title: string;
+  meals: number;
+  received_at: string;
+  donor_name: string;
+  area: string;
+};
 
 export interface Task {
   id: string;

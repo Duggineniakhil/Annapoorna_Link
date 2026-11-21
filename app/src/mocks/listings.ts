@@ -371,6 +371,45 @@ export function listingDetail(listing: Listing): Listing {
   return detail;
 }
 
+/** True when the listing has been claimed by another kitchen (or has otherwise moved on). */
+export function listingTakenFor(listingId: string, receiverOrgId: string): boolean {
+  const listing = listingStore.find((l) => l.id === listingId);
+  if (!listing) return false;
+  if (listing.status === "posted" || listing.status === "offered") return false;
+  return listing.receiver_org !== receiverOrgId;
+}
+
+/**
+ * A receiver accepted an offer for this listing: it becomes claimed by that kitchen, so the
+ * donor sees who is taking the food. Returns undefined for unknown or already-moved listings.
+ */
+export function claimListing(
+  listingId: string,
+  receiverOrgId: string,
+  distanceKm: number,
+  nowMs: number,
+): Listing | undefined {
+  const listing = listingStore.find((l) => l.id === listingId);
+  if (!listing || (listing.status !== "posted" && listing.status !== "offered")) return undefined;
+  const receiver = ORGS[receiverOrgId];
+  listing.status = "claimed";
+  listing.receiver_org = receiverOrgId;
+  listing.matched_receiver = receiver
+    ? { name: receiver.name, area: receiver.area, distance_km: distanceKm }
+    : undefined;
+  listing.timeline = [
+    ...timelineOf(listing),
+    {
+      type: "claimed",
+      status: "claimed",
+      at: new Date(nowMs).toISOString(),
+      actor_role: "receiver",
+    },
+  ];
+  saveStore();
+  return listing;
+}
+
 export function cancelListing(
   donorOrgId: string,
   listingId: string,

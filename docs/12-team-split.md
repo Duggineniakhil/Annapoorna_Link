@@ -42,7 +42,9 @@ Listing     { id, donor_org, items: ListingItem[], total_meals, veg, allergens: 
               volunteer_vehicle?,                                        // added in A5 (B to confirm)
               timeline?: TimelineEvent[],                                // on GET /api/listings/:id
               safety: { max_pickup_by, serve_by, guidance_en, guidance_te } }
-Offer       { id, listing: Listing, rank, score, reasons: [{ en, te }], expires_at, distance_km, eta_min }
+Offer       { id, listing: Listing, rank, score, reasons: [{ en, te }], expires_at, distance_km, eta_min,
+              status?: "open"|"accepted"|"declined"|"expired",                 // added in A7 (B to confirm)
+              volunteer_first_name?, volunteer_eta_min? }                       // added in A7 (B to confirm)
 Task        { id, listing: Listing, donor_org, receiver_org, distance_km, deadline }
 TimelineEvent { type, status, at, actor_role, note? }
 Impact      { meals, kg, co2e_kg, on_time_rate, median_claim_min, rescue_rate, assumptions: [{ key, label_en, label_te, value, source? }] }
@@ -62,6 +64,8 @@ Impact      { meals, kg, co2e_kg, on_time_rate, median_claim_min, rescue_rate, a
 | `GET /api/offers` | receiver: pending offers | `Offer[]` |
 | `POST /api/offers/:id/accept` · `/decline` | receiver | `Listing` / `{ ok }` |
 | `GET /api/receiver/needs` · `PUT /api/receiver/needs` | receiver: `{ meals_needed, veg_only, open_from, open_to }` | needs |
+| `GET /api/offers/:id` (added in A7, B to confirm) | receiver: own offer; delivery code is `listing.delivery_code` once accepted | `Offer` |
+| `GET /api/receiver/history` (added in A7, B to confirm) | receiver | `[{ id, items_title, meals, received_at, donor_name, area }]` |
 | `GET /api/tasks` | volunteer: available + mine | `Task[]` |
 | `POST /api/tasks/:id/accept` | volunteer | `Task` |
 | `POST /api/tasks/:id/pickup` | volunteer: `{ code }` | `Listing` |
