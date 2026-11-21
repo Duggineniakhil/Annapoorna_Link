@@ -47,3 +47,7 @@ Host: **Render** (Web Service) + **Supabase** (Postgres). Region: Singapore or M
 
 ## 4. Rotating secrets
 If a secret is pasted in chat or a log, change it in Supabase (database password, then update DATABASE_URL) or regenerate JWT_SECRET in Render and redeploy. Existing tokens become invalid when JWT_SECRET changes.
+
+## 5. Demo mode and resetting the demo
+- `DEMO_MODE=true` lets any signed-in user start the wedding-night scenario (`POST /api/demo/scenario`). By default only the sponsor account can.
+- `npm run demo:reset` restores the seeded demo data (same as `npm run seed`; set `ALLOW_DEMO_RESET=true` when `NODE_ENV=production`). **Restart the API afterwards**: it keeps its working state in memory and loads it from the database on boot.

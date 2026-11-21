@@ -17,6 +17,7 @@ export interface ApiDeps {
   flow: Flow;
   hub: Hub;
   jwtSecret: string;
+  demoMode: boolean;
   voiceLimiter: (req: Request, res: Response, next: (e?: unknown) => void) => void;
   dbStatus: () => Promise<string>;
 }
@@ -202,7 +203,8 @@ export function createApiRouter(d: ApiDeps): Router {
       .map((l) => ({ listing_id: l.id, area: repo.orgById(l.donor_org_id)?.area, meals: repo.pickupFor(l.id)?.meals_delivered ?? 0, at: repo.pickupFor(l.id)?.delivered_at ?? l.created_at }));
     res.json({ donors: orgs.filter((o) => o.type === "donor").map(toOrg), receivers: orgs.filter((o) => o.type === "receiver").map(toOrg), recent });
   });
-  router.post("/demo/scenario", auth, requireRole("sponsor"), (req, res) => {
+  // Sponsor account, or anyone signed in when DEMO_MODE=true.
+  router.post("/demo/scenario", auth, d.demoMode ? (_req, _res, next) => next() : requireRole("sponsor"), (req, res) => {
     parseOrThrow(ScenarioBody, req.body);
     if (!runWeddingNight(flow)) throw new AppError("INVALID_STATE"); // one scenario at a time
     res.status(202).json({ started: true });

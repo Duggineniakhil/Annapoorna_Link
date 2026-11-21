@@ -16,6 +16,11 @@ const baseSchema = z.object({
     .enum(["true", "false"])
     .default("true")
     .transform((v) => v === "true"),
+  // true: any signed-in user may start the demo scenario (not only the sponsor account).
+  DEMO_MODE: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
 });
 
 // DEPLOY.md asks for 32+ characters; enforce it where it matters.

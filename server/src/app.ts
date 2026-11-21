@@ -63,6 +63,7 @@ export function createApp(opts: AppOptions): BuiltApp {
       flow,
       hub,
       jwtSecret: config.JWT_SECRET,
+      demoMode: config.DEMO_MODE,
       voiceLimiter: limits.voice,
       dbStatus: async () => (opts.db ? await checkDb(opts.db) : "memory"),
     }),

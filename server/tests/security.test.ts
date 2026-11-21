@@ -86,6 +86,21 @@ describe("route x role matrix", () => {
   });
 });
 
+describe("demo scenario gate", () => {
+  it("is sponsor-only by default and open to any signed-in user with DEMO_MODE", async () => {
+    const demo = createApp({
+      config: loadConfig({ ...base, DEMO_MODE: "true" }), logger: createLogger("test"), now: () => new Date(NOW),
+      rateLimits: { generalMax: 10_000, voiceMax: 10_000, windowMs: 60_000 },
+    });
+    const post = (app: BuiltApp, role: Role) => request(app.app).post("/api/demo/scenario").set("Authorization", bearer(role)).send({ name: "wedding_night" });
+    expect((await post(built, "donor")).status).toBe(403);
+    const res = await post(demo, "donor");
+    expect(res.status).toBe(202);
+    expect((await post(demo, "receiver")).status).toBe(409); // one scenario at a time
+    expect((await request(demo.app).post("/api/demo/scenario").send({})).status).toBe(401);
+  });
+});
+
 describe("tokens", () => {
   const call = (auth: string) => request(built.app).get("/api/me").set("Authorization", auth);
   const claims = { ...IDENTITY.donor, role: "donor" };
