@@ -6,22 +6,25 @@ import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import {
   AUDIO_BITS_PER_SECOND,
-  MAX_RECORD_MS,
   MIN_RECORD_MS,
   canRecord,
   fileNameFor,
+  maxRecordMsFor,
   micPermission,
+  needsWav,
   pickAudioType,
+  toWav,
 } from "../lib/recorder";
+import { voiceProblem } from "../lib/voiceErrors";
 
-// Voice option for Quick Post (A12). Press and hold the 🎤 button to record (up to 20 s, with a
-// countdown ring), release to send. The transcript is shown and the form is prefilled; the donor
+// Voice option for Quick Post (A12). Press and hold the 🎤 button to record (up to 20 s, or 12 s
+// when the clip has to be converted to WAV, with a countdown ring), release to send. The transcript is shown and the form is prefilled; the donor
 // still reviews everything and taps Post. Nothing is ever posted from here.
 
 const EXPLAINED_KEY = "annapoorna.micExplained";
 
 type Phase = "checking" | "off" | "denied" | "explain" | "idle" | "recording" | "sending";
-type Problem = { message: string; resend: boolean };
+type Problem = { message: string; resend: boolean; useForm: boolean };
 
 function readExplained(): boolean {
   try {
@@ -50,8 +53,9 @@ export function VoicePost({ onDraft }: { onDraft: (draft: VoiceDraft) => void })
   const startedAt = useRef(0);
   const tick = useRef<number | null>(null);
   const autoStop = useRef<number | null>(null);
-  const lastBlob = useRef<Blob | null>(null);
-  const audioType = useRef<string>("audio/webm;codecs=opus");
+  const lastUpload = useRef<{ blob: Blob; name: string } | null>(null);
+  const audioType = useRef<string>("audio/mp4");
+  const [maxMs, setMaxMs] = useState(maxRecordMsFor("audio/mp4"));
   const mounted = useRef(true);
 
   useEffect(() => {
@@ -122,7 +126,7 @@ export function VoicePost({ onDraft }: { onDraft: (draft: VoiceDraft) => void })
     } catch (err) {
       pressing.current = false;
       if (isDenied(err)) setPhase("denied");
-      else setProblem({ message: t("voice.error"), resend: false });
+      else setProblem({ message: t("voice.error"), resend: false, useForm: true });
       return;
     }
     if (!pressing.current || !mounted.current) {
@@ -134,6 +138,8 @@ export function VoicePost({ onDraft }: { onDraft: (draft: VoiceDraft) => void })
     stream.current = s;
     const type = pickAudioType() ?? "audio/webm;codecs=opus";
     audioType.current = type;
+    const limit = maxRecordMsFor(type);
+    setMaxMs(limit);
     const rec = new MediaRecorder(s, { mimeType: type, audioBitsPerSecond: AUDIO_BITS_PER_SECOND });
     chunks.current = [];
     rec.ondataavailable = (e) => {
@@ -146,7 +152,7 @@ export function VoicePost({ onDraft }: { onDraft: (draft: VoiceDraft) => void })
     setElapsed(0);
     setPhase("recording");
     tick.current = window.setInterval(() => setElapsed(Date.now() - startedAt.current), 100);
-    autoStop.current = window.setTimeout(stopRecording, MAX_RECORD_MS);
+    autoStop.current = window.setTimeout(stopRecording, limit);
   }
 
   function stopRecording() {
@@ -166,25 +172,44 @@ export function VoicePost({ onDraft }: { onDraft: (draft: VoiceDraft) => void })
       setNotice("tooShort");
       return;
     }
-    void send(blob);
+    void prepare(blob);
   }
 
-  async function send(blob: Blob) {
-    lastBlob.current = blob;
+  /** WebM is not accepted by the speech service: turn it into 16 kHz mono WAV first. */
+  async function prepare(blob: Blob) {
+    setPhase("sending");
+    setProblem(null);
+    if (!needsWav(audioType.current)) {
+      await send(blob, fileNameFor(audioType.current));
+      return;
+    }
+    try {
+      const wav = await toWav(blob);
+      await send(wav, "voice.wav");
+    } catch {
+      if (!mounted.current) return;
+      setProblem({ message: t("voice.badAudio"), resend: false, useForm: false });
+      setPhase("idle");
+    }
+  }
+
+  async function send(blob: Blob, name: string) {
+    lastUpload.current = { blob, name };
     setPhase("sending");
     setProblem(null);
     try {
-      const result = await postVoice(blob, fileNameFor(audioType.current));
+      const result = await postVoice(blob, name);
       if (!mounted.current) return;
       setTranscript(result.transcript);
       onDraft(result.draft);
     } catch (err) {
       if (!mounted.current) return;
       const api = err instanceof ApiError ? err : null;
+      const plan = voiceProblem(api?.error_code, Boolean(api?.retryable));
       setProblem({
-        message: api?.message ?? t("voice.error"),
-        // Busy or offline: send the same recording again. Nothing heard: record again.
-        resend: Boolean(api?.retryable) && api?.error_code !== "STT_EMPTY",
+        message: plan.messageKey ? t(plan.messageKey) : (api?.message ?? t("voice.error")),
+        resend: plan.resend,
+        useForm: plan.useForm,
       });
     }
     if (mounted.current) setPhase("idle");
@@ -223,8 +248,8 @@ export function VoicePost({ onDraft }: { onDraft: (draft: VoiceDraft) => void })
     return <p className="rounded-2xl bg-cream p-3 text-sm text-ink/70">{t("voice.denied")}</p>;
   }
 
-  const secondsLeft = Math.max(0, Math.ceil((MAX_RECORD_MS - elapsed) / 1000));
-  const progress = Math.min(1, elapsed / MAX_RECORD_MS);
+  const secondsLeft = Math.max(0, Math.ceil((maxMs - elapsed) / 1000));
+  const progress = Math.min(1, elapsed / maxMs);
   const recording = phase === "recording";
 
   return (
@@ -305,10 +330,13 @@ export function VoicePost({ onDraft }: { onDraft: (draft: VoiceDraft) => void })
       {problem && (
         <div role="alert" className="flex flex-col gap-2 rounded-xl bg-chilli-50 p-3">
           <p className="font-medium text-chilli-700">{problem.message}</p>
-          {problem.resend && lastBlob.current && (
+          {problem.useForm && <p className="text-sm text-ink/80">{t("voice.useForm")}</p>}
+          {problem.resend && lastUpload.current && (
             <Button
               variant="secondary"
-              onClick={() => lastBlob.current && void send(lastBlob.current)}
+              onClick={() =>
+                lastUpload.current && void send(lastUpload.current.blob, lastUpload.current.name)
+              }
               className="self-start"
             >
               {t("voice.retry")}

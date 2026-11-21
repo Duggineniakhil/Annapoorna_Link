@@ -203,6 +203,7 @@ export default function VolunteerTasks() {
   return (
     <Screen
       titleKey="volunteer.tasks.title"
+      demoData
       aside={
         user ? (
           <span className="mt-1 rounded-full bg-leaf-50 px-3 py-1 text-sm font-bold text-leaf-800">

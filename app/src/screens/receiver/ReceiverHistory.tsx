@@ -69,7 +69,7 @@ export default function ReceiverHistory() {
   }
 
   return (
-    <Screen titleKey="receiver.history.title">
+    <Screen titleKey="receiver.history.title" demoData>
       {error && !items && (
         <p role="alert" className="rounded-2xl bg-chilli-50 p-3 font-medium text-chilli-700">
           {t("receiver.error.generic")}

@@ -61,7 +61,7 @@ export default function VolunteerHistory() {
   }, []);
 
   return (
-    <Screen titleKey="volunteer.history.title">
+    <Screen titleKey="volunteer.history.title" demoData>
       {error && (
         <p role="alert" className="rounded-xl bg-chilli-50 p-3 text-sm font-bold text-chilli-700">
           {t("volunteer.error.generic")}
