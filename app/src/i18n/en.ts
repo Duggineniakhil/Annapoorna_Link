@@ -111,6 +111,7 @@ export const en = {
   "common.meals": "meals",
   "common.km": "{km} km",
   "time.hm": "{h} h {m} min",
+  "time.h": "{h} h",
   "time.m": "{m} min",
   "food.veg": "Veg",
   "food.nonveg": "Non-veg",
@@ -230,6 +231,18 @@ export const en = {
   "post.submitting": "Posting…",
   "post.success": "Posted in {s} s. We're finding a kitchen nearby.",
   "post.dismiss": "Dismiss",
+
+  // Safety card (app/src/components/SafetyCard.tsx)
+  "safetyCard.storage.hot": "Hot",
+  "safetyCard.storage.room": "Room temperature",
+  "safetyCard.storage.chilled": "Chilled",
+  "safetyCard.countdown.pickup": "Pick up within {time}",
+  "safetyCard.countdown.serve": "Serve within {time}",
+  "safetyCard.expired": "Do not use. The safe window has passed.",
+  "safetyCard.disclaimer":
+    "Annapoorna Link connects donors and receivers. It does not certify food safety. Receivers should check food before serving.",
+  "safetyCard.allergens": "Allergens",
+  "safetyCard.guidance": "Handling guidance",
 } as const;
 
 export type MessageKey = keyof typeof en;

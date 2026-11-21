@@ -8,7 +8,8 @@ import { Card } from "../../components/ui/Card";
 import { ButtonLink } from "../../components/ui/Button";
 import { Icon } from "../../components/ui/Icon";
 import { LocationHeader } from "../../components/ui/LocationHeader";
-import { CategoryTile, Countdown, VegMark } from "../../components/food/FoodBits";
+import { CategoryTile } from "../../components/food/FoodBits";
+import { SafetyCard } from "../../components/SafetyCard";
 import { DistancePill, MealsBadge } from "../../components/food/ListingCard";
 import { itemsTitle } from "../../components/food/format";
 import { TASKS, orgArea, orgName } from "../../mocks/fixtures";
@@ -75,7 +76,6 @@ function TaskCard({ task }: { task: Task }) {
             <MealsBadge meals={task.listing.total_meals} />
           </div>
           <div className="flex items-center gap-2">
-            <VegMark veg={task.listing.veg} />
             <DistancePill km={task.distance_km} />
           </div>
         </div>
@@ -84,9 +84,7 @@ function TaskCard({ task }: { task: Task }) {
         <Stop kind="from" name={orgName(task.donor_org)} area={orgArea(task.donor_org)} />
         <Stop kind="to" name={orgName(task.receiver_org)} area={orgArea(task.receiver_org)} />
       </ol>
-      <div>
-        <Countdown deadline={task.deadline} kind="deliver" />
-      </div>
+      <SafetyCard listing={task.listing} variant="compact" />
       <ButtonLink to={`/volunteer/tasks/${task.id}`} size="lg" block>
         <Icon name="bike" className="h-6 w-6" />
         {t("volunteer.take")}

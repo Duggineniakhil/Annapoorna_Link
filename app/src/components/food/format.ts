@@ -1,14 +1,15 @@
 import type { Lang } from "../../i18n";
 import type { Listing } from "../../types/api";
 
-type T = (key: "time.hm" | "time.m", vars?: Record<string, string | number>) => string;
+type T = (key: "time.hm" | "time.h" | "time.m", vars?: Record<string, string | number>) => string;
 
-/** "1 h 20 min" / "20 min" (localised). Negative values become 0. */
+/** "1 h 20 min" / "2 h" / "20 min" (localised). Negative values become 0. */
 export function formatDuration(ms: number, t: T): string {
   const totalMin = Math.max(0, Math.round(ms / 60_000));
   const h = Math.floor(totalMin / 60);
   const m = totalMin % 60;
-  return h > 0 ? t("time.hm", { h, m }) : t("time.m", { m });
+  if (h > 0) return m > 0 ? t("time.hm", { h, m }) : t("time.h", { h });
+  return t("time.m", { m });
 }
 
 /** Clock time like "10:30 PM" in the chosen language. */

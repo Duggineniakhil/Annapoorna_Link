@@ -10,6 +10,7 @@ import { Card } from "../../components/ui/Card";
 import { Icon } from "../../components/ui/Icon";
 import { ListingCard } from "../../components/food/ListingCard";
 import { formatClock } from "../../components/food/format";
+import { SafetyCard } from "../../components/SafetyCard";
 
 // Donor listing detail: the listing card, status timeline, matched receiver and volunteer,
 // pickup code (before pickup), cancel (before pickup), expired notice and the safety card.
@@ -132,6 +133,7 @@ export default function DonorListingDetail() {
             donorName={org?.name ?? ""}
             area={org?.area ?? ""}
             showSteps
+            showSafety={false}
           />
 
           {listing.timeline && listing.timeline.length > 0 && (
@@ -196,16 +198,7 @@ export default function DonorListingDetail() {
             </Card>
           )}
 
-          <Card className="flex flex-col gap-2 p-4">
-            <h2 className="flex items-center gap-2 font-bold text-ink">
-              <Icon name="info" className="h-5 w-5 text-leaf-700" />
-              {t("post.safetyTitle")}
-            </h2>
-            <p className="text-sm text-ink/80">
-              {lang === "te" ? listing.safety.guidance_te : listing.safety.guidance_en}
-            </p>
-            <p className="text-xs text-ink/50">{t("about.disclaimer")}</p>
-          </Card>
+          <SafetyCard listing={listing} variant="full" />
 
           {CANCELLABLE.includes(listing.status) && (
             <Card className="flex flex-col gap-3 p-4">

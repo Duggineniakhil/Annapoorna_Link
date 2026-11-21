@@ -1,21 +1,12 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import type { Listing, Status } from "../../types/api";
+import type { Listing } from "../../types/api";
 import { useT } from "../../i18n";
 import { Card } from "../ui/Card";
 import { Icon } from "../ui/Icon";
-import {
-  AllergenLine,
-  CategoryTile,
-  Countdown,
-  StatusSteps,
-  StorageTag,
-  VegMark,
-} from "./FoodBits";
+import { CategoryTile, StatusSteps } from "./FoodBits";
 import { itemsTitle } from "./format";
-
-// The pickup countdown only matters while the food is still waiting to be picked up.
-const PICKUP_PENDING: Status[] = ["posted", "offered", "claimed", "volunteer_assigned"];
+import { SafetyCard } from "../SafetyCard";
 
 /** Meals as the hero number of every card. */
 export function MealsBadge({ meals }: { meals: number }) {
@@ -49,7 +40,7 @@ export function ListingCard({
   distanceKm,
   to,
   showSteps = false,
-  showCountdown = true,
+  showSafety = true,
   children,
 }: {
   listing: Listing;
@@ -58,7 +49,8 @@ export function ListingCard({
   distanceKm?: number;
   to?: string;
   showSteps?: boolean;
-  showCountdown?: boolean;
+  /** Compact safety card (storage, veg, countdown, allergens, guidance, disclaimer). */
+  showSafety?: boolean;
   children?: ReactNode;
 }) {
   const title = itemsTitle(listing);
@@ -89,16 +81,7 @@ export function ListingCard({
       ) : (
         header
       )}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-        <VegMark veg={listing.veg} withLabel />
-        <StorageTag storage={listing.storage} />
-      </div>
-      <AllergenLine allergens={listing.allergens} />
-      {showCountdown && PICKUP_PENDING.includes(listing.status) && (
-        <div>
-          <Countdown deadline={listing.pickup_by} />
-        </div>
-      )}
+      {showSafety && <SafetyCard listing={listing} variant="compact" />}
       {showSteps && <StatusSteps status={listing.status} />}
       {children}
     </Card>

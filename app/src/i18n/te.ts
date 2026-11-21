@@ -112,6 +112,7 @@ export const te: Record<MessageKey, string> = {
   "common.meals": "భోజనాలు",
   "common.km": "{km} కి.మీ",
   "time.hm": "{h} గం {m} ని",
+  "time.h": "{h} గం",
   "time.m": "{m} ని",
   "food.veg": "శాకాహారం",
   "food.nonveg": "మాంసాహారం",
@@ -230,4 +231,16 @@ export const te: Record<MessageKey, string> = {
   "post.submitting": "పోస్ట్ చేస్తున్నాం…",
   "post.success": "{s} సెకన్లలో పోస్ట్ అయింది. దగ్గరి వంటశాలను వెతుకుతున్నాం.",
   "post.dismiss": "మూసివేయండి",
+
+  // Safety card (app/src/components/SafetyCard.tsx). Draft: needs native Telugu review.
+  "safetyCard.storage.hot": "వేడిగా",
+  "safetyCard.storage.room": "గది ఉష్ణోగ్రత",
+  "safetyCard.storage.chilled": "చల్లగా",
+  "safetyCard.countdown.pickup": "{time} లోపు తీసుకెళ్లాలి",
+  "safetyCard.countdown.serve": "{time} లోపు వడ్డించాలి",
+  "safetyCard.expired": "ఈ ఆహారాన్ని వాడవద్దు. సురక్షిత సమయం దాటిపోయింది.",
+  "safetyCard.disclaimer":
+    "అన్నపూర్ణ లింక్ దాతలను, స్వీకర్తలను కలుపుతుంది. ఆహారం సురక్షితమని ధృవీకరించదు. వడ్డించే ముందు స్వీకర్తలు ఆహారాన్ని తనిఖీ చేయాలి.",
+  "safetyCard.allergens": "ఇందులో ఉన్నవి",
+  "safetyCard.guidance": "జాగ్రత్తలు",
 };

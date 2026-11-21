@@ -88,10 +88,17 @@ export function CategoryTile({
 
 type Urgency = "ok" | "soon" | "urgent" | "passed";
 
-function urgencyFor(msLeft: number): Urgency {
+function urgencyFor(msLeft: number, kind: "pickup" | "respond" | "deliver"): Urgency {
   if (msLeft <= 0) return "passed";
-  if (msLeft < 30 * 60_000) return "urgent";
-  if (msLeft < 60 * 60_000) return "soon";
+  if (kind === "respond") {
+    // Offers stay open about 10 minutes (D5), so the bands are shorter.
+    if (msLeft < 3 * 60_000) return "urgent";
+    if (msLeft < 6 * 60_000) return "soon";
+    return "ok";
+  }
+  // Same bands as the safety card (components/safety.ts): amber under 30 min, red under 10.
+  if (msLeft < 10 * 60_000) return "urgent";
+  if (msLeft < 30 * 60_000) return "soon";
   return "ok";
 }
 
@@ -118,7 +125,7 @@ export function Countdown({
   const { t, lang } = useT();
   const now = useNow();
   const msLeft = new Date(deadline).getTime() - now;
-  const urgency = urgencyFor(msLeft);
+  const urgency = urgencyFor(msLeft, kind);
   const left = formatDuration(msLeft, t);
 
   let text: string;
