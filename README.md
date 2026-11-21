@@ -9,7 +9,7 @@ A voice-first, offline-friendly AI Science tutor for Class 8 students in Telugu-
 | | |
 |---|---|
 | 🔗 **Live app** | <!-- TODO --> `https://...` |
-| 🎥 **Demo video (3 min)** | <!-- TODO --> `https://...` |
+| 🎥 **Demo video (3–6 min)** | <!-- TODO --> `https://...` |
 | 📊 **Pitch deck** | <!-- TODO --> `https://...` |
 | 🛠️ **How we built it** | [CODEBENDERS_USAGE.md](CODEBENDERS_USAGE.md) |
 
@@ -165,7 +165,7 @@ The learners are children, so the app is built to protect them:
 
 ## 🛠️ Built with Codebenders
 
-The whole application was built in the **Codebenders IDE** during the hackathon build window (21 Nov 12:00 PM to 22 Nov 11:59 PM IST).
+The whole application was built in the **Codebenders IDE** during the hackathon build window (21 Nov 11:30 AM to 22 Nov 11:59 PM IST).
 [CODEBENDERS_USAGE.md](CODEBENDERS_USAGE.md) documents the build timeline, key prompts, the iterations that mattered, and where human review corrected the output (Telugu wording, science accuracy, security).
 
 ## 🚀 Run locally

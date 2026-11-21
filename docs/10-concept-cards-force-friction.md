@@ -2,7 +2,7 @@
 Telangana SCERT · Class 8 Physical Science · Chapter 1 & Chapter 2 · Telugu medium
 
 > ⚠️ **Read before using**
-> 1. **Hackathon rule:** the rules say *"External AI tools… are prohibited"* and the product must be built with Codebenders. These cards were drafted with an external AI tool. Shipping them in your app as-is could be treated as a rule violation. Safe options: (a) ask the organisers if AI-drafted *content* is allowed, or (b) use these only as your **reference/study notes**, and write or generate the final in-app content yourself inside Codebenders.
+> 1. **Hackathon rule:** the product must be built with Codebenders, and external AI tools aren't allowed for building it. At the kick-off, the organisers allowed outside tools for **research, planning prompts and writing specs** (doc 15). These cards were drafted with an external AI tool. Using them as **reference and study notes** is within that. Shipping them **inside the app** wasn't asked directly, so either (a) get the organisers' OK in the WhatsApp group first, or (b) write or generate the final in-app content yourself inside Codebenders, using these as reference.
 > 2. **Original content:** written from general science knowledge, not copied from the SCERT book.
 > 3. **Telugu review needed:** check every card against the **Telugu-medium SCERT book**. Use the book's exact terms (see the term list in §3), and get a native speaker or teacher to check the wording.
 > 4. **Syllabus check:** cards marked 🔎 cover topics that may sit in a different chapter in the current edition. Keep them only if the book has them.

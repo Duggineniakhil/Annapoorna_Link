@@ -3,6 +3,12 @@
 
 Both members build in the **Codebenders IDE** and log their own key prompts in `CODEBENDERS_USAGE.md` (doc 07).
 
+**Before you start (from the kick-off, doc 15):**
+- Both of you register through **app.codebenders.ai/hackathon**, claim the coupon (**8 million credits each**), and sign in to the IDE with that same email.
+- Work in **chat-to-build** mode with the **Nexon** agent. Read Nexon's plan before approving it, and build one feature at a time.
+- If one of you runs low on credits, move the project to the other's account. Credits can't be transferred.
+- **Last commit before Sun 22 Nov, 11:59 PM IST.** Commits are tracked, and nothing can be built or committed after that.
+
 ---
 
 ## 1. Who owns what

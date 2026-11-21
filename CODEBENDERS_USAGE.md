@@ -16,7 +16,7 @@ This file records how the application was developed in the **Codebenders IDE**: 
 ## 1. Summary
 | | |
 |---|---|
-| Build window | Sat 21 Nov 2026, 12:00 PM to Sun 22 Nov 2026, 11:59 PM IST |
+| Build window | Sat 21 Nov 2026, 11:30 AM to Sun 22 Nov 2026, 11:59 PM IST (last commit before the window closed) |
 | Team | <!-- Member A name --> (frontend, offline & content) · <!-- Member B name --> (backend, voice, AI & learning logic) |
 | Total prompts used | <!-- e.g., 64 --> |
 | Major iterations | <!-- e.g., 9 --> |
@@ -24,8 +24,11 @@ This file records how the application was developed in the **Codebenders IDE**: 
 | Codebenders features used | <!-- see section 6 --> |
 
 ## 2. How we worked with Codebenders
-1. **Spec first.** Before the build window we wrote planning documents in [`docs/`](docs/): problem and user research, product spec, architecture, and shared contracts between the two members. We gave these to Codebenders as context so its output matched one consistent design.
-2. **One task, one prompt.** Each member worked through a numbered task list (A1–A15, B1–B15). Each task started with one detailed prompt ([Member A prompts](docs/13-prompts-member-a.md), [Member B prompts](docs/14-prompts-member-b.md)), followed by short follow-up prompts to fix or refine.
+1. **Spec first.** Right after the problem statements were revealed, we wrote planning documents in [`docs/`](docs/): problem and user research, product spec, architecture, and shared contracts between the two members. We gave these to Codebenders as context so its output matched one consistent design.
+2. **Chat to build with Nexon, one task at a time.** Each member worked through a numbered task list (A1–A15, B1–B15).
+   - Each task started with one detailed prompt ([Member A prompts](docs/13-prompts-member-a.md), [Member B prompts](docs/14-prompts-member-b.md)).
+   - We read Nexon's plan before approving it, and split a prompt when the plan was too large.
+   - Short follow-up prompts fixed or refined the result. If a fix failed twice, we re-planned instead of resending it.
 3. **Contracts and mocks.** We agreed the API, data format, engine and sync interfaces up front ([team split §2](docs/12-team-split.md)). That let both members build in parallel in Codebenders, with the frontend running on mocks until the backend was live.
 4. **Verify every output.** After every prompt we ran tests and checked the result on a real low-end Android phone, including in airplane mode. We reviewed Telugu text and science facts by hand.
 5. **Commit small.** One commit per task, so the git history shows the build step by step.

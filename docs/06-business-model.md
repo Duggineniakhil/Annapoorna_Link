@@ -9,6 +9,8 @@
 ## 1. Business model in one line
 **B2B2C / B2G:** NGOs, CSR programmes, and state education programmes pay **per student per year**; students and parents use it **free**.
 
+> At the kick-off, the organisers said business viability isn't only revenue: **social impact counts too** (doc 15). Pitch both: a sustainable funding model, *and* measurable learning impact for children the market ignores.
+
 ## 2. Customer segments (who pays and why)
 | Payer | Why they'd pay | What they buy | Sales cycle |
 |---|---|---|---|

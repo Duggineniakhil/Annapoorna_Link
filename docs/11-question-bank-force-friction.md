@@ -2,7 +2,7 @@
 Telangana SCERT · Class 8 Physical Science · Ch 1 & Ch 2 · Telugu · **55 questions** (Force 29, Friction 26)
 
 > ⚠️ **Same caveats as the concept cards (doc 10):**
-> - These were drafted with an external AI tool. Check with the organisers whether you may ship AI-drafted content, or use this file only as a reference.
+> - These were drafted with an external AI tool. Using them as reference is fine: the organisers allowed outside tools for research and specs (doc 15). Before shipping them **inside the app**, get the organisers' OK, or recreate the final questions in Codebenders.
 > - Have every question and its answer checked by a native Telugu speaker or teacher, and against the Telugu-medium SCERT book.
 > - Questions tied to 🔎 cards (F6, F8, R7) apply only if the book covers those topics.
 

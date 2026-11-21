@@ -12,6 +12,13 @@
 4. **You own:** `app/` (except `app/src/engine/` and `app/src/sync/`) and `content/`. Member B owns `server/`, `app/src/engine/`, `app/src/sync/` and `scripts/`.
 5. **Never wait for B.** Until B's piece is ready, use mocks (`USE_MOCKS=true`) or the local stand-ins these prompts ask for.
 6. **Telugu strings:** all user-facing text lives in `app/src/i18n/te.ts`. Have the wording reviewed by a native speaker; changing it later takes minutes.
+7. **Use the IDE the way the organisers recommend** (doc 15 §3):
+   - work in **chat-to-build** with Nexon
+   - **read the plan before approving it**
+   - if a plan looks huge (likely for A1 and A7), split the prompt into 2–3 smaller ones, e.g. A1a routes + layout, A1b PWA + offline, A1c i18n + budget checks
+   - if a fix fails twice, re-plan instead of resending it
+   - start a new chat when the history gets long
+8. **Hard cut-off:** last commit before **Sun 22 Nov, 11:59 PM IST**.
 
 ---
 
@@ -236,7 +243,7 @@ common doubts, and list any question whose wrong options are missing a misconcep
 - No Telugu text was changed.
 - Repeat this prompt for `chapter-friction-v1.json` (R1–R7) on Sunday.
 
-> ⚠️ The pasted content comes from docs 10 and 11. Confirm with the organisers that AI-drafted content is allowed, or write the final content yourself inside Codebenders first.
+> ⚠️ Docs 10 and 11 were drafted with an external tool. Outside tools are allowed for research and specs (doc 15), but before pasting that content in to ship it, get the organisers' OK in the WhatsApp group. Otherwise, write the final content yourself inside Codebenders, using docs 10–11 as reference.
 
 ---
 

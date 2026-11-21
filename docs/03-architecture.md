@@ -13,7 +13,7 @@
 | Backend | Node.js (Express or serverless functions) | Holds API keys; proxies Gnani + LLM; sync endpoint |
 | Database | Supabase (Postgres) or Firebase — or SQLite on Render if simpler | Synced progress, teacher view aggregates |
 | Voice | **Gnani** STT (Telugu) + TTS (Telugu) | Indian-language voice; you have credits |
-| LLM | Whatever is permitted by organisers (confirm!) | Tutor answers, photo-question extraction |
+| LLM | Any AI-model API (paid or free); allowed inside the product per the kick-off Q&A. Code itself must be generated in Codebenders | Tutor answers, photo-question extraction |
 | Hosting | Vercel/Netlify (frontend) + Render/Railway/Vercel functions (backend) | Free tiers, public URL quickly |
 
 > If Codebenders IDE has its own preferred stack / deploy target, **use that instead** — it scores better on "Use of Codebenders".

@@ -19,7 +19,8 @@
 
 Must-Include mapping table (from `02-product-spec.md §1`) → put in the appendix or on slide 5.
 
-## 2. Demo video script (≈3 minutes)
+## 2. Demo video script (3–6 minutes; mandatory)
+The organisers require a demo video. Aim for **3–6 minutes** and cover the problem, why you chose it, the solution, and a walkthrough. A face cam isn't needed and a voiceover is optional. The core script below runs about 3 minutes. Add 1–2 minutes on the build: the architecture slide plus a short clip of Codebenders' Nexon planning a feature. Record it during the Monday submission window, from footage of the final build captured before the Sunday commit cut-off.
 | Time | Scene | Say (English or Telugu) |
 |---|---|---|
 | 0:00–0:20 | Lakshmi's evening (slides/illustration) | "Lakshmi studies in Telugu medium, on her father's phone, after 7 PM. When she doesn't understand Science, there's no one to ask." |
@@ -31,7 +32,7 @@ Must-Include mapping table (from `02-product-spec.md §1`) → put in the append
 | 2:25–2:40 | Teacher view (demo data) | "Teachers and volunteers see which concepts the class is stuck on." |
 | 2:40–3:00 | Business + close | "Free for students, paid by NGOs and CSR at ₹250 per student per year. Built end to end in Codebenders in 36 hours." |
 
-Tips: record on a **real phone** (screen record + voice), show the Telugu clearly, add English subtitles for non-Telugu judges, keep it under the length limit if one is given.
+Tips: record on a **real phone** (screen record + voice), show the Telugu clearly, add English subtitles for non-Telugu judges, and stay within 3–6 minutes. Make the video complete on its own: if the free hosting is asleep or down when judges look, the video is the main evidence of a working product.
 
 ## 3. Repository README (structure)
 ```markdown
@@ -75,14 +76,20 @@ Demo: tap "Load demo data" → profile "లక్ష్మి", PIN shown on scr
 (Check the event's **LinkedIn Post Guidelines** tab for required tags/hashtags and add them.)
 
 ## 5. Final submission checklist
+**Two deadlines:**
+- **Code:** last commit before **Sun 22 Nov, 11:59 PM IST**. Commit times are tracked.
+- **Form:** submit through the Codebenders dashboard by **Mon 23 Nov, 11:59 PM IST**. No code changes after Sunday.
+
+- [ ] Final code pushed before Sunday 11:59 PM IST
 - [ ] Project name + description (2–3 lines + feature bullets)
-- [ ] Team details (solo/duo, names as registered)
-- [ ] **Working, deployed app link** (tested in incognito on a phone; screenshots alone are not accepted)
+- [ ] Problem statement selected: **PS3, The Last-Mile Tutor** (only one)
+- [ ] **Duo form:** both members' names, emails and phone numbers (both registered on app.codebenders.ai/hackathon)
 - [ ] **Public GitHub repo** link (README complete, no secrets, commit history during the build window)
+- [ ] **Demo video link, 3–6 min, mandatory** (unlisted YouTube / Drive with "anyone with link")
+- [ ] Live app link: optional per the organisers but strongly recommended (tested in incognito on a phone; screenshots alone are not accepted)
 - [ ] `CODEBENDERS_USAGE.md` with key prompts + iterations + screenshots
-- [ ] Demo video link (unlisted YouTube / Drive with "anyone with link")
-- [ ] LinkedIn post link
-- [ ] Deck link (if allowed/required)
-- [ ] All links open without login
-- [ ] Submitted by **10:30 PM IST Sunday** (deadline 11:59 PM)
+- [ ] LinkedIn post link (use the hashtags from the event's LinkedIn Post Guidelines tab)
+- [ ] Deck link (if used)
+- [ ] All links open without login (check in an incognito window)
+- [ ] Optional feedback for Codebenders in the form
 - [ ] Confirmation email/screenshot saved

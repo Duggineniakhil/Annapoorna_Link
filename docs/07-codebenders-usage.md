@@ -9,6 +9,13 @@
 - **Good prompting**: clear specs, iteration, fixing what the AI got wrong
 - **Your judgement**: where you rejected or corrected AI output (Telugu wording, science facts, security)
 - Screenshots / short screen recordings of the IDE at key moments
+- **Good platform habits.** The organisers said the platform tracks *how well* you use it (doc 15). In practice:
+  - chat-to-build with Nexon
+  - read and approve its plan before it builds
+  - one feature at a time
+  - specific prompts with success criteria
+  - re-plan after two failed fixes
+  - commit after each working slice
 
 ## 2. Prompt bank (adapt and paste into the Codebenders IDE)
 > These are starting prompts. Refer to the spec docs so the IDE has full context. If Codebenders lets you attach files/context, add `02-product-spec.md` and `03-architecture.md`.
@@ -58,7 +65,7 @@
 
 ## Summary
 - Total build time: __ h · Prompts used: __ · Major iterations: __
-- Everything was built in the Codebenders IDE between 21 Nov 12:00 PM and 22 Nov 11:59 PM IST.
+- Everything was built in the Codebenders IDE between 21 Nov 11:30 AM and 22 Nov 11:59 PM IST.
 
 ## Build timeline
 | # | Time (IST) | Feature | Key prompt (short) | What Codebenders produced | What we changed / iterated | Screenshot |
