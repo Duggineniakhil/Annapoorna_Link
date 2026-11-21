@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens. Values are "R G B" so Tailwind can add opacity. */
+:root {
+  --bg: 242 243 247;          /* steel */
+  --surface: 255 255 255;
+  --sunken: 232 234 242;
+  --line: 220 223 234;
+  --ink: 23 26 51;
+  --muted: 90 95 122;
+  --indigo: 43 47 107;        /* brand: Hyderabad night */
+  --indigo-deep: 27 30 72;
+  --indigo-soft: 226 228 248;
+  --marigold: 245 165 36;     /* the one action colour */
+  --marigold-ink: 58 36 0;
+  --marigold-soft: 255 240 210;
+  --leaf: 46 125 79;          /* veg, done */
+  --leaf-soft: 222 241 229;
+  --kumkum: 200 50 60;        /* urgent */
+  --kumkum-soft: 251 226 228;
+  --nonveg: 123 63 0;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: 18 20 42;
+    --surface: 27 30 58;
+    --sunken: 37 41 73;
+    --line: 46 50 85;
+    --ink: 241 242 250;
+    --muted: 163 167 199;
+    --indigo-soft: 46 50 96;
+    --marigold-soft: 74 52 14;
+    --leaf: 92 186 128;
+    --leaf-soft: 24 58 42;
+    --kumkum: 240 104 112;
+    --kumkum-soft: 72 28 36;
+    --nonveg: 214 140 64;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: 18 20 42;
+  --surface: 27 30 58;
+  --sunken: 37 41 73;
+  --line: 46 50 85;
+  --ink: 241 242 250;
+  --muted: 163 167 199;
+  --indigo-soft: 46 50 96;
+  --marigold-soft: 74 52 14;
+  --leaf: 92 186 128;
+  --leaf-soft: 24 58 42;
+  --kumkum: 240 104 112;
+  --kumkum-soft: 72 28 36;
+  --nonveg: 214 140 64;
+  color-scheme: dark;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  font-feature-settings: "tnum" 1;
+}
+body {
+  @apply font-sans text-body antialiased;
+  min-height: 100dvh;
+}
+:focus-visible {
+  outline: 3px solid rgb(var(--marigold));
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+@layer components {
+  .tile {
+    @apply rounded-tile border border-line bg-surface p-5;
+  }
+  .tile-hero {
+    @apply rounded-hero p-6 text-white;
+    background:
+      radial-gradient(120% 90% at 100% 0%, rgb(var(--marigold) / 0.28), transparent 55%),
+      linear-gradient(160deg, rgb(var(--indigo)), rgb(var(--indigo-deep)));
+  }
+  .btn {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 font-display text-lead font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-marigold text-marigold-ink hover:brightness-95;
+  }
+  .btn-quiet {
+    @apply btn border border-line bg-surface text-ink hover:bg-sunken;
+  }
+  .btn-danger {
+    @apply btn border border-kumkum/40 bg-surface text-kumkum hover:bg-kumkum-soft;
+  }
+  .chip {
+    @apply inline-flex min-h-12 items-center gap-2 rounded-chip border border-line bg-surface px-4 text-small font-medium transition-colors;
+  }
+  .chip[aria-pressed="true"] {
+    @apply border-indigo bg-indigo text-white;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
