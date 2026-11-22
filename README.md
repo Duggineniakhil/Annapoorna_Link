@@ -8,7 +8,7 @@ Built for the **ACE Builders Hackathon 2026** by team **Codebenders**, for **Pro
 
 | Resource | Link |
 |---|---|
-| Live app | <!-- TODO --> _coming soon_ |
+| Live app | [annapoorna-link.vercel.app](https://annapoorna-link.vercel.app) (demo mode, no sign-up) |
 | Demo video (3–6 min) | <!-- TODO --> _coming soon_ |
 | Pitch deck | <!-- TODO --> _coming soon_ |
 | Build log | [CODEBENDERS_USAGE.md](CODEBENDERS_USAGE.md) |
