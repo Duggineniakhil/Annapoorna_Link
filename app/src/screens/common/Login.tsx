@@ -50,13 +50,17 @@ function Hero() {
   const { t, lang } = useT();
   return (
     <section className="relative -mx-4 -mt-4 overflow-hidden bg-night text-cream sm:-mx-6 sm:-mt-6 lg:sticky lg:top-24 lg:mx-0 lg:mt-0 lg:rounded-3xl">
-      <img
-        src={photo(PHOTOS.biryaniHandi, 900, 1100)}
-        srcSet={photoSet(PHOTOS.biryaniHandi, 900, 1100)}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
+      {/* Phones get a small landscape crop; the tall crop is only for the wide side panel. */}
+      <picture>
+        <source media="(min-width: 1024px)" srcSet={photoSet(PHOTOS.biryaniHandi, 640, 780)} />
+        <img
+          src={photo(PHOTOS.biryaniHandi, 480, 320)}
+          srcSet={photoSet(PHOTOS.biryaniHandi, 480, 320)}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      </picture>
       <span className="absolute inset-0 bg-gradient-to-t from-night via-night/75 to-night/30" />
       <div className="relative flex flex-col gap-5 px-4 pb-6 pt-10 sm:px-6 lg:min-h-[36rem] lg:justify-end lg:p-8">
         <div className="flex items-center gap-3">
