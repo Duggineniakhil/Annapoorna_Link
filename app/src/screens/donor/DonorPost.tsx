@@ -13,6 +13,8 @@ import { VegMark } from "../../components/food/FoodBits";
 import { VoicePost } from "../../components/VoicePost";
 import { formatClock, formatDuration } from "../../components/food/format";
 import { maxPickupBy } from "../../lib/quickPost";
+import { PHOTOS } from "../../lib/media";
+import { PhotoBanner } from "../../components/layout/Detail";
 import {
   ALL_ALLERGENS,
   CATEGORY_ORDER,
@@ -556,6 +558,11 @@ export default function DonorPost() {
         ) : undefined
       }
     >
+      <PhotoBanner
+        photoId={PHOTOS.weddingBuffet}
+        className="h-36 sm:h-44"
+        title={<span className="text-xl sm:text-2xl">{t("donor.home.postHint")}</span>}
+      />
       {lastPost && (
         <Button variant="secondary" onClick={repeatLast} className="self-start">
           <Icon name="history" className="h-5 w-5" />

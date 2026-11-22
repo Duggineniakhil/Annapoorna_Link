@@ -79,7 +79,7 @@ function closeMenu(e: MouseEvent<HTMLElement>): void {
 /** Bowl-with-steam mark, same artwork as the app icon. */
 export function LogoMark({ className = "h-9 w-9" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 40 40" className={className} aria-hidden="true">
+    <svg viewBox="0 0 40 40" className={`shrink-0 ${className}`} aria-hidden="true">
       <rect width="40" height="40" rx="12" fill="#164F2E" />
       <path d="M9 21h22a11 11 0 01-22 0z" fill="#FFF9EE" />
       <rect x="8" y="19.5" width="24" height="2.6" rx="1.3" fill="#FFF9EE" />
@@ -118,7 +118,7 @@ export function TopBar() {
           className="flex min-h-[48px] min-w-[48px] items-center gap-2"
         >
           <LogoMark />
-          <span className="brand-name whitespace-nowrap font-display text-base font-black uppercase leading-tight tracking-tight text-leaf-900 sm:text-lg">
+          <span className="brand-name hidden whitespace-nowrap font-display text-base font-black uppercase leading-tight tracking-tight text-leaf-900 sm:inline sm:text-lg">
             {t("app.name")}
           </span>
         </Link>

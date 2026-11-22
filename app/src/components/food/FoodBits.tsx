@@ -96,10 +96,13 @@ export function FoodPhoto({
   category,
   className = "h-36",
   width = 640,
+  eager = false,
 }: {
   category: Category;
   className?: string;
   width?: number;
+  /** Load at once (the big photo on a detail page) instead of when scrolled into view. */
+  eager?: boolean;
 }) {
   const tile = CATEGORY_TILE[category];
   const [failed, setFailed] = useState(false);
@@ -115,7 +118,7 @@ export function FoodPhoto({
           src={photo(id, width, Math.round(width * 0.5))}
           srcSet={photoSet(id, width, Math.round(width * 0.5))}
           alt=""
-          loading="lazy"
+          loading={eager ? "eager" : "lazy"}
           onError={() => setFailed(true)}
           className="absolute inset-0 h-full w-full object-cover"
         />

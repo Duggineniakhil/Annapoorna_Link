@@ -41,6 +41,7 @@ export function ListingCard({
   to,
   showSteps = false,
   showSafety = true,
+  hero = false,
   children,
 }: {
   listing: Listing;
@@ -51,6 +52,8 @@ export function ListingCard({
   showSteps?: boolean;
   /** Compact safety card (storage, veg, countdown, allergens, guidance, disclaimer). */
   showSafety?: boolean;
+  /** Detail pages: a taller photo and a bigger title. */
+  hero?: boolean;
   children?: ReactNode;
 }) {
   const { t } = useT();
@@ -59,7 +62,12 @@ export function ListingCard({
   const header = (
     <div className="flex flex-col">
       <div className="relative">
-        <FoodPhoto category={category} className="h-36 w-full sm:h-40" />
+        <FoodPhoto
+          category={category}
+          className={hero ? "h-52 w-full sm:h-72" : "h-36 w-full sm:h-40"}
+          width={hero ? 960 : 640}
+          eager={hero}
+        />
         <span className="absolute inset-0 bg-gradient-to-t from-night/70 via-transparent to-transparent" />
         <span className="absolute bottom-3 right-3 flex flex-col items-end rounded-2xl bg-white/95 px-3 py-1.5 leading-none shadow-card">
           <span className="font-display text-2xl font-black text-leaf-800">
@@ -74,7 +82,11 @@ export function ListingCard({
         )}
       </div>
       <div className="flex min-w-0 flex-col gap-0.5 px-4 pt-3">
-        <h3 className="line-clamp-2 text-lg font-bold leading-snug text-ink">{title}</h3>
+        <h3
+          className={`line-clamp-2 leading-snug text-ink ${hero ? "font-display text-2xl font-black sm:text-3xl" : "text-lg font-bold"}`}
+        >
+          {title}
+        </h3>
         <p className="truncate text-sm text-ink/70">
           {donorName} · {area}
         </p>

@@ -17,6 +17,8 @@ import type { MessageKey } from "../../i18n/en";
 import { ApiError, deliverTask, getTask, submitPickupCode } from "../../services/api";
 import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import { AreaMap } from "../../components/map/AreaMap";
+import { DetailColumns, PhotoBanner } from "../../components/layout/Detail";
+import { PHOTOS } from "../../lib/media";
 import { routeBetween } from "../../components/map/route";
 import type { Task } from "../../types/api";
 
@@ -296,6 +298,11 @@ export default function VolunteerTaskDetail() {
         titleKey="volunteer.task.title"
         title={t("volunteer.delivered.title", { n: formatNumber(meals, lang) })}
       >
+        <PhotoBanner
+          photoId={PHOTOS.clayPots}
+          eyebrow={t("volunteer.task.route", { from: task.pickup.area, to: task.delivery.area })}
+          title={t("volunteer.task.meals", { count: formatNumber(meals, lang) })}
+        />
         <ButtonLink to="/volunteer" size="lg" block className="py-4">
           {t("volunteer.delivery.back")}
         </ButtonLink>
@@ -360,41 +367,54 @@ export default function VolunteerTaskDetail() {
 
   return (
     <Screen
-      narrow
       titleKey={STEP_TITLE[step]}
       title={t(STEP_TITLE[step])}
       eyebrow={<Progress step={step} />}
       demoData
     >
+      <PhotoBanner
+        photoId={PHOTOS.packingBags}
+        className="h-36 sm:h-48"
+        eyebrow={t("volunteer.task.meals", { count: formatNumber(task.meals, lang) })}
+        title={t("volunteer.task.route", { from: task.pickup.area, to: task.delivery.area })}
+      />
       {step === 1 && (
-        <div className="flex flex-col gap-4">
-          <PlaceBlock label={t("task.from")} name={task.pickup.name} area={task.pickup.area} />
-          {route && (
-            <AreaMap
-              points={route.points}
-              lines={route.lines}
-              distanceKm={route.distanceKm}
-              label={t("map.label")}
-            />
-          )}
-          <Button
-            variant="secondary"
-            size="lg"
-            block
-            className="py-4"
-            onClick={() => navigateTo(task.pickup.lat, task.pickup.lng)}
-          >
-            {t("volunteer.navigate")}
-          </Button>
-          <SafetyCard listing={task.listing} variant="full" />
-          <Button size="lg" block className="py-4" onClick={() => setLocalStep(2)}>
-            {t("volunteer.pickup.toCode")}
-          </Button>
-        </div>
+        <DetailColumns
+          main={
+            <>
+              <PlaceBlock label={t("task.from")} name={task.pickup.name} area={task.pickup.area} />
+              <Button
+                variant="secondary"
+                size="lg"
+                block
+                className="py-4"
+                onClick={() => navigateTo(task.pickup.lat, task.pickup.lng)}
+              >
+                {t("volunteer.navigate")}
+              </Button>
+              <SafetyCard listing={task.listing} variant="full" />
+              <Button size="lg" block className="py-4" onClick={() => setLocalStep(2)}>
+                {t("volunteer.pickup.toCode")}
+              </Button>
+            </>
+          }
+          side={
+            <>
+              {route && (
+                <AreaMap
+                  points={route.points}
+                  lines={route.lines}
+                  distanceKm={route.distanceKm}
+                  label={t("map.label")}
+                />
+              )}
+            </>
+          }
+        />
       )}
 
       {step === 2 && (
-        <div className="flex flex-col gap-5">
+        <div className="mx-auto flex w-full max-w-xl flex-col gap-5">
           <CodeBoxes
             digits={pickupDigits}
             onChange={setPickupDigits}
@@ -421,34 +441,46 @@ export default function VolunteerTaskDetail() {
       )}
 
       {step === 3 && (
-        <div className="flex flex-col gap-4">
-          <PlaceBlock label={t("task.to")} name={task.delivery.name} area={task.delivery.area} />
-          <Countdown deadline={task.delivery.serve_by} kind="deliver" />
-          {route && (
-            <AreaMap
-              points={route.points}
-              lines={route.lines}
-              distanceKm={route.distanceKm}
-              label={t("map.label")}
-            />
-          )}
-          <Button
-            variant="secondary"
-            size="lg"
-            block
-            className="py-4"
-            onClick={() => navigateTo(task.delivery.lat, task.delivery.lng)}
-          >
-            {t("volunteer.navigate")}
-          </Button>
-          <Button size="lg" block className="py-4" onClick={() => setLocalStep(4)}>
-            {t("volunteer.delivery.toCode")}
-          </Button>
-        </div>
+        <DetailColumns
+          main={
+            <>
+              <PlaceBlock
+                label={t("task.to")}
+                name={task.delivery.name}
+                area={task.delivery.area}
+              />
+              <Countdown deadline={task.delivery.serve_by} kind="deliver" />
+              <Button
+                variant="secondary"
+                size="lg"
+                block
+                className="py-4"
+                onClick={() => navigateTo(task.delivery.lat, task.delivery.lng)}
+              >
+                {t("volunteer.navigate")}
+              </Button>
+              <Button size="lg" block className="py-4" onClick={() => setLocalStep(4)}>
+                {t("volunteer.delivery.toCode")}
+              </Button>
+            </>
+          }
+          side={
+            <>
+              {route && (
+                <AreaMap
+                  points={route.points}
+                  lines={route.lines}
+                  distanceKm={route.distanceKm}
+                  label={t("map.label")}
+                />
+              )}
+            </>
+          }
+        />
       )}
 
       {step === 4 && (
-        <div className="flex flex-col gap-5">
+        <div className="mx-auto flex w-full max-w-xl flex-col gap-5">
           <CodeBoxes
             digits={deliverDigits}
             onChange={setDeliverDigits}
