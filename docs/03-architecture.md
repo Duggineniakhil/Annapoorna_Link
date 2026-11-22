@@ -92,7 +92,7 @@ Every transition writes an `events` row and publishes an SSE message to the dono
 
 ## 9. Repository layout
 ```
-Vidya_Nestham/            (repo; product name: Annapoorna Link)
+Annapoorna_Link/
   app/        # PWA frontend (Member A)
   server/     # API, matching, state machine, impact (Member B)
   docs/       # these documents

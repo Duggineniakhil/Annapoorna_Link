@@ -9,7 +9,6 @@ export const en = {
 
   "common.demoData": "Demo data",
   "common.back": "Back",
-  "common.comingSoon": "This screen is coming soon.",
   "common.account": "Account",
   "common.switchAccount": "Switch account",
   "common.logout": "Log out",

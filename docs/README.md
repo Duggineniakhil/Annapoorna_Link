@@ -38,4 +38,4 @@ ACE Builders Hackathon 2026 · **Problem Statement 2: Rescue the Surplus** · Hy
 3. Start a **new Nexon chat** with the context message in doc 13 (Member A) or doc 14 (Member B).
 4. Agree the contracts in doc 12 §2 together (30 min).
 5. Make 3–5 quick user calls (doc 01 §7) for real quotes.
-6. ✅ Public GitHub repo created: Vidya_Nestham. The product name is Annapoorna Link; you can rename the repo in GitHub settings.
+6. ✅ Public GitHub repo created: Annapoorna_Link.

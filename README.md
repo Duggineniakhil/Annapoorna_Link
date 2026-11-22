@@ -41,8 +41,6 @@ Built by team **CREED** for the **ACE Builders Hackathon 2026**, **Problem State
 |---|---|
 | Live app | [annapoorna-link.vercel.app](https://annapoorna-link.vercel.app) (demo accounts, no sign-up) |
 | Live API | [annapoorna-link-api.onrender.com/api/health](https://annapoorna-link-api.onrender.com/api/health) (free tier; the first request after a quiet spell can take about a minute) |
-| Demo video (3–6 min) | <!-- TODO --> _coming soon_ |
-| Pitch deck | <!-- TODO --> _coming soon_ |
 | Build log | [CODEBENDERS_USAGE.md](CODEBENDERS_USAGE.md) |
 
 ## Contents
@@ -94,8 +92,6 @@ It is 10:30 PM and a wedding reception in Kukatpally has just ended, with 150 pl
 
 Both sides want to help, but there is no fast, reliable way to connect surplus food with the people who need it before it spoils. Coordination runs on phone calls and messaging groups that break down late at night, with no matching, no status and no record of impact.
 
-<!-- TODO: add 2–3 cited statistics and 1–2 anonymised quotes from user interviews -->
-
 ---
 
 ## The solution
@@ -115,7 +111,7 @@ Both sides want to help, but there is no fast, reliable way to connect surplus f
 
 | Problem Statement 2 requirement | How Annapoorna Link meets it |
 |---|---|
-| Donor flow under a minute: what food, how much, pickup-by time | Quick Post with food chips, an auto-suggested pickup-by time and a built-in timer (median posting time: <!-- TODO --> s) |
+| Donor flow under a minute: what food, how much, pickup-by time | Quick Post with food chips, an auto-suggested pickup-by time and a built-in posting timer |
 | Smart matching by distance, quantity, timing and need | Matching engine with eligibility rules, a weighted score and stated reasons; volunteer selection by distance and capacity |
 | Pickup coordination with live status: posted → claimed → collected → delivered | Server-enforced state machine, live updates over Server-Sent Events, handover codes |
 | Impact view: meals saved and waste avoided, with assumptions | Donor and city dashboards with a "How we calculate this" panel and a printable monthly report |
@@ -221,7 +217,7 @@ Kitchens and volunteers use the platform free of charge.
 
 | Customer | Value | Plan |
 |---|---|---|
-| Caterers and wedding halls | Lower disposal costs and a "zero-waste events" story for their clients | Donor Pro, per venue per month <!-- TODO: price --> |
+| Caterers and wedding halls | Lower disposal costs and a "zero-waste events" story for their clients | Donor Pro, per venue per month |
 | Hostel and college messes | Routine daily pickups and sustainability reports | Institution plan |
 | CSR sponsors | Verified, reportable social and environmental impact | Area sponsorship with dashboard |
 | City authorities (later) | Less food waste sent to landfill | City licence and data |

@@ -11,7 +11,6 @@ export const te: Record<MessageKey, string> = {
 
   "common.demoData": "డెమో డేటా",
   "common.back": "వెనక్కి",
-  "common.comingSoon": "ఈ పేజీ త్వరలో వస్తుంది.",
   "common.account": "ఖాతా",
   "common.switchAccount": "ఖాతా మార్చండి",
   "common.logout": "లాగ్ అవుట్",

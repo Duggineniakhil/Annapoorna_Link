@@ -3,14 +3,6 @@
 
 This file records how the application was developed in the **Codebenders IDE**: the build timeline, the key prompts, the iterations that mattered, and where we used our own judgement to correct or improve the output.
 
-> **How to keep this file:** fill in each row **right after** finishing a task, while the details are fresh:
-> - write the prompt and its result
-> - note what you changed
-> - add a screenshot in `docs/img/codebenders/`
-> - add the commit hash
->
-> Delete every `<!-- … -->` note and empty row before submitting.
-
 ---
 
 ## 1. Summary
@@ -43,59 +35,56 @@ This file records how the application was developed in the **Codebenders IDE**: 
 | Sat 20:37 | Switch to Problem Statement 2 | We gave Nexon the Annapoorna Link context and docs. It summarised the product and flagged open items (missing seed-data doc, unreviewed Telugu, emission factor source) before writing any code. |
 
 ### Member A: Frontend & Experience
-| # | Time (IST) | Task | Key prompt (short) | What Codebenders produced | What we changed / iterated | Screenshot | Commit |
-|---|---|---|---|---|---|---|---|
-| A1 | Sat 21:12 / 21:16 | PWA skeleton, roles, EN/TE | Chat Sat 20:39. "Create the frontend skeleton for Annapoorna Link in app/. This task is ONLY the skeleton: routes, layout, i18n and placeholders." | `package.json`, TypeScript and Vite configs, `config.ts` and the shared API types. `npm install` passed after it moved `eslint-plugin-react-hooks` from ^4.6.2 to ^5.2.0. | Deferred the Telugu strings to a second step. The editor agent's write gate then refused new files, so we re-sent the step as small batches ("Write the files yourself, one at a time"). | | `e7365f3`, `cf0cd7b` |
-| A2 | Sun 15:08 | Frontend deploy | | | | | `311bd77`, `742d731` |
-| A3 | Sat 21:41 | Demo login & role routing | Chat Sat 21:19. "Implement demo login and role-based routing for Annapoorna Link." | Fetch client with typed EN/TE errors and a 15 s timeout, mock API handlers, auth context, role guards, account switcher; 20 tests (13 redirect cases, 7 error-mapping cases). | A test-library version clash: we told Nexon to pin `@testing-library/jest-dom` to ^6, keep Vitest unchanged and not use `--legacy-peer-deps`. | | `d8aae41` |
-| A4 | Sat 22:42 | Donor Quick Post | Chat Sat 21:43. "Build the donor Quick Post screen (/donor/post). Goal: a busy caterer posts surplus in under 60 seconds." | Quick Post rules in the mock API: categories, storage, safe pickup windows. Writes to new files under `src/lib/` and `src/services/` were refused by the editor's permission gate. | Code review by Akhil found four issues (per-item veg ignored, weak validation, past pickup accepted, garbled text). Nexon reproduced three, fixed them, and showed the fourth did not reproduce. | | `98f5ce7` |
-| A5 | Sat 23:30 | Donor listings & detail | Chat Sat 23:14. "Build donor listings for Annapoorna Link." | Donor home with Active and Past tabs, listing detail with timeline, pickup code and cancel; mocks for list, detail and cancel. 69 tests passing. | Kept the pickup countdown on past cards because the spec asked for it; noted the status shown twice on active cards for later. | | `49acd00` |
-| A6 | Sat 23:45 | Safety card | Chat Sat 23:32. "Build a reusable SafetyCard component (app/src/components/SafetyCard.tsx) used on every listing, offer and task." | `SafetyCard` with full and compact variants (storage, countdown, veg, allergens, guidance, disclaimer) wired into donor, offer and task screens; 8 new tests (81 total). | Nexon flagged two strings near the "no 'safe' claims" rule; we kept them because they describe timing, not food safety. | | `fdc2456` |
-| A7 | Sun 00:11 | Receiver offers, needs, history | Chat Sat 23:46. "Build the receiver screens for Annapoorna Link." | Offers list with match-reason chips and expiry countdown, offer detail with accept and decline reasons, needs and history screens. 93 tests passing. | Nexon ignored a stray instruction returned by one exploration call because it did not match the request. | | `045e33a` |
-| A8 | Sun 00:41 | Volunteer tasks & stepper | Chat Sun 00:13. "Build the volunteer screens for Annapoorna Link." | Availability switch, open and active tasks, four-step pickup and delivery stepper with 4-digit codes and a tries-left message, history. 107 tests passing. | Lint fix in the task mapper re-verified by a second run. | | `7c539be` |
-| A9 | Sun 01:03 | Live updates | Chat Sun 00:42. "Add live updates across Annapoorna Link." | Server-Sent Events client with backoff and a polling fallback, live toasts, status note, tests. | The editor marked the screen wiring as cancelled; we told Nexon to finish it. Every screen now uses one shared `useLiveRefetch` instead of its own 15 s timer. | | `56f8465` |
-| A10 | Sun 01:17 | Map | | | | | `97475f0` |
-| A11 | Sun 01:40 | Impact dashboards | | | | | `1ff271c` |
-| A12 | Sun 01:54 | Voice post UI | | | | | `b0c17aa` |
-| A13 | Sun 02:07 | Errors, empty states, settings | | | | | `83a30a7` |
-| A14 | Sun 02:23 | Demo mode | | | | | `8b1f1ec` |
-| A15 | Sun 15:02 | Performance & accessibility | Chat Sun 14:07. "Do a performance and accessibility pass on Annapoorna Link for mid-range Android phones on 4G/3G." | Measured baseline: 395 KB first load, largest role chunk 27 KB, Leaflet lazy (151 KB), Lighthouse performance 95 to 97. Fixed the colour-contrast failure. | We asked it to continue after the baseline. Lighthouse accessibility went from 96 to 100; the 360 px Telugu check was finished afterwards in commit `d8141ee`. | | `d8141ee` |
+| # | Time (IST) | Task | Key prompt (short) | What Codebenders produced | What we changed / iterated | Commit |
+|---|---|---|---|---|---|---|
+| A1 | Sat 21:12 / 21:16 | PWA skeleton, roles, EN/TE | Chat Sat 20:39. "Create the frontend skeleton for Annapoorna Link in app/. This task is ONLY the skeleton: routes, layout, i18n and placeholders." | `package.json`, TypeScript and Vite configs, `config.ts` and the shared API types. `npm install` passed after it moved `eslint-plugin-react-hooks` from ^4.6.2 to ^5.2.0. | Deferred the Telugu strings to a second step. The editor agent's write gate then refused new files, so we re-sent the step as small batches ("Write the files yourself, one at a time"). | `e7365f3`, `cf0cd7b` |
+| A2 | Sun 15:08 | Frontend deploy | | | | `311bd77`, `742d731` |
+| A3 | Sat 21:41 | Demo login & role routing | Chat Sat 21:19. "Implement demo login and role-based routing for Annapoorna Link." | Fetch client with typed EN/TE errors and a 15 s timeout, mock API handlers, auth context, role guards, account switcher; 20 tests (13 redirect cases, 7 error-mapping cases). | A test-library version clash: we told Nexon to pin `@testing-library/jest-dom` to ^6, keep Vitest unchanged and not use `--legacy-peer-deps`. | `d8aae41` |
+| A4 | Sat 22:42 | Donor Quick Post | Chat Sat 21:43. "Build the donor Quick Post screen (/donor/post). Goal: a busy caterer posts surplus in under 60 seconds." | Quick Post rules in the mock API: categories, storage, safe pickup windows. Writes to new files under `src/lib/` and `src/services/` were refused by the editor's permission gate. | Code review by Akhil found four issues (per-item veg ignored, weak validation, past pickup accepted, garbled text). Nexon reproduced three, fixed them, and showed the fourth did not reproduce. | `98f5ce7` |
+| A5 | Sat 23:30 | Donor listings & detail | Chat Sat 23:14. "Build donor listings for Annapoorna Link." | Donor home with Active and Past tabs, listing detail with timeline, pickup code and cancel; mocks for list, detail and cancel. 69 tests passing. | Kept the pickup countdown on past cards because the spec asked for it; noted the status shown twice on active cards for later. | `49acd00` |
+| A6 | Sat 23:45 | Safety card | Chat Sat 23:32. "Build a reusable SafetyCard component (app/src/components/SafetyCard.tsx) used on every listing, offer and task." | `SafetyCard` with full and compact variants (storage, countdown, veg, allergens, guidance, disclaimer) wired into donor, offer and task screens; 8 new tests (81 total). | Nexon flagged two strings near the "no 'safe' claims" rule; we kept them because they describe timing, not food safety. | `fdc2456` |
+| A7 | Sun 00:11 | Receiver offers, needs, history | Chat Sat 23:46. "Build the receiver screens for Annapoorna Link." | Offers list with match-reason chips and expiry countdown, offer detail with accept and decline reasons, needs and history screens. 93 tests passing. | Nexon ignored a stray instruction returned by one exploration call because it did not match the request. | `045e33a` |
+| A8 | Sun 00:41 | Volunteer tasks & stepper | Chat Sun 00:13. "Build the volunteer screens for Annapoorna Link." | Availability switch, open and active tasks, four-step pickup and delivery stepper with 4-digit codes and a tries-left message, history. 107 tests passing. | Lint fix in the task mapper re-verified by a second run. | `7c539be` |
+| A9 | Sun 01:03 | Live updates | Chat Sun 00:42. "Add live updates across Annapoorna Link." | Server-Sent Events client with backoff and a polling fallback, live toasts, status note, tests. | The editor marked the screen wiring as cancelled; we told Nexon to finish it. Every screen now uses one shared `useLiveRefetch` instead of its own 15 s timer. | `56f8465` |
+| A10 | Sun 01:17 | Map | | | | `97475f0` |
+| A11 | Sun 01:40 | Impact dashboards | | | | `1ff271c` |
+| A12 | Sun 01:54 | Voice post UI | | | | `b0c17aa` |
+| A13 | Sun 02:07 | Errors, empty states, settings | | | | `83a30a7` |
+| A14 | Sun 02:23 | Demo mode | | | | `8b1f1ec` |
+| A15 | Sun 15:02 | Performance & accessibility | Chat Sun 14:07. "Do a performance and accessibility pass on Annapoorna Link for mid-range Android phones on 4G/3G." | Measured baseline: 395 KB first load, largest role chunk 27 KB, Leaflet lazy (151 KB), Lighthouse performance 95 to 97. Fixed the colour-contrast failure. | We asked it to continue after the baseline. Lighthouse accessibility went from 96 to 100; the 360 px Telugu check was finished afterwards in commit `d8141ee`. | `d8141ee` |
 
 ### Member B: Backend, Matching & Data
-| # | Time (IST) | Task | Key prompt (short) | What Codebenders produced | What we changed / iterated | Screenshot | Commit |
-|---|---|---|---|---|---|---|---|
-| B1 | Sun 01:25 | Backend skeleton + stubs | "Create the backend skeleton for Annapoorna Link…" | | | | `825c7de` |
-| B2 | Sun 01:25 | Deploy + Postgres | | | | | `825c7de` |
-| B3 | Sun 01:25 | Seed data | | | | | `825c7de` |
-| B4 | Sun 01:25 | Demo auth & authorization | | | | | `825c7de` |
-| B5 | Sun 01:25 | Guidance service | | | | | `825c7de` |
-| B6 | Sun 01:25 | Listings API + expiry | | | | | `825c7de` |
-| B7 | Sun 01:25 | Matching engine | | | | | `825c7de` |
-| B8 | Sun 01:25 / 01:27 | Offer cascade | | | | | `825c7de`, `aa56ca2` |
-| B9 | Sun 01:25 / 01:27 | Tasks, codes, state machine | | | | | `825c7de`, `aa56ca2` |
-| B10 | Sun 01:25 | Realtime (SSE) | | | | | `825c7de` |
-| B11 | Sun 01:25 | Impact calculator | | | | | `825c7de` |
-| B12 | Sun 01:59 | Voice post | | | | | `53698ab` |
-| B13 | Sun 01:48 | Demo scenario bots | | | | | `b4839cb` |
-| B14 | Sun 01:25 | Hardening | | | | | `825c7de` |
-| B15 | Sun 01:25 | Metrics | | | | | `825c7de` |
+| # | Time (IST) | Task | Key prompt (short) | What Codebenders produced | What we changed / iterated | Commit |
+|---|---|---|---|---|---|---|
+| B1 | Sun 01:25 | Backend skeleton + stubs | "Create the backend skeleton for Annapoorna Link…" | | | `825c7de` |
+| B2 | Sun 01:25 | Deploy + Postgres | | | | `825c7de` |
+| B3 | Sun 01:25 | Seed data | | | | `825c7de` |
+| B4 | Sun 01:25 | Demo auth & authorization | | | | `825c7de` |
+| B5 | Sun 01:25 | Guidance service | | | | `825c7de` |
+| B6 | Sun 01:25 | Listings API + expiry | | | | `825c7de` |
+| B7 | Sun 01:25 | Matching engine | | | | `825c7de` |
+| B8 | Sun 01:25 / 01:27 | Offer cascade | | | | `825c7de`, `aa56ca2` |
+| B9 | Sun 01:25 / 01:27 | Tasks, codes, state machine | | | | `825c7de`, `aa56ca2` |
+| B10 | Sun 01:25 | Realtime (SSE) | | | | `825c7de` |
+| B11 | Sun 01:25 | Impact calculator | | | | `825c7de` |
+| B12 | Sun 01:59 | Voice post | | | | `53698ab` |
+| B13 | Sun 01:48 | Demo scenario bots | | | | `b4839cb` |
+| B14 | Sun 01:25 | Hardening | | | | `825c7de` |
+| B15 | Sun 01:25 | Metrics | | | | `825c7de` |
 
 Member B's first tasks (B1–B11, B14, B15) landed together in one commit, `825c7de`, when the backend was pushed to the shared repository.
 
 ### Work after the task lists
-| # | Time (IST) | Task | Key prompt (short) | What Codebenders produced | What we changed / iterated | Screenshot | Commit |
-|---|---|---|---|---|---|---|---|
-| A16 | Sun 15:22 / 15:35 | Frontend against the live API's response shapes | | | | | `084f440`, `91eaa23` |
-| A17 | Sun 15:45 | API deploy on Render (blueprint, in memory) | | | | | `cf75099` |
-| A18 | Sun 16:04 | Volunteer history, weekly impact, demo kitchens first in DEMO_MODE | | | | | `53fa227` |
-| A19 | Sun 16:35 | Redesign: photo homepage, desktop layout, food photos | | | | | `83d53d1` |
-| A20 | Sun 16:55 | Redesign: detail screens | | | | | `c6c91ea` |
-| A21 | Sun 15:06 / 19:06 | README, screenshots, Lighthouse re-run | | | | | `dc9df3a`, `e899496` |
-
-<!-- Add rows for extra prompts (bug fixes, refactors) like A7.1, B8.2 -->
+| # | Time (IST) | Task | Key prompt (short) | What Codebenders produced | What we changed / iterated | Commit |
+|---|---|---|---|---|---|---|
+| A16 | Sun 15:22 / 15:35 | Frontend against the live API's response shapes | | | | `084f440`, `91eaa23` |
+| A17 | Sun 15:45 | API deploy on Render (blueprint, in memory) | | | | `cf75099` |
+| A18 | Sun 16:04 | Volunteer history, weekly impact, demo kitchens first in DEMO_MODE | | | | `53fa227` |
+| A19 | Sun 16:35 | Redesign: photo homepage, desktop layout, food photos | | | | `83d53d1` |
+| A20 | Sun 16:55 | Redesign: detail screens | | | | `c6c91ea` |
+| A21 | Sun 15:06 / 19:06 | README, screenshots, Lighthouse re-run | | | | `dc9df3a`, `e899496` |
 
 ## 4. Iterations that mattered
-<!-- Add before/after screenshots where you have them. -->
 
 ### Iteration 1: Code review of the Quick Post rules
 - **Prompt v1 (Sat 21:43):** "Build the donor Quick Post screen (/donor/post). Goal: a busy caterer posts surplus in under 60 seconds."
@@ -148,7 +137,7 @@ Member B's first tasks (B1–B11, B14, B15) landed together in one commit, `825c
 - **Result:** Lighthouse mobile performance 96 on the homepage, accessibility 100 on every page measured. Commits `83d53d1`, `c6c91ea`.
 
 ## 5. Key design decisions
-1. **Under-a-minute posting.** Chips, smart defaults, an auto-suggested pickup time and "repeat last post". The app measures posting time, so the claim is testable. Median: <!-- ___ s -->.
+1. **Under-a-minute posting.** Chips, smart defaults, an auto-suggested pickup time and "repeat last post". The app measures posting time, so the claim is testable.
 2. **Explainable matching.** A weighted score after eligibility rules (veg-only, open hours, need, arrival before pickup-by). Receivers see the top reasons in English and Telugu. Pure functions, unit-tested, weights in config.
 3. **Offer cascade.** 10 minutes per receiver, then the next, then open to all, so food never waits on one phone call.
 4. **Handover codes instead of GPS.** A pickup code (donor) and a delivery code (receiver), entered by the volunteer. They prove each step, protect privacy and work on weak networks.
@@ -177,7 +166,6 @@ Member B's first tasks (B1–B11, B14, B15) landed together in one commit, `825c
 | **Security** | Codes only visible to the right role, keys server-side, rate limits | Pickup code hidden once food is picked up; five wrong code tries lock the step |
 | **Privacy** | Synthetic, area-level data only | The sponsor map lists recent deliveries by area only, with no lines to individual kitchens |
 | **Telugu text** | Reviewer: Duggineni Akhil; every Telugu string stays a draft until he signs it off | Letter-spacing removed for Telugu headings; layout checked at 360 px with the largest text size |
-| **Real-phone testing** | <!-- phone model, network --> | <!-- … --> |
 
 ## 8. Data and sources
 - **Organisations, people and locations:** fictional, synthetic demo data (area-level, Hyderabad).
@@ -186,17 +174,7 @@ Member B's first tasks (B1–B11, B14, B15) landed together in one commit, `825c
 
 ## 9. Evidence
 - Exported Nexon sessions (JSON), Member A: seven sessions, 33 prompts, Sat 19:12 to Sun 14:45 IST
-- Screenshots of the Codebenders IDE at key steps: [`docs/img/codebenders/`](docs/img/codebenders/)
-- Short screen recordings: <!-- links -->
 - Git history, one commit per task: [commits on `main`](https://github.com/Duggineniakhil/Annapoorna_Link/commits/main)
-- Test results: 167 frontend tests and 86 API tests passing (`npm test` in `app/` and `server/`) <!-- add screenshots -->
-- Lighthouse report (mobile): homepage 96 performance, sign-in 82–87, demo guide 93; accessibility and best practices 100 on all three (see the README) <!-- add screenshot -->
+- Test results: 167 frontend tests and 86 API tests passing (`npm test` in `app/` and `server/`)
+- Lighthouse report (mobile): homepage 96 performance, sign-in 82–87, demo guide 93; accessibility and best practices 100 on all three (see the README)
 - App screenshots: [`docs/screenshots/`](docs/screenshots/)
-
-## 10. Before submitting: confirm each item
-- [ ] All application code was written in the Codebenders IDE during the build window.
-- [ ] Every row in section 3 is filled in, or removed if the task was dropped.
-- [ ] At least 3 real iterations are documented in section 4.
-- [ ] Section 6 lists only features we actually used.
-- [ ] No API keys, tokens or personal data appear in this file or its screenshots.
-- [ ] All `<!-- … -->` notes are removed.

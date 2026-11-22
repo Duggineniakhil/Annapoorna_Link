@@ -43,13 +43,3 @@ export function Screen({
     </section>
   );
 }
-
-/** Placeholder content for screens built in later tasks. */
-export function ComingSoon() {
-  const { t } = useT();
-  return (
-    <div className="rounded-2xl border-2 border-dashed border-leaf-800/15 p-8 text-center text-ink/70">
-      {t("common.comingSoon")}
-    </div>
-  );
-}
