@@ -10,6 +10,7 @@ export function Screen({
   eyebrow,
   demoData = false,
   aside,
+  narrow = false,
   children,
 }: {
   titleKey: MessageKey;
@@ -19,16 +20,20 @@ export function Screen({
   demoData?: boolean;
   /** Right-aligned element next to the heading. */
   aside?: ReactNode;
+  /** Forms and detail pages: keep a readable width on wide screens. */
+  narrow?: boolean;
   children?: ReactNode;
 }) {
   const { t } = useT();
   return (
-    <section className="flex flex-col gap-4">
+    <section className={`flex flex-col gap-5 ${narrow ? "mx-auto w-full max-w-3xl" : ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
           {eyebrow}
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold leading-tight text-ink">{title ?? t(titleKey)}</h1>
+            <h1 className="font-display text-3xl font-black leading-tight tracking-tight text-ink sm:text-4xl">
+              {title ?? t(titleKey)}
+            </h1>
             {demoData && <DemoDataBadge />}
           </div>
         </div>

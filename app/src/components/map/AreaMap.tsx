@@ -88,7 +88,7 @@ export function AreaMap({
           <Suspense
             fallback={
               <div
-                className={`${tall ? "h-80" : "h-52"} animate-pulse rounded-2xl bg-leaf-50 ring-1 ring-leaf-800/10`}
+                className={`${tall ? "h-80 lg:h-[34rem]" : "h-52 lg:h-64"} animate-pulse rounded-2xl bg-leaf-50 ring-1 ring-leaf-800/10`}
               />
             }
           >
@@ -96,7 +96,7 @@ export function AreaMap({
               points={points}
               lines={lines}
               onTilesFailed={() => setTextOnly(true)}
-              className={`${tall ? "h-80" : "h-52"} relative isolate z-0 overflow-hidden rounded-2xl ring-1 ring-leaf-800/10`}
+              className={`${tall ? "h-80 lg:h-[34rem]" : "h-52 lg:h-64"} relative isolate z-0 overflow-hidden rounded-2xl ring-1 ring-leaf-800/10`}
             />
           </Suspense>
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-ink/70">

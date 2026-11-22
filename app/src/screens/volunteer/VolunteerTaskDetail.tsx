@@ -264,7 +264,7 @@ export default function VolunteerTaskDetail() {
 
   if (!task) {
     return (
-      <Screen titleKey="volunteer.task.title">
+      <Screen narrow titleKey="volunteer.task.title">
         {loadFailed ? (
           <div
             role="alert"
@@ -292,6 +292,7 @@ export default function VolunteerTaskDetail() {
     const meals = deliveredMeals ?? task.meals;
     return (
       <Screen
+        narrow
         titleKey="volunteer.task.title"
         title={t("volunteer.delivered.title", { n: formatNumber(meals, lang) })}
       >
@@ -359,6 +360,7 @@ export default function VolunteerTaskDetail() {
 
   return (
     <Screen
+      narrow
       titleKey={STEP_TITLE[step]}
       title={t(STEP_TITLE[step])}
       eyebrow={<Progress step={step} />}

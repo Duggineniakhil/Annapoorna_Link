@@ -1,8 +1,10 @@
+import { useState } from "react";
 import type { Allergen, Category, Status, Storage } from "../../types/api";
 import { useT } from "../../i18n";
 import { useNow } from "../../hooks/useNow";
 import { Icon, type IconName } from "../ui/Icon";
 import { formatClock, formatDuration } from "./format";
+import { CATEGORY_PHOTO, photo, photoSet } from "../../lib/media";
 
 /** Indian food-packet style mark: green square + dot (veg) or brown square + triangle (non-veg). */
 export function VegMark({ veg, withLabel = false }: { veg: boolean; withLabel?: boolean }) {
@@ -82,6 +84,42 @@ export function CategoryTile({
       className={`flex shrink-0 items-center justify-center rounded-2xl ${tile.bg} ${dims}`}
     >
       {tile.emoji}
+    </span>
+  );
+}
+
+/**
+ * A food photo for the category (redesign), with the emoji tile underneath: if the photo cannot
+ * load (offline, blocked), the coloured tile still shows.
+ */
+export function FoodPhoto({
+  category,
+  className = "h-36",
+  width = 640,
+}: {
+  category: Category;
+  className?: string;
+  width?: number;
+}) {
+  const tile = CATEGORY_TILE[category];
+  const [failed, setFailed] = useState(false);
+  const id = CATEGORY_PHOTO[category];
+  return (
+    <span
+      aria-hidden="true"
+      className={`relative flex items-center justify-center overflow-hidden text-5xl ${tile.bg} ${className}`}
+    >
+      {tile.emoji}
+      {!failed && (
+        <img
+          src={photo(id, width, Math.round(width * 0.5))}
+          srcSet={photoSet(id, width, Math.round(width * 0.5))}
+          alt=""
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
     </span>
   );
 }

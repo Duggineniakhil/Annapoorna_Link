@@ -102,7 +102,7 @@ export default function DonorListingDetail() {
   }
 
   return (
-    <Screen titleKey="donor.listing.title" demoData>
+    <Screen narrow titleKey="donor.listing.title" demoData>
       {showToast && postedIn !== undefined && (
         <div
           role="status"

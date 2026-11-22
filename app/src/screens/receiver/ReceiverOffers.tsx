@@ -191,7 +191,7 @@ export default function ReceiverOffers() {
           }
         />
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
           {shown.map((offer) => (
             <li key={offer.id}>
               <ListingCard

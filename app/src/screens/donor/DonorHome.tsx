@@ -103,7 +103,7 @@ export default function DonorHome() {
           action={<ButtonLink to="/donor/post">{t("empty.action.post")}</ButtonLink>}
         />
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
           {shown.map((listing) => (
             <li key={listing.id}>
               <ListingCard

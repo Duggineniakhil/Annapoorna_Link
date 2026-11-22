@@ -86,7 +86,7 @@ export default function ReceiverNeeds() {
   };
 
   return (
-    <Screen titleKey="receiver.needs.title" demoData>
+    <Screen narrow titleKey="receiver.needs.title" demoData>
       {loadError && <p className="text-sm text-red-700">{t("receiver.error.generic")}</p>}
       {!loadError && !draft && <p className="text-ink/70">{t("receiver.needs.loading")}</p>}
       {draft && (

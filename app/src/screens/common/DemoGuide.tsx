@@ -33,7 +33,7 @@ const BY_HAND: { icon: IconName; where: MessageKey; who: MessageKey; steps: Mess
 export default function DemoGuide() {
   const { t } = useT();
   return (
-    <Screen titleKey="demo.guide.title" demoData>
+    <Screen narrow titleKey="demo.guide.title" demoData>
       <p className="text-ink/80">{t("demo.guide.intro")}</p>
 
       <section className="flex flex-col gap-2">

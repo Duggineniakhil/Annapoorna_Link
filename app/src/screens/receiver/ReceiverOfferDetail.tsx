@@ -121,7 +121,7 @@ export default function ReceiverOfferDetail() {
         : [];
 
   return (
-    <Screen titleKey="receiver.offer.title" demoData>
+    <Screen narrow titleKey="receiver.offer.title" demoData>
       {error && (
         <p role="alert" className="rounded-2xl bg-chilli-50 p-3 font-medium text-chilli-700">
           {error}

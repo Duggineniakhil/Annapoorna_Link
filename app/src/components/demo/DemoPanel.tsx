@@ -27,7 +27,7 @@ function ActivePanel() {
   return (
     <aside
       aria-label={t("demo.panel.label")}
-      className="fixed bottom-24 right-3 z-20 w-60 rounded-2xl bg-white p-3 shadow-card ring-1 ring-ink/10 print:hidden"
+      className="fixed bottom-24 right-3 z-20 md:bottom-6 md:right-6 w-60 rounded-2xl bg-white p-3 shadow-card ring-1 ring-ink/10 print:hidden"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col">

@@ -10,7 +10,7 @@ import { LogoMark } from "../../components/TopBar";
 export default function About() {
   const { t } = useT();
   return (
-    <Screen titleKey="about.title">
+    <Screen narrow titleKey="about.title">
       <div className="flex items-center gap-3">
         <LogoMark className="h-12 w-12" />
         <p className="font-medium text-ink/80">{t("app.tagline")}</p>

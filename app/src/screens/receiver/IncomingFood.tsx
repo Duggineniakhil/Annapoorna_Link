@@ -35,7 +35,7 @@ export function IncomingFood() {
   return (
     <section className="flex flex-col gap-2">
       <h2 className="text-lg font-bold text-ink">{t("receiver.incoming.title")}</h2>
-      <ul className="flex flex-col gap-3">
+      <ul className="grid gap-4 lg:grid-cols-2">
         {listings.map((listing) => (
           <li key={listing.id}>
             <Card className="flex flex-col gap-3 p-4">

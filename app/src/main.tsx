@@ -4,6 +4,8 @@ import { createRoot } from "react-dom/client";
 // first load small; the browser picks the nearest weight for medium/semibold.
 import "@fontsource/noto-sans-telugu/400.css";
 import "@fontsource/noto-sans-telugu/700.css";
+import "@fontsource/archivo/latin-700.css";
+import "@fontsource/archivo/latin-900.css";
 import "./index.css";
 import App from "./App";
 import { LanguageProvider } from "./i18n";

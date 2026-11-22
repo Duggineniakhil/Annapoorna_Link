@@ -88,7 +88,7 @@ export default function ReceiverHistory() {
         />
       )}
       {items && items.length > 0 && (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-4 lg:grid-cols-2">
           {items.map((item) => {
             const outcome = outcomeOf(item);
             const meals = item.meals_delivered ?? item.listing.total_meals;

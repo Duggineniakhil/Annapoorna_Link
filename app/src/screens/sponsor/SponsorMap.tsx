@@ -10,6 +10,8 @@ import { Button } from "../../components/ui/Button";
 import { formatClock, formatNumber } from "../../components/food/format";
 import { AreaMap } from "../../components/map/AreaMap";
 import type { MapPoint } from "../../components/map/geo";
+import { Icon } from "../../components/ui/Icon";
+import { PHOTOS, photo } from "../../lib/media";
 
 // Sponsor activity map (A10): donors and receivers at area level, and the newest deliveries by
 // the donor's area, filtered by donor type. The server does not say which kitchen received each
@@ -85,44 +87,62 @@ export default function SponsorMap() {
         </p>
       )}
       {view && (
-        <>
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
           <AreaMap points={view.points} label={t("sponsor.map.label")} tall />
-          <p className="font-bold text-leaf-800">
-            {t("sponsor.map.summary", {
-              count: formatNumber(view.recent.length, lang),
-              meals: formatNumber(view.meals, lang),
-            })}
-          </p>
-          <Card className="flex flex-col gap-3 p-4">
-            <SectionHeader titleKey="sponsor.map.recent" />
-            {view.recent.length === 0 ? (
-              <div className="flex flex-col items-start gap-2">
-                <p className="text-ink/70">{t("sponsor.map.none")}</p>
-                {filter !== "all" && (
-                  <Button variant="secondary" onClick={() => setFilter("all")}>
-                    {t("empty.action.allTypes")}
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <ul className="flex flex-col divide-y divide-ink/5">
-                {view.recent.map((d) => (
-                  <li key={d.listing_id} className="flex items-center justify-between gap-3 py-2">
-                    <span className="flex flex-col">
-                      <span className="font-medium text-ink">
-                        {d.area ?? t("sponsor.map.unknownArea")}
+          <div className="flex flex-col gap-4">
+            <div className="relative overflow-hidden rounded-3xl bg-night p-5 text-white">
+              <img
+                src={photo(PHOTOS.charminar, 640, 360)}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover opacity-35"
+              />
+              <p className="relative font-display text-4xl font-black text-turmeric-400">
+                {formatNumber(view.meals, lang)}
+              </p>
+              <p className="relative font-bold">
+                {t("sponsor.map.summary", {
+                  count: formatNumber(view.recent.length, lang),
+                  meals: formatNumber(view.meals, lang),
+                })}
+              </p>
+            </div>
+            <Card className="flex flex-col gap-3 p-4">
+              <SectionHeader titleKey="sponsor.map.recent" />
+              {view.recent.length === 0 ? (
+                <div className="flex flex-col items-start gap-2">
+                  <p className="text-ink/70">{t("sponsor.map.none")}</p>
+                  {filter !== "all" && (
+                    <Button variant="secondary" onClick={() => setFilter("all")}>
+                      {t("empty.action.allTypes")}
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <ul className="flex flex-col divide-y divide-ink/5">
+                  {view.recent.map((d) => (
+                    <li key={d.listing_id} className="flex items-center justify-between gap-3 py-2">
+                      <span className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mint text-night">
+                          <Icon name="pin" className="h-5 w-5" />
+                        </span>
+                        <span className="flex flex-col">
+                          <span className="font-medium text-ink">
+                            {d.area ?? t("sponsor.map.unknownArea")}
+                          </span>
+                          <span className="text-sm text-ink/70">{formatClock(d.at, lang)}</span>
+                        </span>
                       </span>
-                      <span className="text-sm text-ink/70">{formatClock(d.at, lang)}</span>
-                    </span>
-                    <span className="shrink-0 font-bold text-leaf-800">
-                      {formatNumber(d.meals, lang)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
-        </>
+                      <span className="shrink-0 font-display text-xl font-black text-leaf-800">
+                        {formatNumber(d.meals, lang)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          </div>
+        </div>
       )}
     </Screen>
   );

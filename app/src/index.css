@@ -64,3 +64,9 @@ body {
     display: none;
   }
 }
+
+/* Letter-spacing splits Telugu conjuncts apart, so the redesign's tracked headings and
+   eyebrows use normal spacing in Telugu. */
+html[lang="te"] [class*="tracking-"] {
+  letter-spacing: normal;
+}

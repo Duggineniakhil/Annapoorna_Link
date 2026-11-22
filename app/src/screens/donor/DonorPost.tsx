@@ -545,6 +545,7 @@ export default function DonorPost() {
 
   return (
     <Screen
+      narrow
       titleKey="donor.post.title"
       eyebrow={
         org ? (
@@ -826,8 +827,8 @@ export default function DonorPost() {
       {/* Space so the sticky bar never covers the last step. */}
       <div aria-hidden="true" className="h-24" />
 
-      <div className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom))] z-10 border-t border-ink/5 bg-cream/95 backdrop-blur">
-        <div className="mx-auto flex max-w-xl items-center gap-3 px-4 py-3">
+      <div className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom))] z-10 border-t border-ink/5 bg-white/95 backdrop-blur md:bottom-0 md:left-64">
+        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
           <p className="min-w-0 flex-1 text-sm font-bold leading-snug text-ink" aria-live="polite">
             {summary}
           </p>

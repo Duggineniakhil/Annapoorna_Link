@@ -108,9 +108,9 @@ export function TopBar() {
   const item = "flex min-h-[48px] w-full items-center gap-3 px-4 text-left hover:bg-leaf-50";
 
   return (
-    <header className="sticky top-0 z-10 print:hidden border-b border-ink/5 bg-cream/95 backdrop-blur">
+    <header className="sticky top-0 z-10 print:hidden border-b border-ink/5 bg-white/95 backdrop-blur">
       <OfflineBanner />
-      <div className="mx-auto flex max-w-xl items-center justify-between gap-2 px-4 py-2">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 py-2">
         {/* "/" sends a logged-in user to their role home and everyone else to login. */}
         <Link
           to="/"
@@ -118,7 +118,9 @@ export function TopBar() {
           className="flex min-h-[48px] min-w-[48px] items-center gap-2"
         >
           <LogoMark />
-          <span className="brand-name font-bold leading-tight text-leaf-900">{t("app.name")}</span>
+          <span className="brand-name whitespace-nowrap font-display text-base font-black uppercase leading-tight tracking-tight text-leaf-900 sm:text-lg">
+            {t("app.name")}
+          </span>
         </Link>
         <div className="flex items-center gap-1">
           <LanguageToggle />

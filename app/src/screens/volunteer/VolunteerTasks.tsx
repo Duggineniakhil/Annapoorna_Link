@@ -18,6 +18,7 @@ import {
   setVolunteerAvailability,
 } from "../../services/api";
 import { useLiveRefetch } from "../../hooks/useLiveEvents";
+import { PHOTOS, photo, photoSet } from "../../lib/media";
 
 type AcceptFailureKind = "notOpen" | "alreadyActive" | "network" | "generic";
 type AcceptFailure = { id: string; kind: AcceptFailureKind };
@@ -112,25 +113,38 @@ function OpenTaskCard({
 }) {
   const { t, lang } = useT();
   return (
-    <Card className="flex flex-col gap-3 p-4">
-      <p className="font-bold leading-snug text-ink">
-        {t("volunteer.task.route", { from: task.pickup.area, to: task.delivery.area })}
-      </p>
-      <div className="flex flex-wrap items-center gap-2 text-sm text-ink/70">
-        <span className="rounded-full bg-leaf-50 px-3 py-1 font-bold text-leaf-800">
-          {t("volunteer.task.meals", { count: formatNumber(task.meals, lang) })}
-        </span>
-        <span className="rounded-full bg-leaf-50 px-3 py-1 font-bold text-leaf-800">
-          {t("volunteer.task.distance", { km: formatNumber(task.distance_km, lang) })}
-        </span>
-        <Countdown deadline={task.deadline} kind="pickup" compact />
+    <Card className="flex h-full flex-col gap-3 overflow-hidden pb-4">
+      <div className="relative h-28 bg-night-700">
+        <img
+          src={photo(PHOTOS.packingBags, 640, 224)}
+          srcSet={photoSet(PHOTOS.packingBags, 640, 224)}
+          alt=""
+          loading="lazy"
+          className="h-full w-full object-cover opacity-80"
+        />
+        <span className="absolute inset-0 bg-gradient-to-t from-night/90 to-transparent" />
+        <p className="absolute inset-x-4 bottom-3 font-display text-lg font-black leading-snug text-white">
+          {t("volunteer.task.route", { from: task.pickup.area, to: task.delivery.area })}
+        </p>
       </div>
-      <p className="text-sm text-ink/70">
-        {t(task.vehicle_fit ? "volunteer.task.vehicleFit" : "volunteer.task.vehicleNoFit")}
-      </p>
-      <Button size="lg" block disabled={disabled || busy} onClick={() => onAccept(task.id)}>
-        {t(busy ? "volunteer.task.accepting" : "volunteer.task.accept")}
-      </Button>
+      <div className="flex flex-1 flex-col gap-3 px-4">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-ink/70">
+          <span className="rounded-full bg-leaf-50 px-3 py-1 font-bold text-leaf-800">
+            {t("volunteer.task.meals", { count: formatNumber(task.meals, lang) })}
+          </span>
+          <span className="rounded-full bg-leaf-50 px-3 py-1 font-bold text-leaf-800">
+            {t("volunteer.task.distance", { km: formatNumber(task.distance_km, lang) })}
+          </span>
+          <Countdown deadline={task.deadline} kind="pickup" compact />
+        </div>
+        <p className="text-sm text-ink/70">
+          {t(task.vehicle_fit ? "volunteer.task.vehicleFit" : "volunteer.task.vehicleNoFit")}
+        </p>
+        <span className="flex-1" />
+        <Button size="lg" block disabled={disabled || busy} onClick={() => onAccept(task.id)}>
+          {t(busy ? "volunteer.task.accepting" : "volunteer.task.accept")}
+        </Button>
+      </div>
     </Card>
   );
 }
@@ -263,7 +277,7 @@ export default function VolunteerTasks() {
           }
         />
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
           {open.map((task) => (
             <li key={task.id}>
               <OpenTaskCard

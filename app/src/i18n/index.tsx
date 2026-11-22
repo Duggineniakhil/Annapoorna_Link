@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { en, type MessageKey } from "./en";
 import { te } from "./te";
 
@@ -26,6 +34,10 @@ const I18nContext = createContext<I18nValue | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(readStoredLang);
+  // Keep <html lang> right from the first render (screen readers, Telugu letter-spacing rule).
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const setLang = useCallback((next: Lang) => {
     setLangState(next);
@@ -34,7 +46,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     } catch {
       // Storage may be unavailable (private mode); the choice still applies for this session.
     }
-    document.documentElement.lang = next;
   }, []);
 
   const t = useCallback(

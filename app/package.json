@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@fontsource/archivo": "^5.3.0",
     "@fontsource/noto-sans-telugu": "^5.0.0",
     "leaflet": "^1.9.4",
     "react": "^18.3.1",

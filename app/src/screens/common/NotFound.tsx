@@ -5,7 +5,7 @@ import { Screen } from "../../components/Screen";
 export default function NotFound() {
   const { t } = useT();
   return (
-    <Screen titleKey="notFound.title">
+    <Screen narrow titleKey="notFound.title">
       <p>{t("notFound.body")}</p>
       <Link
         to="/login"

@@ -82,7 +82,7 @@ export default function VolunteerHistory() {
             }
           />
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="grid gap-4 lg:grid-cols-2">
             {items.map((item) => (
               <li key={item.id}>
                 <HistoryRow item={item} />

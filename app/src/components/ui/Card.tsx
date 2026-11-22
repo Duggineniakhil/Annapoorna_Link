@@ -15,7 +15,7 @@ export function SectionHeader({ titleKey, allTo }: { titleKey: MessageKey; allTo
   const { t } = useT();
   return (
     <div className="flex items-center justify-between">
-      <h2 className="text-lg font-bold text-ink">{t(titleKey)}</h2>
+      <h2 className="font-display text-xl font-black tracking-tight text-ink">{t(titleKey)}</h2>
       {allTo && (
         <Link
           to={allTo}
@@ -45,8 +45,8 @@ export function StatTile({
     white: `${CARD} text-ink`,
   };
   return (
-    <div className={`flex flex-col gap-0.5 rounded-2xl p-3 ${tones[tone]}`}>
-      <span className="text-2xl font-bold leading-tight">{value}</span>
+    <div className={`flex flex-col gap-0.5 rounded-2xl p-4 ${tones[tone]}`}>
+      <span className="font-display text-3xl font-black leading-tight">{value}</span>
       <span className="text-xs font-medium opacity-80">{label}</span>
     </div>
   );

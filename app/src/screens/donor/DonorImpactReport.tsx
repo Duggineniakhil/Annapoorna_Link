@@ -40,7 +40,7 @@ export default function DonorImpactReport() {
   const lastDay = range ? new Date(range.to.getTime() - 1) : undefined;
 
   return (
-    <Screen titleKey="impact.report.title" demoData>
+    <Screen narrow titleKey="impact.report.title" demoData>
       <div className="flex flex-col gap-1">
         <p className="text-lg font-bold text-ink">{org?.name}</p>
         {range && lastDay && (

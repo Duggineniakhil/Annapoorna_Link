@@ -29,6 +29,10 @@ export default {
           700: "#AE3517",
         },
         cream: "#FFF9EE",
+        // Landing page (dark, food4all-like) and soft app background.
+        night: { DEFAULT: "#0E1F17", 800: "#13281E", 700: "#1A3628", 600: "#24493A" },
+        mint: "#A6EBC0",
+        mist: "#F4F7F2",
         ink: "#1D1B16",
         veg: "#1B8A3A",
         nonveg: "#7B3F00",
@@ -43,10 +47,12 @@ export default {
           "Roboto",
           "sans-serif",
         ],
+        display: ["Archivo", '"Noto Sans Telugu"', "system-ui", "sans-serif"],
       },
       boxShadow: {
         card: "0 1px 2px rgba(29, 27, 22, 0.06), 0 4px 12px rgba(29, 27, 22, 0.06)",
         bar: "0 -2px 12px rgba(29, 27, 22, 0.08)",
+        lift: "0 10px 30px -8px rgba(14, 31, 23, 0.25)",
       },
     },
   },
