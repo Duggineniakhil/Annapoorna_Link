@@ -206,6 +206,10 @@ export const ImpactSchema = z.object({
   by_donor_type: z
     .array(z.object({ donor_type: DonorTypeSchema, meals: z.number(), kg: z.number(), co2e_kg: z.number() }))
     .optional(),
+  // Present when the request gives from and to: the period and meals per week (Monday, IST).
+  from: z.string().optional(),
+  to: z.string().optional(),
+  weekly: z.array(z.object({ week_start: z.string(), meals: z.number().int().min(0) })).optional(),
 });
 export type Impact = z.infer<typeof ImpactSchema>;
 

@@ -50,6 +50,7 @@ If a secret is pasted in chat or a log, change it in Supabase (database password
 
 ## 5. Demo mode and resetting the demo
 - `DEMO_MODE=true` lets any signed-in user start the wedding-night scenario (`POST /api/demo/scenario`). By default only the sponsor account can.
+- `DEMO_MODE=true` also sends a demo donor's post (Sri Sai Caterers, Green Valley Hostel Mess) to the demo kitchens (Annadanam, Asha) first, ignoring their evening-only hours, so the hand demo works at any time of day. Every other matching rule still applies, and normal matching is unchanged. `render.yaml` turns it on.
 - `npm run demo:reset` restores the seeded demo data (same as `npm run seed`; set `ALLOW_DEMO_RESET=true` when `NODE_ENV=production`). **Restart the API afterwards**: it keeps its working state in memory and loads it from the database on boot.
 
 ## 6. Voice post (optional)

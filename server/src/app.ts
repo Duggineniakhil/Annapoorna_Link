@@ -49,7 +49,7 @@ export function createApp(opts: AppOptions): BuiltApp {
   const { config } = opts;
   const repo = opts.repo ?? new DemoRepo();
   const hub = new Hub();
-  const flow = new Flow(repo, hub, opts.now, opts.persister);
+  const flow = new Flow(repo, hub, opts.now, opts.persister, config.DEMO_MODE);
   const voice = opts.voice ?? defaultVoice(config);
   const limits = createRateLimiters(config.JWT_SECRET, opts.rateLimits ?? DEFAULT_RATE_LIMITS);
 

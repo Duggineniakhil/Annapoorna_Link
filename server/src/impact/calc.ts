@@ -30,6 +30,17 @@ function deliveredOf(repo: DemoRepo, l: ListingRow): { meals: number; kg: number
   return { meals, kg };
 }
 
+const DAY_MS = 86_400_000;
+const IST_OFFSET_MS = 330 * 60_000; // Hyderabad is UTC+5:30 all year
+
+/** Monday 00:00 in Hyderabad of the week containing ms (as a UTC timestamp). */
+export function weekStartIst(ms: number): number {
+  const local = ms + IST_OFFSET_MS;
+  const dayStart = local - (((local % DAY_MS) + DAY_MS) % DAY_MS);
+  const weekday = new Date(dayStart).getUTCDay(); // 0 = Sunday
+  return dayStart - ((weekday + 6) % 7) * DAY_MS - IST_OFFSET_MS;
+}
+
 export interface ImpactFilter {
   donorOrgId?: string;
   from?: string;
@@ -86,6 +97,25 @@ export function computeImpact(repo: DemoRepo, f: ImpactFilter): Impact {
     rescue_rate: posted.length ? round(delivered.length / posted.length, 3) : 0,
     assumptions: ASSUMPTIONS,
   };
+  // Weekly bars for the chart (only for a bounded period). Like the totals, a listing counts in
+  // the week it was posted; the first bar starts where the period starts.
+  if (Number.isFinite(fromMs) && Number.isFinite(toMs) && toMs > fromMs) {
+    out.from = new Date(fromMs).toISOString();
+    out.to = new Date(toMs).toISOString();
+    out.weekly = [];
+    for (let w = weekStartIst(fromMs); w < toMs; w += 7 * DAY_MS) {
+      const end = w + 7 * DAY_MS;
+      out.weekly.push({
+        week_start: new Date(Math.max(w, fromMs)).toISOString(),
+        meals: delivered
+          .filter((l) => {
+            const t = Date.parse(l.created_at);
+            return t >= w && t < end;
+          })
+          .reduce((sum, l) => sum + deliveredOf(repo, l).meals, 0),
+      });
+    }
+  }
   if (!f.donorOrgId) {
     out.by_area = [...byArea].map(([area, v]) => ({ area, meals: v.meals, kg: round(v.kg), co2e_kg: co2(v.kg) }));
     out.by_donor_type = [...byType].map(([donor_type, v]) => ({ donor_type, meals: v.meals, kg: round(v.kg), co2e_kg: co2(v.kg) }));

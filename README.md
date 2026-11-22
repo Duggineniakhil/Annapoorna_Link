@@ -234,7 +234,7 @@ The frontend can also run on its own with a built-in mock API (`VITE_USE_MOCKS=t
 | `JWT_SECRET` | Signing key for demo auth tokens |
 | `ALLOWED_ORIGIN` | Frontend URL allowed by CORS |
 | `GNANI_API_KEY`, `AI_API_KEY`, `AI_MODEL` | Optional voice posting; without both keys, voice posting reports "busy" and everything else works |
-| `DEMO_MODE` | `true` lets any signed-in user start the wedding-night demo (default: sponsor account only) |
+| `DEMO_MODE` | `true` for demo deploys: any signed-in user may start the wedding-night demo, and demo donors' posts go to the demo kitchens first at any hour (default: off) |
 | `VOICE_DAILY_PER_DONOR`, `VOICE_DAILY_GLOBAL` | Daily voice-posting limits (defaults 30 and 500) |
 | `VITE_API_BASE_URL`, `VITE_USE_MOCKS` | Frontend API address and mock mode |
 

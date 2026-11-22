@@ -25,3 +25,7 @@ services:
         generateValue: true
       - key: USE_STUBS
         value: "true"
+      # Demo deploy: demo donors' posts go to the demo kitchens first (at any hour), and any
+      # signed-in user may start the wedding-night demo.
+      - key: DEMO_MODE
+        value: "true"

@@ -52,6 +52,7 @@ const ROUTES: { method: "get" | "post" | "put"; path: string; roles: Role[]; bod
   { method: "post", path: "/api/tasks/nope/accept", roles: ["volunteer"] },
   { method: "post", path: "/api/tasks/nope/pickup", roles: ["volunteer"], body: {} },
   { method: "post", path: "/api/tasks/nope/deliver", roles: ["volunteer"], body: {} },
+  { method: "get", path: "/api/volunteer/history", roles: ["volunteer"] },
   { method: "put", path: "/api/volunteer/availability", roles: ["volunteer"], body: {} },
   { method: "get", path: "/api/map", roles: ["sponsor"] },
   { method: "post", path: "/api/demo/scenario", roles: ["sponsor"], body: {} },

@@ -8,7 +8,12 @@ import type { Hub, LiveEvent } from "../realtime.js";
 import type { ListingSnap, Persister } from "../db/persist.js";
 import type { PickupState } from "../data/liveFixtures.js";
 import type { CreateListingInput } from "../schemas.js";
-import type { ListingRow, OfferRow } from "../seed/generate.js";
+import { DEMO_ACCOUNTS, type ListingRow, type OfferRow } from "../seed/generate.js";
+
+const orgsOf = (role: string) =>
+  new Set(DEMO_ACCOUNTS.filter((a) => a.role === role && a.org_id).map((a) => a.org_id as string));
+const DEMO_DONOR_ORGS = orgsOf("donor");
+const DEMO_RECEIVER_ORGS = orgsOf("receiver");
 
 export const OFFER_WINDOW_MS = 10 * 60_000;
 export const CASCADE_MAX = 5; // after this many offers, open to all eligible receivers
@@ -28,6 +33,8 @@ export class Flow {
     readonly hub: Hub,
     readonly now: () => Date = () => new Date(),
     private readonly persister?: Persister,
+    /** DEMO_MODE: demo donors' food goes to the demo kitchens first (see buildQueue). */
+    private readonly demoMode = false,
   ) {
     this.eventsSaved = repo.events.length; // everything loaded is already stored
   }
@@ -184,11 +191,24 @@ export class Flow {
     const { repo } = this;
     const donor = repo.orgById(l.donor_org_id);
     if (!donor) return [];
+    // DEMO_MODE: a post from a demo donor account is offered to the demo kitchens first, whatever
+    // the time of day (their seeded hours are evenings only), so a judge signed in as one of them
+    // sees it. They still have to pass every other rule (veg-only, need, arrival in time).
+    const demo = this.demoMode && DEMO_DONOR_ORGS.has(l.donor_org_id);
     const candidates: ReceiverCandidate[] = repo
       .allOrgs()
       .filter((o) => o.type === "receiver")
-      .map((org) => ({ org, remaining: repo.remainingNeed(org.id) }));
-    const queue = rankReceivers(l, donor, candidates, this.now());
+      .map((org) => ({
+        org: demo && DEMO_RECEIVER_ORGS.has(org.id) ? { ...org, open_from: null, open_to: null } : org,
+        remaining: repo.remainingNeed(org.id),
+      }));
+    const ranked = rankReceivers(l, donor, candidates, this.now());
+    const queue = demo
+      ? [
+          ...ranked.filter((r) => DEMO_RECEIVER_ORGS.has(r.receiver_org_id)),
+          ...ranked.filter((r) => !DEMO_RECEIVER_ORGS.has(r.receiver_org_id)),
+        ]
+      : ranked;
     repo.queues.set(l.id, queue);
     return queue;
   }

@@ -51,7 +51,7 @@ Task        { id, listing: Listing, donor_org, receiver_org, distance_km, deadli
               volunteer_id? }
 TimelineEvent { type, status, at, actor_role, note? }
 Impact      { meals, kg, co2e_kg, on_time_rate, median_claim_min, rescue_rate, assumptions: [{ key, label_en, label_te, value, source? }],
-              from, to, weekly: [{ week_start, meals }],             // added in A11 (B to confirm); first bar starts at `from`
+              from, to, weekly: [{ week_start, meals }],             // when from and to are given; weeks start Monday (IST); first bar starts at `from`
               by_area?: [{ key, meals }], by_donor_type?: [{ key, meals }] }  // city only, meals delivered, largest first
 ```
 
@@ -78,7 +78,7 @@ Impact      { meals, kg, co2e_kg, on_time_rate, median_claim_min, rescue_rate, a
 | `PUT /api/volunteer/availability` | `{ available }` | `{ ok }` |
 | `GET /api/tasks/:id` (added in A8, B to confirm) | volunteer: open task or own task; never sends codes | `Task` |
 | `GET /api/volunteer/availability` (added in A8, B to confirm) | volunteer | `{ available }` |
-| `GET /api/volunteer/history` (added in A8, B to confirm) | volunteer: own delivered tasks | `[{ id, items_title, meals, delivered_at, donor_area, receiver_area }]` |
+| `GET /api/volunteer/history` | volunteer: own delivered tasks | `[{ id, items_title, meals, delivered_at, donor_area, receiver_area }]` |
 | `GET /api/listings` for receivers (added in A8, B to confirm) | receiver: own claimed / volunteer_assigned / picked_up listings, with `delivery_code`, no `pickup_code` | `Listing[]` |
 
 Task errors (added in A8, B to confirm): accepting while unavailable or with a task already active is 409 (`VOLUNTEER_UNAVAILABLE`, `TASK_ALREADY_ACTIVE`). A wrong pickup or delivery code is 422 `WRONG_CODE` with `tries_left`; after 5 wrong tries the code is locked, 423 `CODE_LOCKED`. The pickup code is the donor's `listing.pickup_code`; the delivery code is the receiver's `listing.delivery_code`.

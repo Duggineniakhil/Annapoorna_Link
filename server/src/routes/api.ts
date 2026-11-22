@@ -182,6 +182,29 @@ export function createApiRouter(d: ApiDeps): Router {
     const body = parseOrThrow(DeliverBody, req.body);
     res.json(toListing(repo, flow.deliver(me(req), String(req.params.id), body.code, body.meals_delivered), me(req)));
   });
+  // This volunteer's deliveries, newest first (max 50). Same item shape as the app's mock.
+  router.get("/volunteer/history", auth, requireRole("volunteer"), (req, res) => {
+    const a = me(req);
+    const items = repo.pickups
+      .filter((p) => p.volunteer_user_id === a.userId && p.status === "delivered")
+      .flatMap((p) => {
+        const l = repo.listingById(p.listing_id);
+        const donor = l ? repo.orgById(l.donor_org_id) : undefined;
+        const receiver = repo.orgById(p.receiver_org_id);
+        if (!l || !donor || !receiver) return [];
+        return [{
+          id: l.id,
+          items_title: (l.items as { name: string }[]).map((i) => i.name).join(", "),
+          meals: p.meals_delivered ?? l.total_meals,
+          delivered_at: p.delivered_at ?? l.created_at,
+          donor_area: donor.area,
+          receiver_area: receiver.area,
+        }];
+      })
+      .sort((x, y) => Date.parse(y.delivered_at) - Date.parse(x.delivered_at))
+      .slice(0, 50);
+    res.json(items);
+  });
   router.put("/volunteer/availability", auth, requireRole("volunteer"), (req, res) => {
     repo.setVolunteerAvailable(me(req).userId, parseOrThrow(AvailabilityBody, req.body).available);
     flow.touchUser(me(req).userId);
