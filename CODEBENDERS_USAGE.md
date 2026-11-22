@@ -11,8 +11,8 @@ This file records how the application was developed in the **Codebenders IDE**: 
 | Build window | Sat 21 Nov 2026, 11:30 AM to Sun 22 Nov 2026, 11:59 PM IST (last commit before the window closed) |
 | Live app | [annapoorna-link.vercel.app](https://annapoorna-link.vercel.app) (frontend on Vercel, API on Render) |
 | Team | **CREED**: Duggineni Akhil (frontend & experience) · Kuchipudi Yokshith (backend, matching & data) |
-| Total prompts used | 33 prompts in 7 Nexon sessions (Member A's exported chats, Sat 19:12 to Sun 14:45 IST) |
-| Major iterations | 9 (section 4) |
+| Total prompts used | 47 prompts in 8 exported Nexon sessions: Member A 33 in 7 sessions (Sat 19:12 to Sun 14:45 IST), Member B 14 in 1 session (Sat 20:44 to 23:50 IST) |
+| Major iterations | 10 (section 4) |
 | Commits during the build window | 41 (36 by Duggineni Akhil, 5 by Kuchipudi Yokshith), first at Sat 13:15, latest at Sun 19:06 IST |
 | Codebenders features used | Nexon chat-to-build, plan-first replies, editor and tester agents, follow-up questions (section 6) |
 
@@ -33,6 +33,7 @@ This file records how the application was developed in the **Codebenders IDE**: 
 |---|---|---|
 | Sat 19:12 to 20:10 | Context and questions | We first planned a different idea (a Telugu science tutor for Problem Statement 3). Nexon read the planning docs, listed what it understood and asked eight questions; we answered them as build decisions. |
 | Sat 20:37 | Switch to Problem Statement 2 | We gave Nexon the Annapoorna Link context and docs. It summarised the product and flagged open items (missing seed-data doc, unreviewed Telugu, emission factor source) before writing any code. |
+| Sat 20:44 | Member B context | Yokshith gave Nexon the same docs. It summarised the state machine and contracts, and flagged the unverified CO₂e factor, the Telugu review and the old repo name in doc 03, before any code. |
 
 ### Member A: Frontend & Experience
 | # | Time (IST) | Task | Key prompt (short) | What Codebenders produced | What we changed / iterated | Commit |
@@ -56,11 +57,11 @@ This file records how the application was developed in the **Codebenders IDE**: 
 ### Member B: Backend, Matching & Data
 | # | Time (IST) | Task | Key prompt (short) | What Codebenders produced | What we changed / iterated | Commit |
 |---|---|---|---|---|---|---|
-| B1 | Sun 01:25 | Backend skeleton + stubs | "Create the backend skeleton for Annapoorna Link…" | | | `825c7de` |
-| B2 | Sun 01:25 | Deploy + Postgres | | | | `825c7de` |
-| B3 | Sun 01:25 | Seed data | | | | `825c7de` |
-| B4 | Sun 01:25 | Demo auth & authorization | | | | `825c7de` |
-| B5 | Sun 01:25 | Guidance service | | | | `825c7de` |
+| B1 | Sun 01:25 | Backend skeleton + stubs | Chat Sat 20:45. "Create the backend skeleton for Annapoorna Link in server/: project setup, security basics, the error format, and STUB endpoints that already return the exact contract shapes." | Project setup (`package.json`, TypeScript, ESLint, Prettier, `.env.example`), `errors.ts`, `config.ts`, `schemas.ts`; later the middleware (`requestId`, `auth`, `rateLimit`, `errorHandler`), logger and Vitest config. The tester reported each step's install, type-check, lint and test results. | Paused B1 to start B2 ("hold that b1, keep them like that, start b2"), then asked for an audit of what was left and blocked (Sat 22:29) and had Nexon resume B1 from that list. | `825c7de` |
+| B2 | Sun 01:25 | Deploy + Postgres | Chat Sat 21:11. "Deploy the Annapoorna Link backend and add the database." | `migrations/0001_init.sql` (eight tables and indexes), Postgres client with SSL for remote URLs, a 1-second `SELECT 1` health check, the migration runner, and `DEPLOY.md` with hosting steps and a live checklist. | Nexon later flagged that setting `NODE_ENV=production` before install would skip dev dependencies, leaving TypeScript missing on the host. The Render blueprint fixes this with `npm ci --include=dev`. | `825c7de` |
+| B3 | Sun 01:25 | Seed data | Chat Sat 23:03. "Create `npm run seed` for Annapoorna Link following docs/04-sample-data-plan.md exactly." | Deterministic generator (fixed seed and date): 23 fictional orgs, 34 users, 6 demo accounts, 21 guidance rules, 9 needs, 120 history listings; `--dry-run` with a fingerprint; refuses to reset production data without `ALLOW_DEMO_RESET=true`. | Ran the dry run twice to confirm the same fingerprint; Nexon listed capacity exceptions and the fixed date for a decision. | `825c7de` |
+| B4 | Sun 01:25 | Demo auth & authorization | Chat Sat 23:15. "Implement demo auth for Annapoorna Link (decision D10)." | In-memory `DemoRepo` over the seed data, two live fixture listings, and `views.ts`: pickup code only to the donor, delivery code only to the claiming kitchen, no codes for volunteers or sponsors. | When the editor refused the same write twice, Yokshith told Nexon to "Retry with general agent". That run also removed a stray `</content>` line that had broken compilation. | `825c7de` |
+| B5 | Sun 01:25 | Guidance service | Chat Sat 23:35. "Implement handling guidance for Annapoorna Link (docs/10-food-handling-guidance.md, decision D6)." | The guidance route; the `computeSafety` file was refused by the editor's write gate in this session. | Asked Nexon to write the tests first, then to "double check whats missing and build that first". | `825c7de` |
 | B6 | Sun 01:25 | Listings API + expiry | | | | `825c7de` |
 | B7 | Sun 01:25 | Matching engine | | | | `825c7de` |
 | B8 | Sun 01:25 / 01:27 | Offer cascade | | | | `825c7de`, `aa56ca2` |
@@ -72,7 +73,7 @@ This file records how the application was developed in the **Codebenders IDE**: 
 | B14 | Sun 01:25 | Hardening | | | | `825c7de` |
 | B15 | Sun 01:25 | Metrics | | | | `825c7de` |
 
-Member B's first tasks (B1–B11, B14, B15) landed together in one commit, `825c7de`, when the backend was pushed to the shared repository.
+Member B's first tasks (B1–B11, B14, B15) landed together in one commit, `825c7de`, when the backend was pushed to the shared repository. Rows B1–B5 come from Member B's exported Nexon session.
 
 ### Work after the task lists
 | # | Time (IST) | Task | Key prompt (short) | What Codebenders produced | What we changed / iterated | Commit |
@@ -110,28 +111,34 @@ Member B's first tasks (B1–B11, B14, B15) landed together in one commit, `825c
 - **Result:** every screen uses one shared `useLiveRefetch` hook; no screen keeps its own 15-second timer.
 
 
-### Iteration 5: The app crashed against the real server
+### Iteration 5: A write artifact broke the backend build
+- **Prompt v1 (Sat 22:35):** "try again", after asking Nexon to audit the repository and resolve every B1 blocker.
+- **What we saw:** the tester's type-check failed with `TS1110: Type expected` in `errorHandler.ts`. A stray `</content>` line had been written after the closing brace.
+- **Prompt v2 (Sat 23:19):** "Retry with general agent".
+- **Result:** the stray line was removed and confirmed on disk, and the type-check passed again. Nexon reported the failure instead of hiding it, and did not patch it silently.
+
+### Iteration 6: The app crashed against the real server
 - **What we saw:** the frontend was built against mocks. On the live API, listings carried the donor and kitchen as full objects instead of ids, the volunteer as an object instead of a name, and the impact report had no weekly figures, so several screens broke.
 - **Fix:** one adapter (`app/src/services/serverShape.ts`) converts the server's shapes into the app's types, with fallbacks for routes the server did not have yet. The missing routes (volunteer history, weekly impact) were then added to the server.
 - **Result:** every role works end to end on the live deployment. Commits `084f440`, `91eaa23`, `53fa227`.
 
-### Iteration 6: Voice posts failed on iPhones
+### Iteration 7: Voice posts failed on iPhones
 - **What we saw:** browsers record in different formats (WebM, Ogg, MP4/AAC), and the speech-to-text service did not accept all of them.
 - **Fix:** the app records AAC where the browser can, otherwise converts the recording to WAV in the browser, with a shorter limit for WAV to keep uploads small. Clear error messages in English and Telugu for each failure.
 - **Result:** one upload path that works across browsers. Commit `8b1f1ec`.
 
-### Iteration 7: The hand demo found no kitchen during the day
+### Iteration 8: The hand demo found no kitchen during the day
 - **What we saw:** the demo kitchens only open from 6 PM to 11 PM, so during daytime judging a donor's post was offered to other kitchens or to none.
 - **Fix:** with `DEMO_MODE=true`, posts from demo donors go to the demo kitchens first, ignoring their opening hours. Every other matching rule still applies, and normal matching is unchanged.
 - **Result:** checked against the live API at 4:43 PM: post → offer to a demo kitchen → accept → pickup → delivery → volunteer history. Commit `53fa227`.
 
-### Iteration 8: Accessibility on small phones
+### Iteration 9: Accessibility on small phones
 - **What we saw:** secondary text was below WCAG AA contrast (3.3:1 to 4.46:1), tap targets were 40 px, and Telugu at the largest text size made the offer page 445 px wide on a 360 px screen.
 - **Prompt (Sun 14:07):** "Do a performance and accessibility pass on Annapoorna Link for mid-range Android phones on 4G/3G." then "continue".
 - **Fix:** darker secondary text, 48 px targets, wrapping action buttons.
 - **Result:** 6.2:1 contrast, 48 px targets, no horizontal scrolling; Lighthouse accessibility 100. Commit `d8141ee`.
 
-### Iteration 9: The interface looked generic
+### Iteration 10: The interface looked generic
 - **What we saw:** a phone-only layout that wasted desktop screens and had no imagery.
 - **Fix:** a dark, photographic public homepage with a video hero; a light app with a desktop sidebar, food photos on cards and two-column detail pages. Letter-spacing turned off for Telugu, where it split letters apart.
 - **Result:** Lighthouse mobile performance 96 on the homepage, accessibility 100 on every page measured. Commits `83d53d1`, `c6c91ea`.
@@ -173,7 +180,7 @@ Member B's first tasks (B1–B11, B14, B15) landed together in one commit, `825c
 - **Impact factors:** see `docs/11-impact-assumptions.md` for the formulas and sources.
 
 ## 9. Evidence
-- Exported Nexon sessions (JSON), Member A: seven sessions, 33 prompts, Sat 19:12 to Sun 14:45 IST
+- Exported Nexon sessions (JSON): Member A, seven sessions, 33 prompts, Sat 19:12 to Sun 14:45 IST; Member B, one session, 14 prompts, Sat 20:44 to 23:50 IST
 - Git history, one commit per task: [commits on `main`](https://github.com/Duggineniakhil/Annapoorna_Link/commits/main)
 - Test results: 167 frontend tests and 86 API tests passing (`npm test` in `app/` and `server/`)
 - Lighthouse report (mobile): homepage 96 performance, sign-in 82–87, demo guide 93; accessibility and best practices 100 on all three (see the README)
