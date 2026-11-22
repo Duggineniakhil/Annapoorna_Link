@@ -100,7 +100,7 @@ describe("GET /api/impact", () => {
     expect(city.meals).toBe(sum);
     expect(city.by_donor_type!.reduce((a, r) => a + r.meals, 0)).toBe(city.meals);
     expect(city.by_area!.reduce((a, r) => a + r.meals, 0)).toBe(city.meals);
-    expect(city.weekly.reduce((a, w) => a + w.meals, 0)).toBe(city.meals);
+    expect(city.weekly!.reduce((a, w) => a + w.meals, 0)).toBe(city.meals);
   });
 
   it("donors get their own impact only; city is for sponsors", async () => {

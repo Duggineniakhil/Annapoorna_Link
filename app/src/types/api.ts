@@ -231,7 +231,8 @@ export interface ImpactBreakdown {
 export interface ImpactReport extends Impact {
   from: string;
   to: string;
-  weekly: ImpactWeek[];
+  /** Weekly bars; the real server does not send them yet, so the chart is hidden then. */
+  weekly?: ImpactWeek[];
   by_area?: ImpactBreakdown[];
   by_donor_type?: ImpactBreakdown[];
 }

@@ -1,4 +1,5 @@
 import { config } from "../config";
+import { fromServer } from "./serverShape";
 import { handleMockRequest } from "../mocks/handlers";
 import { errorText } from "../lib/errorMessages";
 import type {
@@ -215,7 +216,8 @@ export async function apiRequest<T>(
   if (status === 204) {
     return undefined as T;
   }
-  return settle<T>(status, parsed, lang);
+  // The real server nests orgs and the volunteer as objects; the app uses ids and names.
+  return settle<T>(status, status < 400 ? fromServer(parsed) : parsed, lang);
 }
 
 // Receiver API (docs/12-team-split.md). Thin typed wrappers over apiRequest.
@@ -258,10 +260,24 @@ export function getReceiverHistory(): Promise<ReceiverHistoryItem[]> {
 }
 
 // Volunteer API. Thin typed wrappers over apiRequest.
+//
+// The real server has no GET /api/volunteer/availability, GET /api/volunteer/history or
+// GET /api/tasks/:id yet. On a 404 the app falls back to what it does have, so the volunteer
+// screens keep working against either.
 
-/** GET /api/volunteer/availability */
-export function getVolunteerAvailability(): Promise<VolunteerAvailability> {
-  return apiRequest<VolunteerAvailability>("GET", "/api/volunteer/availability");
+function isMissingRoute(err: unknown): boolean {
+  return err instanceof ApiError && err.status === 404;
+}
+
+/** GET /api/volunteer/availability, else `available` from GET /api/me. */
+export async function getVolunteerAvailability(): Promise<VolunteerAvailability> {
+  try {
+    return await apiRequest<VolunteerAvailability>("GET", "/api/volunteer/availability");
+  } catch (err) {
+    if (!isMissingRoute(err)) throw err;
+    const me = await apiRequest<{ user: { available?: boolean } }>("GET", "/api/me");
+    return { available: me.user.available ?? false };
+  }
 }
 
 /** PUT /api/volunteer/availability → { ok } (contract). */
@@ -297,8 +313,16 @@ export function getImpact(scope: "me" | "city", from: Date, to: Date): Promise<I
   return apiRequest<ImpactReport>("GET", `/api/impact?${query.toString()}`);
 }
 
-export function getTask(id: string): Promise<Task> {
-  return apiRequest<Task>("GET", `/api/tasks/${encodeURIComponent(id)}`);
+/** GET /api/tasks/:id, else the task from GET /api/tasks (404 if it is not there). */
+export async function getTask(id: string): Promise<Task> {
+  try {
+    return await apiRequest<Task>("GET", `/api/tasks/${encodeURIComponent(id)}`);
+  } catch (err) {
+    if (!isMissingRoute(err)) throw err;
+    const task = (await listTasks()).find((t) => t.id === id);
+    if (!task) throw err;
+    return task;
+  }
 }
 
 /** POST /api/tasks/:id/accept → the accepted Task. */
@@ -316,7 +340,12 @@ export function deliverTask(id: string, input: DeliverInput): Promise<Listing> {
   return apiRequest<Listing>("POST", `/api/tasks/${encodeURIComponent(id)}/deliver`, input);
 }
 
-/** GET /api/volunteer/history: delivered tasks, newest first. */
-export function getVolunteerHistory(): Promise<VolunteerHistoryItem[]> {
-  return apiRequest<VolunteerHistoryItem[]>("GET", "/api/volunteer/history");
+/** GET /api/volunteer/history: delivered tasks, newest first (empty if the server has none). */
+export async function getVolunteerHistory(): Promise<VolunteerHistoryItem[]> {
+  try {
+    return await apiRequest<VolunteerHistoryItem[]>("GET", "/api/volunteer/history");
+  } catch (err) {
+    if (isMissingRoute(err)) return [];
+    throw err;
+  }
 }

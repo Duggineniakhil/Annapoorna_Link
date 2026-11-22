@@ -88,9 +88,11 @@ export default function DonorImpactReport() {
         <div className="flex flex-col gap-4 print:gap-2">
           <ImpactCounters impact={data} />
           <RateTiles items={[{ value: pct(data.on_time_rate), label: t("impact.onTime") }]} />
-          <div className="print:mx-auto print:w-3/5">
-            <WeeklyChart weeks={data.weekly} />
-          </div>
+          {data.weekly && (
+            <div className="print:mx-auto print:w-3/5">
+              <WeeklyChart weeks={data.weekly} />
+            </div>
+          )}
           <HowWeCalculate impact={data} open />
           <p className="border-t border-ink/15 pt-3 text-sm text-ink/70">
             {t("impact.report.footer")}

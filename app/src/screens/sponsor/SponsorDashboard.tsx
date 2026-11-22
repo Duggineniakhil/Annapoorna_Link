@@ -88,7 +88,7 @@ export default function SponsorDashboard() {
           )}
         </>
       )}
-      {chart.data && (
+      {chart.data?.weekly && (
         <Card className="p-4">
           <WeeklyChart weeks={chart.data.weekly} />
         </Card>

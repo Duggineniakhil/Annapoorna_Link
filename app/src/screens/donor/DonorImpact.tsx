@@ -58,7 +58,7 @@ export default function DonorImpact() {
           <RateTiles items={[{ value: pct(data.on_time_rate), label: t("impact.onTime") }]} />
         </>
       )}
-      {chart.data && (
+      {chart.data?.weekly && (
         <Card className="p-4">
           <WeeklyChart weeks={chart.data.weekly} />
         </Card>
