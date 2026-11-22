@@ -12,7 +12,7 @@ self-hosted Noto Sans Telugu · ESLint 9 + Prettier. No UI library.
 
 ## Run
 
-Needs Node 18+.
+Needs Node 20.19+ (or 22.12+).
 
 ```bash
 cd app

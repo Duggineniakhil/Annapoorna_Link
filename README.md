@@ -282,7 +282,7 @@ The app is installable as a PWA and opens offline from its service worker.
 
 ## Getting started
 
-**Prerequisites:** Node.js 18 or later and npm. PostgreSQL is optional.
+**Prerequisites:** Node.js 20.19 or later (or 22.12+) and npm. PostgreSQL is optional.
 
 ```bash
 git clone https://github.com/Duggineniakhil/Annapoorna_Link.git

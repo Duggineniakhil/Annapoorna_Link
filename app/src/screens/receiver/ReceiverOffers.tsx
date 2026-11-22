@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { DeclineReason, Offer } from "../../types/api";
 import type { MessageKey } from "../../i18n/en";
 import { useT } from "../../i18n";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import { useNow } from "../../hooks/useNow";
 import { ApiError, acceptOffer, declineOffer, listOffers } from "../../services/api";

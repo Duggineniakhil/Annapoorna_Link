@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Allergen, Category, Listing, Storage, VoiceDraft } from "../../types/api";
 import { useT } from "../../i18n";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { useNow } from "../../hooks/useNow";
 import { apiRequest, userMessage } from "../../services/api";
 import { Screen } from "../../components/Screen";

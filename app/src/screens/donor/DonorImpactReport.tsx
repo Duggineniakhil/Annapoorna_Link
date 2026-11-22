@@ -1,6 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 import { useT } from "../../i18n";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { Screen } from "../../components/Screen";
 import { Button } from "../../components/ui/Button";
 import {

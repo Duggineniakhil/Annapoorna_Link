@@ -13,7 +13,7 @@ import { ListingCard } from "../../components/food/ListingCard";
 import { formatClock, formatNumber } from "../../components/food/format";
 import { SafetyCard } from "../../components/SafetyCard";
 import { orgArea, orgName } from "../../mocks/fixtures";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { AreaMap } from "../../components/map/AreaMap";
 import { DetailColumns } from "../../components/layout/Detail";
 import { routeBetweenOrgs } from "../../components/map/route";

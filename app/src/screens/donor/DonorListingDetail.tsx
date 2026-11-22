@@ -3,7 +3,7 @@ import { useLocation, useParams } from "react-router-dom";
 import type { Listing, Status, TimelineEvent } from "../../types/api";
 import type { MessageKey } from "../../i18n/en";
 import { useT } from "../../i18n";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import { ApiError, apiRequest, userMessage } from "../../services/api";
 import { Screen } from "../../components/Screen";

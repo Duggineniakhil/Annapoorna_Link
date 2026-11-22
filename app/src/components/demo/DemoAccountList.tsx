@@ -1,7 +1,7 @@
 import { useEffect, useState, type MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Role } from "../../types/api";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { useT } from "../../i18n";
 import { ROLE_HOME } from "../roles";
 import { Icon, type IconName } from "../ui/Icon";

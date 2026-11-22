@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import type { Role } from "../types/api";
 import { useT } from "../i18n";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 import { ROLE_NAV } from "./roles";
 import { Icon } from "./ui/Icon";
 import { PHOTOS, photo } from "../lib/media";

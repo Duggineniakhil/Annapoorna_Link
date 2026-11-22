@@ -15,7 +15,8 @@ Postgres on boot and writes every change back. Run it as a single instance.
 | Script | What it does |
 |---|---|
 | `npm run dev` / `build` / `start` | Develop, compile to `dist/`, run the build |
-| `npm test` | Vitest + supertest (set `TEST_DATABASE_URL` to also run the Postgres round trip; it truncates demo tables) |
+| `npm test` | Vitest + supertest, no database needed |
+| `npm run test:db` | Postgres round trip (restart keeps state, codes and events); needs `TEST_DATABASE_URL` pointing at a throwaway database, because it truncates the demo tables |
 | `npm run lint` | ESLint |
 | `npm run migrate` | Apply new `migrations/*.sql` files (tracked in `schema_migrations`) |
 | `npm run seed` / `demo:reset` | Reset the demo tables to the seeded data, then restart the API |

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Listing } from "../../types/api";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { useLiveEvents } from "../../hooks/useLiveEvents";
 import { ApiError, apiRequest, userMessage } from "../../services/api";
 import { DemoContext, type DemoValue } from "./demoContext";

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import type { Role } from "../../types/api";
 import type { MessageKey } from "../../i18n/en";
 import { useT } from "../../i18n";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { LanguageToggle } from "../../components/LanguageToggle";
 import { LogoMark } from "../../components/TopBar";
 import { Icon, type IconName } from "../../components/ui/Icon";

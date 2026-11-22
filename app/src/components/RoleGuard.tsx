@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 import { ROLE_HOME, resolveRedirect } from "./roles";
 import Landing from "../screens/common/Landing";
 

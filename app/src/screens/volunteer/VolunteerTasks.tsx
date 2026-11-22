@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useT } from "../../i18n";
 import type { MessageKey } from "../../i18n/en";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import type { Task } from "../../types/api";
 import { Screen } from "../../components/Screen";
 import { EmptyState } from "../../components/EmptyState";

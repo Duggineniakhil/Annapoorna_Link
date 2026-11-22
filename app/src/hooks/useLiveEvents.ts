@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { config } from "../config";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 import { subscribeMockEvents } from "../mocks/events";
 import { createLiveClient, type LiveEvent, type LiveMode } from "../services/liveEvents";
 

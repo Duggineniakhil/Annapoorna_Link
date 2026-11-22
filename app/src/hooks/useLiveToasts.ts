@@ -1,4 +1,4 @@
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 import { apiRequest } from "../services/api";
 import type { Listing } from "../types/api";
 import { useT } from "../i18n";

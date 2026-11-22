@@ -1,19 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { apiRequest, SESSION_EXPIRED_EVENT, TOKEN_KEY, USER_KEY } from "../services/api";
 import type { Org, User } from "../types/api";
+import { AuthContext, type AuthValue } from "./useAuth";
 
-export const ORG_KEY = "al.org";
-
-export interface AuthValue {
-  token: string | null;
-  user: User | null;
-  org: Org | null;
-  isLoggedIn: boolean;
-  login(accountId: string): Promise<User>;
-  switchAccount(accountId: string): Promise<User>;
-  logout(): void;
-}
+const ORG_KEY = "al.org";
 
 interface SessionState {
   token: string | null;
@@ -57,7 +48,7 @@ function parseOrg(raw: string | null): Org | null {
  * Pure reader for a persisted session. Returns null when the token or user is
  * missing, or when the stored user JSON does not parse into a user.
  */
-export function readStoredSession(
+function readStoredSession(
   storage: Pick<Storage, "getItem">,
 ): { token: string; user: User; org: Org | null } | null {
   let token: string | null;
@@ -147,8 +138,6 @@ function writeStoredSession(token: string, user: User, org: Org | null): void {
   for (const storage of storages()) writeTo(storage, token, user, org);
 }
 
-const AuthContext = createContext<AuthValue | null>(null);
-
 export function AuthProvider({ children }: { children: ReactNode }): ReactElement {
   const [session, setSession] = useState<SessionState>(hydrateSession);
 
@@ -202,12 +191,4 @@ export function AuthProvider({ children }: { children: ReactNode }): ReactElemen
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-export function useAuth(): AuthValue {
-  const ctx = useContext(AuthContext);
-  if (ctx === null) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
-  return ctx;
 }

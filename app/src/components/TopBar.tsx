@@ -1,6 +1,6 @@
 import type { MouseEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 import { useT } from "../i18n";
 import { DemoAccountList } from "./demo/DemoAccountList";
 import { LanguageToggle } from "./LanguageToggle";

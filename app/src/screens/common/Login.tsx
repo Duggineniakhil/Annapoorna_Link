@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { Role } from "../../types/api";
 import type { MessageKey } from "../../i18n/en";
 import { useT } from "../../i18n";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { ApiError, apiRequest } from "../../services/api";
 import { ROLE_HOME } from "../../components/roles";
 import { DemoDataBadge } from "../../components/DemoDataBadge";

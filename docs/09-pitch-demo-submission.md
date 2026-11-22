@@ -33,6 +33,13 @@ The organisers require a demo video of **3–6 minutes** covering the problem, w
 | 3:40–4:20 | Business model slide | "Receivers use it free. Caterers pay for scheduled pickups and impact certificates; CSR sponsors fund whole areas." |
 | 4:20–5:00 | Built with Codebenders: Nexon planning a feature, the usage log, tests passing | "We built it in 36 hours in Codebenders, one planned, tested slice at a time." |
 
+### Before any demo, recording or judging window
+1. **Wake the API** 2 minutes before: open https://annapoorna-link-api.onrender.com/api/health and wait for `{"ok":true}`. The free Render tier sleeps after about 15 minutes idle, and the first request can take up to a minute.
+2. Open https://annapoorna-link.vercel.app and refresh once, so the browser loads the newest version.
+3. Sign in to each demo window (donor, kitchen, volunteer) before you start; veg food goes to Asha Night Shelter first.
+4. Keep the one-tap **Watch the one-minute demo** as the fallback if a hand step stalls.
+5. The live API keeps data in memory, so a restart resets it to the seeded demo data.
+
 Tips:
 - Use **split screen** for donor / receiver / volunteer, or the wedding-night demo scenario.
 - Add English subtitles.
@@ -67,7 +74,7 @@ Tips:
 - [ ] **Duo form:** both members' names, emails and phone numbers (both registered on app.codebenders.ai/hackathon)
 - [ ] **Public GitHub repo** link (README complete, no secrets, commit history during the build window)
 - [ ] **Demo video link, 3–6 min, mandatory** (unlisted YouTube / Drive with "anyone with link")
-- [ ] Live app link: optional but strongly recommended (tested in incognito; backend awake)
+- [ ] Live app link: optional but strongly recommended (tested in incognito; API woken first, see "Before any demo" above)
 - [ ] `CODEBENDERS_USAGE.md` with key prompts + iterations + screenshots
 - [ ] LinkedIn post link
 - [ ] Deck link (if used)

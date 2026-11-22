@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Listing, Status } from "../../types/api";
 import { apiRequest } from "../../services/api";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "../../auth/useAuth";
 import { useLiveRefetch } from "../../hooks/useLiveEvents";
 import { useT } from "../../i18n";
 import { Screen } from "../../components/Screen";
