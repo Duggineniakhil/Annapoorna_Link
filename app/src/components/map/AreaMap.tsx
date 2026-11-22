@@ -31,7 +31,7 @@ function TextMap({ points, distanceKm }: { points: MapPoint[]; distanceKm?: numb
             <span aria-hidden="true">{ICON[p.kind]}</span>
             <span>
               <span className="font-bold">{p.area}</span>
-              <span className="text-ink/60"> · {p.name}</span>
+              <span className="text-ink/70"> · {p.name}</span>
             </span>
           </li>
         ))}
@@ -41,7 +41,7 @@ function TextMap({ points, distanceKm }: { points: MapPoint[]; distanceKm?: numb
           {t("map.distance", { km: distanceKm.toLocaleString(lang === "te" ? "te-IN" : "en-IN") })}
         </p>
       )}
-      <p className="text-xs text-ink/60">{t("map.textOnly")}</p>
+      <p className="text-xs text-ink/70">{t("map.textOnly")}</p>
     </div>
   );
 }

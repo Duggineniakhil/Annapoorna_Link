@@ -148,7 +148,7 @@ export default function ReceiverOffers() {
               setDismissedExpired((prev) => [...prev, ...justExpired.map((o) => o.id)])
             }
             aria-label={t("post.dismiss")}
-            className="-m-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl leading-none hover:bg-chilli-100"
+            className="-m-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl leading-none hover:bg-chilli-100"
           >
             ×
           </button>
@@ -166,7 +166,7 @@ export default function ReceiverOffers() {
       )}
       {offers === null ? (
         loadError ? null : (
-          <p role="status" className="text-ink/60">
+          <p role="status" className="text-ink/70">
             {t("receiver.offers.loading")}
           </p>
         )
@@ -219,7 +219,7 @@ export default function ReceiverOffers() {
                     </ul>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <Countdown deadline={offer.expires_at} kind="respond" />
-                      <span className="text-sm text-ink/60">
+                      <span className="text-sm text-ink/70">
                         {t("offer.eta", { min: offer.eta_min })}
                       </span>
                     </div>
@@ -238,7 +238,7 @@ export default function ReceiverOffers() {
                               type="button"
                               aria-pressed={reason === option}
                               onClick={() => setReason(reason === option ? null : option)}
-                              className={`min-h-11 rounded-full px-3 text-sm font-bold transition-colors ${
+                              className={`min-h-12 rounded-full px-3 text-sm font-bold transition-colors ${
                                 reason === option
                                   ? "bg-leaf-800 text-white"
                                   : "bg-white text-leaf-800 ring-1 ring-inset ring-leaf-800/30"
@@ -267,10 +267,10 @@ export default function ReceiverOffers() {
                         </div>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-[1fr_auto] gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <Button
                           size="lg"
-                          block
+                          className="flex-[2_1_10rem]"
                           onClick={() => void accept(offer.id)}
                           disabled={busyId !== null}
                         >
@@ -280,6 +280,7 @@ export default function ReceiverOffers() {
                         </Button>
                         <Button
                           variant="secondary"
+                          className="flex-[1_1_auto]"
                           size="lg"
                           onClick={() => {
                             setActionError(null);

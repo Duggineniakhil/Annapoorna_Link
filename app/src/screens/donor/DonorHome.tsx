@@ -68,7 +68,7 @@ export default function DonorHome() {
       titleKey="donor.home.title"
       title={t("home.hello", { name })}
       eyebrow={
-        <span className="flex items-center gap-1 text-sm font-medium text-ink/60">
+        <span className="flex items-center gap-1 text-sm font-medium text-ink/70">
           <Icon name="pin" className="h-4 w-4" />
           {area}
         </span>

@@ -53,7 +53,7 @@ export function AllergenLine({ allergens }: { allergens: Allergen[] }) {
   const { t } = useT();
   if (allergens.length === 0) return null;
   const list = allergens.map((a) => t(`allergen.${a}`)).join(", ");
-  return <p className="text-xs text-ink/60">{t("food.contains", { list })}</p>;
+  return <p className="text-xs text-ink/70">{t("food.contains", { list })}</p>;
 }
 
 const CATEGORY_TILE: Record<Category, { emoji: string; bg: string }> = {
@@ -192,7 +192,7 @@ export function StatusSteps({ status }: { status: Status }) {
       <p className="flex items-center gap-1 text-sm font-bold text-leaf-800">
         {index === 4 && <Icon name="check" className="h-4 w-4" />}
         {t(`status.${status}`)}
-        <span className="font-normal text-ink/60">
+        <span className="font-normal text-ink/70">
           · {t("steps.of", { n: index + 1, total: STEP_KEYS.length })}
         </span>
       </p>

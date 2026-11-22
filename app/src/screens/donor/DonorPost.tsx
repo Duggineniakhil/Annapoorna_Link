@@ -116,7 +116,7 @@ function Step({
           </span>
           <div className="flex flex-col">
             <h2 className="text-lg font-bold leading-tight text-ink">{title}</h2>
-            {hint && <p className="text-sm text-ink/60">{hint}</p>}
+            {hint && <p className="text-sm text-ink/70">{hint}</p>}
           </div>
         </div>
         {aside}
@@ -144,7 +144,7 @@ function Pill({
       aria-pressed={active}
       disabled={disabled}
       onClick={onClick}
-      className={`min-h-[44px] rounded-full px-4 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`min-h-12 rounded-full px-4 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
         active
           ? "bg-leaf-800 text-white"
           : "bg-white text-leaf-800 ring-1 ring-inset ring-leaf-800/30 hover:bg-leaf-50"
@@ -183,7 +183,7 @@ function QuantityRow({
           type="button"
           onClick={onRemove}
           aria-label={t("post.remove", { name: label })}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink/50 hover:bg-chilli-50 hover:text-chilli-700"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-ink/70 hover:bg-chilli-50 hover:text-chilli-700"
         >
           <span aria-hidden="true" className="text-2xl leading-none">
             ×
@@ -222,12 +222,12 @@ function QuantityRow({
         >
           +{item.useKg ? 5 : 10}
         </button>
-        <span className="w-14 shrink-0 text-sm font-medium text-ink/60">
+        <span className="w-14 shrink-0 text-sm font-medium text-ink/70">
           {item.useKg ? "kg" : t("common.meals")}
         </span>
       </div>
       <div className="flex items-center justify-between gap-2 text-sm">
-        <span className="text-ink/60">
+        <span className="text-ink/70">
           {item.useKg && item.qtyKg > 0 ? t("post.kgEquals", { n: mealsFromKg(item.qtyKg) }) : ""}
         </span>
         <button
@@ -239,7 +239,7 @@ function QuantityRow({
                 : { useKg: true },
             )
           }
-          className="min-h-[40px] px-1 font-bold text-leaf-700 underline-offset-2 hover:underline"
+          className="min-h-12 px-1 font-bold text-leaf-700 underline-offset-2 hover:underline"
         >
           {t(item.useKg ? "post.useMeals" : "post.useKg")}
         </button>
@@ -548,7 +548,7 @@ export default function DonorPost() {
       titleKey="donor.post.title"
       eyebrow={
         org ? (
-          <span className="flex items-center gap-1 text-sm font-medium text-ink/60">
+          <span className="flex items-center gap-1 text-sm font-medium text-ink/70">
             <Icon name="pin" className="h-4 w-4" />
             {t("post.venue", { name: org.name, area: org.area })}
           </span>
@@ -573,7 +573,7 @@ export default function DonorPost() {
         <div className="flex flex-col gap-3">
           {CATEGORY_ORDER.map((category) => (
             <div key={category} className="flex flex-col gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wide text-ink/50">
+              <span className="text-xs font-bold uppercase tracking-wide text-ink/70">
                 {t(`post.category.${category}`)}
               </span>
               <div className="flex flex-wrap gap-2">
@@ -585,7 +585,7 @@ export default function DonorPost() {
                       type="button"
                       aria-pressed={active}
                       onClick={() => addDish(dish)}
-                      className={`flex min-h-[44px] items-center gap-1.5 rounded-full px-3 text-sm font-bold transition-colors ${
+                      className={`flex min-h-12 items-center gap-1.5 rounded-full px-3 text-sm font-bold transition-colors ${
                         active
                           ? "bg-leaf-800 text-white"
                           : "bg-white text-ink ring-1 ring-inset ring-ink/15 hover:bg-leaf-50"
@@ -620,7 +620,7 @@ export default function DonorPost() {
         </div>
 
         {items.length === 0 ? (
-          <p className="text-sm text-ink/50">{t("post.noItems")}</p>
+          <p className="text-sm text-ink/70">{t("post.noItems")}</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {items.map((item) => (
@@ -660,7 +660,7 @@ export default function DonorPost() {
                 <Icon name={icon} className="h-7 w-7" />
                 <span className="font-bold leading-tight">{t(`storage.${value}`)}</span>
                 <span
-                  className={`text-xs leading-tight ${active ? "text-white/80" : "text-ink/50"}`}
+                  className={`text-xs leading-tight ${active ? "text-white/80" : "text-ink/70"}`}
                 >
                   {t(`post.storageHint.${value}`)}
                 </span>
@@ -681,7 +681,7 @@ export default function DonorPost() {
             </Pill>
           ))}
           <label
-            className={`flex min-h-[44px] items-center gap-2 rounded-full px-3 text-sm font-bold ring-1 ring-inset ${
+            className={`flex min-h-12 items-center gap-2 rounded-full px-3 text-sm font-bold ring-1 ring-inset ${
               cookedPreset === "custom"
                 ? "bg-leaf-800 text-white ring-leaf-800"
                 : "bg-white text-leaf-800 ring-leaf-800/30"
@@ -743,7 +743,7 @@ export default function DonorPost() {
                   </Pill>
                 );
               })}
-              <label className="flex min-h-[44px] items-center gap-2 rounded-full bg-white px-3 text-sm font-bold text-leaf-800 ring-1 ring-inset ring-leaf-800/30">
+              <label className="flex min-h-12 items-center gap-2 rounded-full bg-white px-3 text-sm font-bold text-leaf-800 ring-1 ring-inset ring-leaf-800/30">
                 <Icon name="clock" className="h-4 w-4" />
                 <span className="sr-only">{t("post.step.pickup")}</span>
                 <input
@@ -789,7 +789,7 @@ export default function DonorPost() {
             </button>
           ))}
         </div>
-        {anyNonVegItem && <p className="text-sm text-ink/60">{t("post.vegLocked")}</p>}
+        {anyNonVegItem && <p className="text-sm text-ink/70">{t("post.vegLocked")}</p>}
       </Step>
 
       {/* 6. Allergens */}
@@ -813,7 +813,7 @@ export default function DonorPost() {
           <p className="text-sm text-ink/80">
             {lang === "te" ? guidance.guidance_te : guidance.guidance_en}
           </p>
-          <p className="text-xs text-ink/50">{t("about.disclaimer")}</p>
+          <p className="text-xs text-ink/70">{t("about.disclaimer")}</p>
         </Card>
       )}
 

@@ -48,7 +48,7 @@ export default function DonorImpact() {
         </div>
       )}
       {!data && !error && (
-        <p role="status" className="text-ink/60">
+        <p role="status" className="text-ink/70">
           {t("impact.loading")}
         </p>
       )}

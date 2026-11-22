@@ -140,7 +140,7 @@ export default function ReceiverOfferDetail() {
         />
       ) : !offer ? (
         error ? null : (
-          <p role="status" className="text-ink/60">
+          <p role="status" className="text-ink/70">
             {t("receiver.offer.loading")}
           </p>
         )
@@ -206,7 +206,7 @@ export default function ReceiverOfferDetail() {
                   <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-leaf-700" />
                   <div className="flex flex-1 flex-wrap items-baseline justify-between gap-x-3">
                     <span className="font-medium text-ink">{row.label}</span>
-                    <time dateTime={row.at} className="text-sm text-ink/60">
+                    <time dateTime={row.at} className="text-sm text-ink/70">
                       {formatClock(row.at, lang)}
                     </time>
                   </div>
@@ -270,7 +270,7 @@ export default function ReceiverOfferDetail() {
                       type="button"
                       aria-pressed={reason === option}
                       onClick={() => setReason(reason === option ? null : option)}
-                      className={`min-h-11 rounded-full px-3 text-sm font-bold transition-colors ${
+                      className={`min-h-12 rounded-full px-3 text-sm font-bold transition-colors ${
                         reason === option
                           ? "bg-leaf-800 text-white"
                           : "bg-white text-leaf-800 ring-1 ring-inset ring-leaf-800/30"
@@ -297,12 +297,18 @@ export default function ReceiverOfferDetail() {
                 </div>
               </Card>
             ) : (
-              <div className="grid grid-cols-[1fr_auto] gap-2">
-                <Button size="lg" block onClick={() => void accept()} disabled={busy}>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="lg"
+                  className="flex-[2_1_10rem]"
+                  onClick={() => void accept()}
+                  disabled={busy}
+                >
                   {busy ? t("receiver.offer.accepting") : t("receiver.offer.accept")}
                 </Button>
                 <Button
                   variant="secondary"
+                  className="flex-[1_1_auto]"
                   size="lg"
                   onClick={() => {
                     setError(null);

@@ -21,7 +21,7 @@ function SettingsSection() {
   const { settings, update } = useSettings();
   return (
     <div className="flex flex-col gap-3 border-t border-ink/5 px-4 py-3">
-      <p className="text-xs font-bold text-ink/60">{t("settings.title")}</p>
+      <p className="text-xs font-bold text-ink/70">{t("settings.title")}</p>
       <div className="flex items-center justify-between gap-2">
         <span className="text-ink">{t("settings.language")}</span>
         <LanguageToggle />
@@ -31,7 +31,7 @@ function SettingsSection() {
         role="switch"
         aria-checked={settings.sound}
         onClick={() => update({ sound: !settings.sound })}
-        className="flex min-h-11 items-center justify-between gap-2 text-left text-ink"
+        className="flex min-h-12 items-center justify-between gap-2 text-left text-ink"
       >
         <span>{t("settings.sound")}</span>
         <span
@@ -56,7 +56,7 @@ function SettingsSection() {
               aria-checked={settings.textSize === size}
               aria-label={t(`settings.textSize.${size}`)}
               onClick={() => update({ textSize: size })}
-              className={`flex h-11 w-11 items-center justify-center rounded-full font-bold ${SIZE_CLASS[size]} ${
+              className={`flex h-12 w-12 items-center justify-center rounded-full font-bold ${SIZE_CLASS[size]} ${
                 settings.textSize === size
                   ? "bg-leaf-800 text-white"
                   : "bg-leaf-50 text-leaf-800 ring-1 ring-inset ring-leaf-800/15"
@@ -115,7 +115,7 @@ export function TopBar() {
         <Link
           to="/"
           aria-label={t("app.name")}
-          className="flex min-h-[48px] min-w-0 items-center gap-2"
+          className="flex min-h-[48px] min-w-[48px] items-center gap-2"
         >
           <LogoMark />
           <span className="brand-name font-bold leading-tight text-leaf-900">{t("app.name")}</span>
@@ -133,7 +133,7 @@ export function TopBar() {
               {isLoggedIn && user ? (
                 <div className="border-b border-ink/5 px-4 py-3">
                   <p className="font-bold leading-tight text-ink">{user.display_name}</p>
-                  <p className="text-sm text-ink/60">
+                  <p className="text-sm text-ink/70">
                     {t(`role.${user.role}`)}
                     {org ? ` · ${org.area}` : ""}
                   </p>
@@ -156,7 +156,7 @@ export function TopBar() {
               <SettingsSection />
               {isLoggedIn ? (
                 <div className="border-t border-ink/5 pt-1">
-                  <p className="px-4 py-1 text-xs font-bold text-ink/60">{t("menu.switchDemo")}</p>
+                  <p className="px-4 py-1 text-xs font-bold text-ink/70">{t("menu.switchDemo")}</p>
                   <DemoAccountList variant="menu" onPicked={closeMenu} />
                 </div>
               ) : null}

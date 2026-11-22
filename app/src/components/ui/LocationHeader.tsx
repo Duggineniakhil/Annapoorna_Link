@@ -6,7 +6,7 @@ export function LocationHeader({ area, radiusKm }: { area: string; radiusKm: num
   const { t } = useT();
   return (
     <div className="flex flex-col">
-      <span className="text-xs font-medium text-ink/60">
+      <span className="text-xs font-medium text-ink/70">
         {t("location.within", { km: radiusKm })}
       </span>
       <span className="flex items-center gap-1 text-lg font-bold text-ink">

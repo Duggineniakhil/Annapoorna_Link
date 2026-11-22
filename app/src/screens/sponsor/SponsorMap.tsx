@@ -82,7 +82,7 @@ export default function SponsorMap() {
         </div>
       )}
       {!data && !error && (
-        <p role="status" className="text-ink/60">
+        <p role="status" className="text-ink/70">
           {t("sponsor.map.loading")}
         </p>
       )}
@@ -99,7 +99,7 @@ export default function SponsorMap() {
             <SectionHeader titleKey="sponsor.map.recent" />
             {view.recent.length === 0 ? (
               <div className="flex flex-col items-start gap-2">
-                <p className="text-ink/60">{t("sponsor.map.none")}</p>
+                <p className="text-ink/70">{t("sponsor.map.none")}</p>
                 {filter !== "all" && (
                   <Button variant="secondary" onClick={() => setFilter("all")}>
                     {t("empty.action.allTypes")}
@@ -117,7 +117,7 @@ export default function SponsorMap() {
                           to: orgArea(d.receiver_org) || view.byId.get(d.receiver_org)?.area || "",
                         })}
                       </span>
-                      <span className="text-sm text-ink/60">
+                      <span className="text-sm text-ink/70">
                         {view.byId.get(d.donor_org)?.name} · {formatClock(d.delivered_at, lang)}
                       </span>
                     </span>

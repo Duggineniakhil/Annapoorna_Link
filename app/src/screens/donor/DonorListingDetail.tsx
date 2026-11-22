@@ -116,7 +116,7 @@ export default function DonorListingDetail() {
             type="button"
             onClick={() => setShowToast(false)}
             aria-label={t("post.dismiss")}
-            className="-m-2 flex h-11 w-11 items-center justify-center rounded-full text-2xl leading-none text-white/80 hover:bg-white/10"
+            className="-m-2 flex h-12 w-12 items-center justify-center rounded-full text-2xl leading-none text-white/80 hover:bg-white/10"
           >
             ×
           </button>
@@ -154,7 +154,7 @@ export default function DonorListingDetail() {
                     <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-leaf-700" />
                     <div className="flex flex-1 flex-wrap items-baseline justify-between gap-x-3">
                       <span className="font-medium text-ink">{timelineLabel(event)}</span>
-                      <time dateTime={event.at} className="text-sm text-ink/60">
+                      <time dateTime={event.at} className="text-sm text-ink/70">
                         {formatClock(event.at, lang)}
                       </time>
                     </div>
@@ -227,7 +227,7 @@ export default function DonorListingDetail() {
                     setCancelError(null);
                     setConfirming(true);
                   }}
-                  className="min-h-11 rounded-2xl border border-chilli-700 px-4 py-3 font-bold text-chilli-700 hover:bg-chilli-50"
+                  className="min-h-12 rounded-2xl border border-chilli-700 px-4 py-3 font-bold text-chilli-700 hover:bg-chilli-50"
                 >
                   {t("donor.cancel.button")}
                 </button>
@@ -239,7 +239,7 @@ export default function DonorListingDetail() {
                       type="button"
                       onClick={cancelListing}
                       disabled={cancelling}
-                      className="min-h-11 rounded-2xl bg-chilli-700 px-4 py-3 font-bold text-white disabled:opacity-60"
+                      className="min-h-12 rounded-2xl bg-chilli-700 px-4 py-3 font-bold text-white disabled:opacity-60"
                     >
                       {cancelling ? t("donor.cancel.busy") : t("donor.cancel.confirm")}
                     </button>
@@ -247,7 +247,7 @@ export default function DonorListingDetail() {
                       type="button"
                       onClick={() => setConfirming(false)}
                       disabled={cancelling}
-                      className="min-h-11 rounded-2xl border border-leaf-700 px-4 py-3 font-bold text-leaf-800 disabled:opacity-60"
+                      className="min-h-12 rounded-2xl border border-leaf-700 px-4 py-3 font-bold text-leaf-800 disabled:opacity-60"
                     >
                       {t("donor.cancel.keep")}
                     </button>

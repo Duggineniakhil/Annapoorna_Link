@@ -19,7 +19,7 @@ export function BottomNav({ role }: { role: Role }) {
               end={item.end}
               className={({ isActive }) =>
                 `group flex min-h-[64px] flex-col items-center justify-center gap-0.5 text-xs ${
-                  isActive ? "font-bold text-leaf-800" : "font-medium text-ink/60"
+                  isActive ? "font-bold text-leaf-800" : "font-medium text-ink/70"
                 }`
               }
             >

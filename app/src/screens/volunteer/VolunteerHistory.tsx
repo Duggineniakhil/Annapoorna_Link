@@ -30,7 +30,7 @@ function HistoryRow({ item }: { item: VolunteerHistoryItem }) {
       <p className="text-sm text-ink/70">
         {item.donor_area} → {item.receiver_area}
       </p>
-      <div className="flex flex-wrap items-center gap-2 text-sm text-ink/60">
+      <div className="flex flex-wrap items-center gap-2 text-sm text-ink/70">
         <span className="font-bold text-ink/80">
           {t("volunteer.history.meals", { count: formatNumber(item.meals, lang) })}
         </span>

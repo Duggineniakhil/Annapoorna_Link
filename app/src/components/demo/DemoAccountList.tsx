@@ -55,8 +55,8 @@ export function DemoAccountList({
     setBusy(null);
   };
 
-  if (failed) return <p className="px-4 py-2 text-sm text-ink/60">{t("login.loadError")}</p>;
-  if (!accounts) return <p className="px-4 py-2 text-sm text-ink/60">{t("login.loading")}</p>;
+  if (failed) return <p className="px-4 py-2 text-sm text-ink/70">{t("login.loadError")}</p>;
+  if (!accounts) return <p className="px-4 py-2 text-sm text-ink/70">{t("login.loading")}</p>;
 
   if (variant === "menu") {
     return (
@@ -73,7 +73,7 @@ export function DemoAccountList({
               <Icon name={ROLE_ICON[acc.role]} className="h-5 w-5 shrink-0 text-leaf-700" />
               <span className="flex flex-col leading-tight">
                 <span>{acc.label}</span>
-                <span className="text-xs text-ink/60">{t(`role.${acc.role}`)}</span>
+                <span className="text-xs text-ink/70">{t(`role.${acc.role}`)}</span>
               </span>
             </button>
           ))}
@@ -96,7 +96,7 @@ export function DemoAccountList({
               <Icon name={ROLE_ICON[acc.role]} className="h-5 w-5 shrink-0 text-leaf-700" />
               <span className="flex min-w-0 flex-col leading-tight">
                 <span className="font-bold text-ink">{acc.label}</span>
-                <span className="text-xs text-ink/60">
+                <span className="text-xs text-ink/70">
                   {current ? t("demo.accounts.current") : `${t(`role.${acc.role}`)} · ${acc.area}`}
                 </span>
               </span>

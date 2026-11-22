@@ -148,7 +148,7 @@ export default function Login() {
             </Button>
           </div>
         ) : accounts === null ? (
-          <p role="status" className="text-ink/60">
+          <p role="status" className="text-ink/70">
             {t("login.loading")}
           </p>
         ) : (
@@ -165,7 +165,7 @@ export default function Login() {
                   </span>
                   <div className="flex flex-col leading-tight">
                     <h3 className="font-bold text-ink">{t(`role.${role}`)}</h3>
-                    <span className="text-xs text-ink/60">{t(hintKey)}</span>
+                    <span className="text-xs text-ink/70">{t(hintKey)}</span>
                   </div>
                 </div>
                 <ul className="flex flex-col gap-2">
@@ -179,7 +179,7 @@ export default function Login() {
                       >
                         <span className="flex min-w-0 flex-1 flex-col">
                           <span className="font-bold text-ink">{account.label}</span>
-                          <span className="flex items-center gap-1 text-sm text-ink/60">
+                          <span className="flex items-center gap-1 text-sm text-ink/70">
                             <Icon name="pin" className="h-3.5 w-3.5" />
                             {account.area}
                           </span>

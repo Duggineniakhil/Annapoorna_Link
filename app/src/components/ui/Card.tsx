@@ -19,7 +19,7 @@ export function SectionHeader({ titleKey, allTo }: { titleKey: MessageKey; allTo
       {allTo && (
         <Link
           to={allTo}
-          className="flex min-h-[44px] items-center gap-1 px-2 text-sm font-bold text-leaf-700"
+          className="flex min-h-12 items-center gap-1 px-2 text-sm font-bold text-leaf-700"
         >
           {t("common.all")}
           <Icon name="chevronRight" className="h-4 w-4" />

@@ -27,7 +27,7 @@ export function RunDemoButton({ guideLink = true }: { guideLink?: boolean }) {
       {guideLink && (
         <Link
           to="/demo-guide"
-          className="self-start py-2 text-sm font-bold text-leaf-800 underline"
+          className="flex min-h-12 items-center self-start text-sm font-bold text-leaf-800 underline"
         >
           {t("demo.guide.link")}
         </Link>

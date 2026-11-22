@@ -116,7 +116,7 @@ export function SafetyCard({
       {guidance && (
         <p className={compact ? "text-xs text-ink/80" : "text-sm text-ink/80"}>{guidance}</p>
       )}
-      <p className="text-xs text-ink/60">{t("safetyCard.disclaimer")}</p>
+      <p className="text-xs text-ink/70">{t("safetyCard.disclaimer")}</p>
     </div>
   );
 }

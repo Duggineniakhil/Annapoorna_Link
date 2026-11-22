@@ -43,7 +43,7 @@ export function Screen({
 export function ComingSoon() {
   const { t } = useT();
   return (
-    <div className="rounded-2xl border-2 border-dashed border-leaf-800/15 p-8 text-center text-ink/60">
+    <div className="rounded-2xl border-2 border-dashed border-leaf-800/15 p-8 text-center text-ink/70">
       {t("common.comingSoon")}
     </div>
   );

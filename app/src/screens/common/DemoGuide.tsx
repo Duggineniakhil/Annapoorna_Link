@@ -52,7 +52,7 @@ export default function DemoGuide() {
               </span>
               <div className="flex flex-col leading-tight">
                 <h3 className="font-bold text-ink">{t(where)}</h3>
-                <span className="text-sm text-ink/60">{t(who)}</span>
+                <span className="text-sm text-ink/70">{t(who)}</span>
               </div>
             </div>
             <ol className="ml-5 flex list-decimal flex-col gap-1 text-ink/80">

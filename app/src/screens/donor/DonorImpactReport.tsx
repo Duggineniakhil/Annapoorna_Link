@@ -58,7 +58,7 @@ export default function DonorImpactReport() {
             value={month}
             max={monthKey(new Date())}
             onChange={(e) => e.target.value && setParams({ month: e.target.value })}
-            className="min-h-11 rounded-xl border-2 border-ink/20 px-3 text-ink focus:border-leaf-800 focus:outline-none"
+            className="min-h-12 rounded-xl border-2 border-ink/20 px-3 text-ink focus:border-leaf-800 focus:outline-none"
           />
         </label>
         <Button onClick={() => window.print()} disabled={!data || !range}>
@@ -80,7 +80,7 @@ export default function DonorImpactReport() {
         </div>
       )}
       {range && !data && !error && (
-        <p role="status" className="text-ink/60">
+        <p role="status" className="text-ink/70">
           {t("impact.loading")}
         </p>
       )}

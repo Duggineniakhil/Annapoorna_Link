@@ -93,7 +93,7 @@ function Progress({ step }: { step: Step }) {
 function PlaceBlock({ label, name, area }: { label: string; name: string; area: string }) {
   return (
     <div className="rounded-2xl border border-ink/10 bg-white p-4">
-      <p className="text-sm font-semibold text-ink/60">{label}</p>
+      <p className="text-sm font-semibold text-ink/70">{label}</p>
       <p className="text-xl font-bold text-ink">{name}</p>
       <p className="text-ink/70">{area}</p>
     </div>
@@ -282,7 +282,7 @@ export default function VolunteerTaskDetail() {
             </Button>
           </div>
         ) : (
-          <p className="text-ink/60">{t("volunteer.task.loading")}</p>
+          <p className="text-ink/70">{t("volunteer.task.loading")}</p>
         )}
       </Screen>
     );

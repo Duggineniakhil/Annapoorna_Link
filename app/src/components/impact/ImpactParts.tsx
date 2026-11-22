@@ -37,7 +37,7 @@ export function RateTiles({ items }: { items: { value: string; label: string }[]
       {items.map((stat) => (
         <Card key={stat.label} className="flex flex-col gap-0.5 p-3">
           <span className="text-xl font-bold text-leaf-800">{stat.value}</span>
-          <span className="text-xs leading-tight text-ink/60">{stat.label}</span>
+          <span className="text-xs leading-tight text-ink/70">{stat.label}</span>
         </Card>
       ))}
     </div>
@@ -98,7 +98,7 @@ export function WeeklyChart({ weeks }: { weeks: ImpactWeek[] }) {
                 x={x + barWidth / 2}
                 y={height - 6}
                 textAnchor="middle"
-                className="fill-ink/60 text-[9px]"
+                className="fill-ink/70 text-[9px]"
               >
                 {dateLabel(w.week_start)}
               </text>
@@ -182,7 +182,7 @@ export function HowWeCalculate({
   return (
     <Card className="p-4">
       <details>
-        <summary className="flex min-h-11 cursor-pointer items-center font-bold text-leaf-700">
+        <summary className="flex min-h-12 cursor-pointer items-center font-bold text-leaf-700">
           {t("impact.how")}
         </summary>
         {body}

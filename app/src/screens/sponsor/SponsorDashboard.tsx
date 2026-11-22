@@ -41,7 +41,7 @@ export default function SponsorDashboard() {
     <Screen
       titleKey="sponsor.dashboard.title"
       eyebrow={
-        <span className="text-sm font-medium text-ink/60">{t("sponsor.dashboard.city")}</span>
+        <span className="text-sm font-medium text-ink/70">{t("sponsor.dashboard.city")}</span>
       }
       demoData
     >
@@ -60,7 +60,7 @@ export default function SponsorDashboard() {
         </div>
       )}
       {!data && !error && (
-        <p role="status" className="text-ink/60">
+        <p role="status" className="text-ink/70">
           {t("impact.loading")}
         </p>
       )}

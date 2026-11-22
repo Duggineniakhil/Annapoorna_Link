@@ -14,7 +14,7 @@ export function MealsBadge({ meals }: { meals: number }) {
   return (
     <span className="flex shrink-0 flex-col items-end leading-none">
       <span className="text-2xl font-bold text-leaf-800">{meals}</span>
-      <span className="text-xs font-medium text-ink/60">{t("common.meals")}</span>
+      <span className="text-xs font-medium text-ink/70">{t("common.meals")}</span>
     </span>
   );
 }

@@ -30,7 +30,7 @@ export function FilterChips<V extends string>({
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option.value)}
-            className={`min-h-[44px] shrink-0 rounded-full px-4 text-sm font-bold transition-colors ${
+            className={`min-h-12 shrink-0 rounded-full px-4 text-sm font-bold transition-colors ${
               active
                 ? "bg-leaf-800 text-white"
                 : "bg-white text-leaf-800 ring-1 ring-inset ring-leaf-800/30"

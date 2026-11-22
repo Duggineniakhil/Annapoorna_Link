@@ -28,7 +28,7 @@ export default function About() {
         <p>{t("about.disclaimer")}</p>
       </div>
       <p className="rounded-2xl bg-leaf-50 p-4 font-medium text-leaf-900">{t("about.dataNote")}</p>
-      <p className="text-sm text-ink/60">
+      <p className="text-sm text-ink/70">
         {t("about.version", {
           version: __APP_VERSION__,
           mode: t(config.useMocks ? "about.mode.demo" : "about.mode.live"),

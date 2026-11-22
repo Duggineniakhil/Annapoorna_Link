@@ -110,11 +110,11 @@ export default function ReceiverHistory() {
                 </p>
                 <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                   <span
-                    className={outcome === "delivered" ? "font-bold text-leaf-800" : "text-ink/60"}
+                    className={outcome === "delivered" ? "font-bold text-leaf-800" : "text-ink/70"}
                   >
                     {t("receiver.history.meals", { n: formatNumber(meals, lang) })}
                   </span>
-                  <span className="text-ink/60">{formatDate(item.at)}</span>
+                  <span className="text-ink/70">{formatDate(item.at)}</span>
                 </div>
               </Card>
             );

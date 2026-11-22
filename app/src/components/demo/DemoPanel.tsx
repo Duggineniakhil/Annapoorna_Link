@@ -38,14 +38,14 @@ function ActivePanel() {
             {title}
           </p>
           {state.startedAt && state.phase === "running" && (
-            <p className="text-xs text-ink/60">{formatElapsed(now - state.startedAt)}</p>
+            <p className="text-xs text-ink/70">{formatElapsed(now - state.startedAt)}</p>
           )}
         </div>
         <button
           type="button"
           onClick={close}
           aria-label={t("demo.panel.close")}
-          className="-mr-1 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl text-ink/60 hover:bg-leaf-50"
+          className="-mr-1 -mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl text-ink/70 hover:bg-leaf-50"
         >
           <span aria-hidden="true">×</span>
         </button>
@@ -58,7 +58,7 @@ function ActivePanel() {
             <li
               key={step}
               aria-current={i === reached ? "step" : undefined}
-              className={`flex items-center gap-2 text-sm ${isDone ? "font-medium text-ink" : "text-ink/50"}`}
+              className={`flex items-center gap-2 text-sm ${isDone ? "font-medium text-ink" : "text-ink/70"}`}
             >
               <span
                 aria-hidden="true"
@@ -79,7 +79,7 @@ function ActivePanel() {
         })}
       </ol>
       {state.joined && state.phase === "running" && (
-        <p className="mt-2 text-xs text-ink/60">{t("demo.panel.joined")}</p>
+        <p className="mt-2 text-xs text-ink/70">{t("demo.panel.joined")}</p>
       )}
     </aside>
   );

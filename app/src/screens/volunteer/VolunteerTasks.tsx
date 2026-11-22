@@ -53,7 +53,7 @@ function AvailabilitySwitch({
     <Card className="flex items-center justify-between gap-3 p-4">
       <div className="flex flex-col">
         <span className="font-bold text-ink">{t("volunteer.availability.label")}</span>
-        <span className="text-sm text-ink/60">
+        <span className="text-sm text-ink/70">
           {t(isOn ? "volunteer.availableOn" : "volunteer.availableOff")}
         </span>
       </div>
@@ -64,7 +64,7 @@ function AvailabilitySwitch({
         aria-label={t("volunteer.availability.label")}
         disabled={on === null}
         onClick={() => onChange(!isOn)}
-        className={`relative h-9 w-16 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
+        className={`relative h-9 w-16 shrink-0 rounded-full before:absolute before:-inset-2 before:content-[''] transition-colors disabled:opacity-50 ${
           isOn ? "bg-leaf-700" : "bg-ink/20"
         }`}
       >
@@ -125,7 +125,7 @@ function OpenTaskCard({
         </span>
         <Countdown deadline={task.deadline} kind="pickup" compact />
       </div>
-      <p className="text-sm text-ink/60">
+      <p className="text-sm text-ink/70">
         {t(task.vehicle_fit ? "volunteer.task.vehicleFit" : "volunteer.task.vehicleNoFit")}
       </p>
       <Button size="lg" block disabled={disabled || busy} onClick={() => onAccept(task.id)}>
