@@ -9,11 +9,11 @@ import { FilterChips, type ChipOption } from "../../components/ui/FilterChips";
 import { Button } from "../../components/ui/Button";
 import { formatClock, formatNumber } from "../../components/food/format";
 import { AreaMap } from "../../components/map/AreaMap";
-import type { MapLine, MapPoint } from "../../components/map/geo";
-import { orgArea } from "../../mocks/fixtures";
+import type { MapPoint } from "../../components/map/geo";
 
-// Sponsor activity map (A10): donors and receivers at area level, deliveries from the last 24 h
-// as lines, filtered by donor type.
+// Sponsor activity map (A10): donors and receivers at area level, and the newest deliveries by
+// the donor's area, filtered by donor type. The server does not say which kitchen received each
+// delivery, so there are no donor-to-kitchen lines.
 
 type Filter = "all" | DonorType;
 const FILTERS: ChipOption<Filter>[] = [
@@ -43,26 +43,24 @@ export default function SponsorMap() {
   useEffect(() => {
     void load();
   }, [load]);
-  // A delivery anywhere in the city adds a line.
+  // A delivery anywhere in the city updates the list.
   useLiveRefetch(() => void load());
 
   const view = useMemo(() => {
     if (!data) return null;
     const donors = data.donors.filter((d) => filter === "all" || d.donor_type === filter);
-    const donorIds = new Set(donors.map((d) => d.id));
-    const byId = new Map([...data.donors, ...data.receivers].map((o) => [o.id, o]));
-    const recent = data.recent.filter((d) => donorIds.has(d.donor_org));
+    // Deliveries carry only the donor's area, so a donor-type filter keeps the areas where
+    // donors of that type are.
+    const areas = new Set(donors.map((d) => d.area));
+    const recent = data.recent.filter(
+      (d) => filter === "all" || (d.area !== undefined && areas.has(d.area)),
+    );
     const points: MapPoint[] = [
       ...donors.map((o) => ({ ...o, kind: "donor" as const })),
       ...data.receivers.map((o) => ({ ...o, kind: "receiver" as const })),
     ];
-    const lines: MapLine[] = recent.flatMap((d) => {
-      const from = byId.get(d.donor_org);
-      const to = byId.get(d.receiver_org);
-      return from && to ? [{ from, to }] : [];
-    });
     const meals = recent.reduce((sum, d) => sum + d.meals, 0);
-    return { points, lines, recent, meals, byId };
+    return { points, recent, meals };
   }, [data, filter]);
 
   return (
@@ -88,7 +86,7 @@ export default function SponsorMap() {
       )}
       {view && (
         <>
-          <AreaMap points={view.points} lines={view.lines} label={t("sponsor.map.label")} tall />
+          <AreaMap points={view.points} label={t("sponsor.map.label")} tall />
           <p className="font-bold text-leaf-800">
             {t("sponsor.map.summary", {
               count: formatNumber(view.recent.length, lang),
@@ -112,14 +110,9 @@ export default function SponsorMap() {
                   <li key={d.listing_id} className="flex items-center justify-between gap-3 py-2">
                     <span className="flex flex-col">
                       <span className="font-medium text-ink">
-                        {t("sponsor.map.route", {
-                          from: orgArea(d.donor_org) || view.byId.get(d.donor_org)?.area || "",
-                          to: orgArea(d.receiver_org) || view.byId.get(d.receiver_org)?.area || "",
-                        })}
+                        {d.area ?? t("sponsor.map.unknownArea")}
                       </span>
-                      <span className="text-sm text-ink/70">
-                        {view.byId.get(d.donor_org)?.name} · {formatClock(d.delivered_at, lang)}
-                      </span>
+                      <span className="text-sm text-ink/70">{formatClock(d.at, lang)}</span>
                     </span>
                     <span className="shrink-0 font-bold text-leaf-800">
                       {formatNumber(d.meals, lang)}

@@ -198,16 +198,17 @@ export interface Impact {
   assumptions: ImpactAssumption[];
 }
 
-/** One delivery on the sponsor activity map (added in A10, B to confirm). */
+/** One recent delivery on the sponsor activity map (server shape, B3). */
 export interface MapDelivery {
   listing_id: string;
-  donor_org: string;
-  receiver_org: string;
+  /** The donor's area; missing if the donor org is unknown. */
+  area?: string;
   meals: number;
-  delivered_at: string;
+  /** When it was delivered (the posting time if the delivery time is missing). */
+  at: string;
 }
 
-/** GET /api/map. recent = deliveries in the last 24 h. */
+/** GET /api/map. recent = the 10 newest deliveries, newest first. */
 export interface MapData {
   donors: Org[];
   receivers: Org[];
