@@ -10,6 +10,7 @@ This file records how the application was developed in the **Codebenders IDE**: 
 |---|---|
 | Build window | Sat 21 Nov 2026, 11:30 AM to Sun 22 Nov 2026, 11:59 PM IST (last commit before the window closed) |
 | Live app | [annapoorna-link.vercel.app](https://annapoorna-link.vercel.app) (frontend on Vercel, API on Render) |
+| Demo video | [Watch on Google Drive](https://drive.google.com/file/d/1XkI1Ci8rnocW95-fLsMlEKi13o_YaiiR/view?usp=sharing) |
 | Team | **CREED**: Duggineni Akhil (frontend & experience) · Kuchipudi Yokshith (backend, matching & data) |
 | Total prompts used | 47 prompts in 8 exported Nexon sessions: Member A 33 in 7 sessions (Sat 19:12 to Sun 14:45 IST), Member B 14 in 1 session (Sat 20:44 to 23:50 IST) |
 | Major iterations | 10 (section 4) |
@@ -39,7 +40,6 @@ This file records how the application was developed in the **Codebenders IDE**: 
 | # | Time (IST) | Task | Key prompt (short) | What Codebenders produced | What we changed / iterated | Commit |
 |---|---|---|---|---|---|---|
 | A1 | Sat 21:12 / 21:16 | PWA skeleton, roles, EN/TE | Chat Sat 20:39. "Create the frontend skeleton for Annapoorna Link in app/. This task is ONLY the skeleton: routes, layout, i18n and placeholders." | `package.json`, TypeScript and Vite configs, `config.ts` and the shared API types. `npm install` passed after it moved `eslint-plugin-react-hooks` from ^4.6.2 to ^5.2.0. | Deferred the Telugu strings to a second step. The editor agent's write gate then refused new files, so we re-sent the step as small batches ("Write the files yourself, one at a time"). | `e7365f3`, `cf0cd7b` |
-| A2 | Sun 15:08 | Frontend deploy | | | | `311bd77`, `742d731` |
 | A3 | Sat 21:41 | Demo login & role routing | Chat Sat 21:19. "Implement demo login and role-based routing for Annapoorna Link." | Fetch client with typed EN/TE errors and a 15 s timeout, mock API handlers, auth context, role guards, account switcher; 20 tests (13 redirect cases, 7 error-mapping cases). | A test-library version clash: we told Nexon to pin `@testing-library/jest-dom` to ^6, keep Vitest unchanged and not use `--legacy-peer-deps`. | `d8aae41` |
 | A4 | Sat 22:42 | Donor Quick Post | Chat Sat 21:43. "Build the donor Quick Post screen (/donor/post). Goal: a busy caterer posts surplus in under 60 seconds." | Quick Post rules in the mock API: categories, storage, safe pickup windows. Writes to new files under `src/lib/` and `src/services/` were refused by the editor's permission gate. | Code review by Akhil found four issues (per-item veg ignored, weak validation, past pickup accepted, garbled text). Nexon reproduced three, fixed them, and showed the fourth did not reproduce. | `98f5ce7` |
 | A5 | Sat 23:30 | Donor listings & detail | Chat Sat 23:14. "Build donor listings for Annapoorna Link." | Donor home with Active and Past tabs, listing detail with timeline, pickup code and cancel; mocks for list, detail and cancel. 69 tests passing. | Kept the pickup countdown on past cards because the spec asked for it; noted the status shown twice on active cards for later. | `49acd00` |
@@ -47,11 +47,6 @@ This file records how the application was developed in the **Codebenders IDE**: 
 | A7 | Sun 00:11 | Receiver offers, needs, history | Chat Sat 23:46. "Build the receiver screens for Annapoorna Link." | Offers list with match-reason chips and expiry countdown, offer detail with accept and decline reasons, needs and history screens. 93 tests passing. | Nexon ignored a stray instruction returned by one exploration call because it did not match the request. | `045e33a` |
 | A8 | Sun 00:41 | Volunteer tasks & stepper | Chat Sun 00:13. "Build the volunteer screens for Annapoorna Link." | Availability switch, open and active tasks, four-step pickup and delivery stepper with 4-digit codes and a tries-left message, history. 107 tests passing. | Lint fix in the task mapper re-verified by a second run. | `7c539be` |
 | A9 | Sun 01:03 | Live updates | Chat Sun 00:42. "Add live updates across Annapoorna Link." | Server-Sent Events client with backoff and a polling fallback, live toasts, status note, tests. | The editor marked the screen wiring as cancelled; we told Nexon to finish it. Every screen now uses one shared `useLiveRefetch` instead of its own 15 s timer. | `56f8465` |
-| A10 | Sun 01:17 | Map | | | | `97475f0` |
-| A11 | Sun 01:40 | Impact dashboards | | | | `1ff271c` |
-| A12 | Sun 01:54 | Voice post UI | | | | `b0c17aa` |
-| A13 | Sun 02:07 | Errors, empty states, settings | | | | `83a30a7` |
-| A14 | Sun 02:23 | Demo mode | | | | `8b1f1ec` |
 | A15 | Sun 15:02 | Performance & accessibility | Chat Sun 14:07. "Do a performance and accessibility pass on Annapoorna Link for mid-range Android phones on 4G/3G." | Measured baseline: 395 KB first load, largest role chunk 27 KB, Leaflet lazy (151 KB), Lighthouse performance 95 to 97. Fixed the colour-contrast failure. | We asked it to continue after the baseline. Lighthouse accessibility went from 96 to 100; the 360 px Telugu check was finished afterwards in commit `d8141ee`. | `d8141ee` |
 
 ### Member B: Backend, Matching & Data
@@ -62,28 +57,8 @@ This file records how the application was developed in the **Codebenders IDE**: 
 | B3 | Sun 01:25 | Seed data | Chat Sat 23:03. "Create `npm run seed` for Annapoorna Link following docs/04-sample-data-plan.md exactly." | Deterministic generator (fixed seed and date): 23 fictional orgs, 34 users, 6 demo accounts, 21 guidance rules, 9 needs, 120 history listings; `--dry-run` with a fingerprint; refuses to reset production data without `ALLOW_DEMO_RESET=true`. | Ran the dry run twice to confirm the same fingerprint; Nexon listed capacity exceptions and the fixed date for a decision. | `825c7de` |
 | B4 | Sun 01:25 | Demo auth & authorization | Chat Sat 23:15. "Implement demo auth for Annapoorna Link (decision D10)." | In-memory `DemoRepo` over the seed data, two live fixture listings, and `views.ts`: pickup code only to the donor, delivery code only to the claiming kitchen, no codes for volunteers or sponsors. | When the editor refused the same write twice, Yokshith told Nexon to "Retry with general agent". That run also removed a stray `</content>` line that had broken compilation. | `825c7de` |
 | B5 | Sun 01:25 | Guidance service | Chat Sat 23:35. "Implement handling guidance for Annapoorna Link (docs/10-food-handling-guidance.md, decision D6)." | The guidance route; the `computeSafety` file was refused by the editor's write gate in this session. | Asked Nexon to write the tests first, then to "double check whats missing and build that first". | `825c7de` |
-| B6 | Sun 01:25 | Listings API + expiry | | | | `825c7de` |
-| B7 | Sun 01:25 | Matching engine | | | | `825c7de` |
-| B8 | Sun 01:25 / 01:27 | Offer cascade | | | | `825c7de`, `aa56ca2` |
-| B9 | Sun 01:25 / 01:27 | Tasks, codes, state machine | | | | `825c7de`, `aa56ca2` |
-| B10 | Sun 01:25 | Realtime (SSE) | | | | `825c7de` |
-| B11 | Sun 01:25 | Impact calculator | | | | `825c7de` |
-| B12 | Sun 01:59 | Voice post | | | | `53698ab` |
-| B13 | Sun 01:48 | Demo scenario bots | | | | `b4839cb` |
-| B14 | Sun 01:25 | Hardening | | | | `825c7de` |
-| B15 | Sun 01:25 | Metrics | | | | `825c7de` |
 
 Member B's first tasks (B1–B11, B14, B15) landed together in one commit, `825c7de`, when the backend was pushed to the shared repository. Rows B1–B5 come from Member B's exported Nexon session.
-
-### Work after the task lists
-| # | Time (IST) | Task | Key prompt (short) | What Codebenders produced | What we changed / iterated | Commit |
-|---|---|---|---|---|---|---|
-| A16 | Sun 15:22 / 15:35 | Frontend against the live API's response shapes | | | | `084f440`, `91eaa23` |
-| A17 | Sun 15:45 | API deploy on Render (blueprint, in memory) | | | | `cf75099` |
-| A18 | Sun 16:04 | Volunteer history, weekly impact, demo kitchens first in DEMO_MODE | | | | `53fa227` |
-| A19 | Sun 16:35 | Redesign: photo homepage, desktop layout, food photos | | | | `83d53d1` |
-| A20 | Sun 16:55 | Redesign: detail screens | | | | `c6c91ea` |
-| A21 | Sun 15:06 / 19:06 | README, screenshots, Lighthouse re-run | | | | `dc9df3a`, `e899496` |
 
 ## 4. Iterations that mattered
 

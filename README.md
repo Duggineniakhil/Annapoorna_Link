@@ -40,6 +40,7 @@ Built by team **CREED** for the **ACE Builders Hackathon 2026**, **Problem State
 | Resource | Link |
 |---|---|
 | Live app | [annapoorna-link.vercel.app](https://annapoorna-link.vercel.app) (demo accounts, no sign-up) |
+| Demo video | [Watch the demo (5 min)](https://drive.google.com/file/d/1XkI1Ci8rnocW95-fLsMlEKi13o_YaiiR/view?usp=sharing) |
 | Live API | [annapoorna-link-api.onrender.com/api/health](https://annapoorna-link-api.onrender.com/api/health) (free tier; the first request after a quiet spell can take about a minute) |
 | Build log | [CODEBENDERS_USAGE.md](CODEBENDERS_USAGE.md) |
 
