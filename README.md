@@ -109,6 +109,38 @@ From `npm run metrics` on the seeded demo data (30 days, 120 listings). **These 
 
 Run `cd server && npm run metrics` against the database for the full table (posting time, on-time rate, meals and kg by area and donor type).
 
+## ⚡ Performance & accessibility
+Built for mid-range Android phones on 4G/3G. Measured on the production build (`npm run build && npm run preview`).
+
+**Lighthouse (mobile: slow 4G, 4× CPU slowdown)**
+
+| Page | Performance | Accessibility | Best Practices |
+|---|---|---|---|
+| `/login` | 87 | 100 | 100 |
+| `/demo-guide` | 93 | 100 | 100 |
+
+<!-- TODO: add the Lighthouse screenshot -->
+
+**Bundle size** (uncompressed; target: first load under 1.5 MB, each role's screen under 250 KB)
+
+| Part | Size |
+|---|---|
+| Main app chunk | 349 KB (113 KB gzipped) |
+| Fonts (Noto Sans Telugu, self-hosted) | 266 KB |
+| Largest role screen (Quick Post) | 28 KB |
+| Map (Leaflet), loaded only when a map is shown | 151 KB |
+
+**Accessibility fixes (before → after)**
+
+| Check | Before | After |
+|---|---|---|
+| Muted text contrast on cream | 3.3:1 to 4.46:1 (below AA) | 6.2:1 |
+| Smallest tap target | 40 px | 48 px |
+| Telugu, largest text size, 360 px screen | Offer page 445 px wide (scrolls sideways) | Fits in 360 px |
+| Icon buttons without a label | 0 | 0 (every label in English and Telugu) |
+
+The app installs as a PWA (Chrome reports no installability errors) and opens offline from its service worker.
+
 ## 🛠️ Built with Codebenders
 The whole application was built in the **Codebenders IDE** during the hackathon build window (21 Nov 11:30 AM to 22 Nov 11:59 PM IST), using chat-to-build with the Nexon agent. [CODEBENDERS_USAGE.md](CODEBENDERS_USAGE.md) documents the timeline, key prompts, the iterations that mattered and where we corrected the output.
 
