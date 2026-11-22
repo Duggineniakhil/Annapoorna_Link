@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="docs/screenshots/home-desktop.jpg" alt="Annapoorna Link homepage: Good food. Not wasted." width="100%" />
-
-# Annapoorna Link
+<h1>Annapoorna Link</h1>
 
 **Surplus food to people who need it, before it spoils.**
 
@@ -11,6 +9,8 @@ A bilingual (English and Telugu) web app that moves leftover food from Hyderabad
 [![Live app](https://img.shields.io/badge/live_app-annapoorna--link.vercel.app-F7B500?style=for-the-badge)](https://annapoorna-link.vercel.app)
 &nbsp;
 [![Hackathon](https://img.shields.io/badge/ACE_Builders_Hackathon-2026-164F2E?style=for-the-badge)](#how-it-was-built)
+&nbsp;
+[![Team](https://img.shields.io/badge/team-CREED-0E1F17?style=for-the-badge)](#team)
 
 ![React](https://img.shields.io/badge/React_18-20232A?logo=react&logoColor=61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
@@ -23,13 +23,19 @@ A bilingual (English and Telugu) web app that moves leftover food from Hyderabad
 
 [Live app](https://annapoorna-link.vercel.app) · [Try it in one minute](#try-it-in-one-minute) · [Screenshots](#screenshots) · [Architecture](#architecture) · [Getting started](#getting-started)
 
+<br />
+
+<img src="docs/screenshots/home-desktop.jpg" alt="Annapoorna Link homepage: Good food. Not wasted." width="100%" />
+
+<sub>Built by team <b>CREED</b> · Duggineni Akhil &amp; Kuchipudi Yokshith</sub>
+
 </div>
 
 ---
 
 ## Overview
 
-Built by team **Codebenders** for the **ACE Builders Hackathon 2026**, **Problem Statement 2: Rescue the Surplus** (Society & Environment).
+Built by team **CREED** for the **ACE Builders Hackathon 2026**, **Problem Statement 2: Rescue the Surplus** (Society & Environment).
 
 | Resource | Link |
 |---|---|
@@ -54,7 +60,6 @@ Built by team **Codebenders** for the **ACE Builders Hackathon 2026**, **Problem
 - [Getting started](#getting-started)
 - [Project structure](#project-structure)
 - [How it was built](#how-it-was-built)
-- [Roadmap](#roadmap)
 - [Credits](#credits)
 - [Team](#team)
 - [License](#license)
@@ -355,17 +360,6 @@ The application was built in the **Codebenders IDE** during the hackathon build 
 
 ---
 
-## Roadmap
-
-- [x] Hyderabad MVP: post → match → pickup → deliver → impact
-- [x] Public homepage and full-width desktop design
-- [ ] Pilot with 10 caterers or wedding halls and 5 kitchens
-- [ ] Scheduled pickups for regular donors
-- [ ] WhatsApp notifications
-- [ ] Expansion to more cities; CSR and city partnerships
-
----
-
 ## Credits
 
 - Food and city photos from [Unsplash](https://unsplash.com) (Unsplash License); homepage video from [Pexels](https://www.pexels.com) (Pexels License). Both are loaded from the providers' CDNs and are not stored in this repository.
@@ -376,10 +370,15 @@ The application was built in the **Codebenders IDE** during the hackathon build 
 
 ## Team
 
-<!-- TODO: names and roles -->
+**Team CREED**
+
+| Member | Role |
+|---|---|
+| **Duggineni Akhil** | Frontend and experience: web app, design, maps, live updates, demo mode, deployment |
+| **Kuchipudi Yokshith** | Backend, matching and data: API, matching engine, offer cascade, impact, voice post |
 
 ---
 
 ## License
 
-<!-- TODO: choose a license after checking the hackathon's ownership and licensing terms -->
+No license. All rights reserved by the authors. The source is public for the hackathon's review; no permission is granted to copy, modify or distribute it.

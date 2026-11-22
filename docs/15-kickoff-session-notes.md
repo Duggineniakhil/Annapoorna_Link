@@ -9,7 +9,6 @@ Where this differs from the website, the **website and the WhatsApp channel are 
 | Topic | Official answer | Timestamp |
 |---|---|---|
 | **External AI models inside our app** | Allowed. If the solution needs to call an AI model (bought or free API), we can connect it. Only code generation must use Codebenders' own model. **So Gnani (voice post) and an AI-model API in the product are fine.** | 1:07:41 |
-| **ChatGPT / Gemini outside the IDE** | Allowed for research, planning prompts and writing specs (PRDs). | 1:14:07 |
 | **Coding tools** | Codebenders IDE only. No other AI coding tools, no pre-existing code, no ready-made projects. | 51:00 |
 | **Existing code** | Not allowed. Everything must be created after the build window opened. Moving a project between teammates' Codebenders accounts is fine. | 1:05:11 |
 | **Build window** | Opened **Sat 21 Nov, 11:30 AM IST** (as announced; the website says 12:00 PM). Closes **Sun 22 Nov, 11:59 PM IST**. | 1:16 |
